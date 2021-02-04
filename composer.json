@@ -22,7 +22,8 @@
     },
     "require-dev": {
         "orchestra/testbench": "^6.0",
-        "phpunit/phpunit": "^9.3"
+        "phpunit/phpunit": "^9.3",
+        "vimeo/psalm": "^4.4"
     },
     "autoload": {
         "psr-4": {
@@ -47,12 +48,15 @@
         "laravel": {
             "providers": [
                 "Tipoff\\Checkout\\CheckoutServiceProvider"
-            ],
-            "aliases": {
-                "Checkout": "Tipoff\\Checkout\\CheckoutFacade"
-            }
+            ]
         }
     },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://nova.laravel.com"
+        }
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true
 }
