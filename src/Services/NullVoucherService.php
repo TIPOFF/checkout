@@ -13,7 +13,6 @@ use Tipoff\Checkout\Exceptions\ServiceNotImplementedException;
 
 class NullVoucherService implements VouchersService, NullService
 {
-
     public function generateVoucherCode(): string
     {
         throw new ServiceNotImplementedException(ServiceType::VOUCHER());

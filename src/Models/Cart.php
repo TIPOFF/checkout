@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Models;
 
 use App\Models\Voucher;
-use Brick\Money\Money;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -45,19 +45,19 @@ class CheckoutServiceProvider extends PackageServiceProvider
             return new CheckoutServiceImplementation();
         });
 
-        if (!$this->app->has(DiscountsService::class)) {
+        if (! $this->app->has(DiscountsService::class)) {
             $this->app->singleton(DiscountsService::class, function () {
                 return new NullDiscountService();
             });
         }
 
-        if (!$this->app->has(VouchersService::class)) {
+        if (! $this->app->has(VouchersService::class)) {
             $this->app->singleton(VouchersService::class, function () {
                 return new NullVoucherService();
             });
         }
 
-        if (!$this->app->has(BookingService::class)) {
+        if (! $this->app->has(BookingService::class)) {
             $this->app->singleton(BookingService::class, function () {
                 return new NullBookingService();
             });

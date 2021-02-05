@@ -9,13 +9,12 @@ use Carbon\Carbon;
 use Tipoff\Checkout\Contracts\Model\CartInterface;
 use Tipoff\Checkout\Contracts\Service\DiscountsService;
 use Tipoff\Checkout\Contracts\Service\NullService;
-use Tipoff\Support\Enums\AppliesTo;
 use Tipoff\Checkout\Enums\ServiceType;
 use Tipoff\Checkout\Exceptions\ServiceNotImplementedException;
+use Tipoff\Support\Enums\AppliesTo;
 
 class NullDiscountService implements DiscountsService, NullService
 {
-
     public function createAmountDiscount(string $name, string $code, Money $amount, AppliesTo $appliesTo, Carbon $expiresAt, int $creatorId)
     {
         throw new ServiceNotImplementedException(ServiceType::DISCOUNT());

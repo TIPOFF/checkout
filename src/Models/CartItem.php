@@ -87,6 +87,7 @@ class CartItem extends Model implements CartItemInterface
     public function createBooking()
     {
         $slot = $this->createSlot();
+
         return app(BookingService::class)->createBooking([
             'order_id' => $this->cart->order_id,
             'slot_id' => $slot->getId(),

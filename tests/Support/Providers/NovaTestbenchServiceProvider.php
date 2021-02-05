@@ -7,8 +7,6 @@ namespace Tipoff\Checkout\Tests\Support\Providers;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
-use Tipoff\Vouchers\Nova\Voucher;
-use Tipoff\Vouchers\Nova\VoucherType;
 
 class NovaTestbenchServiceProvider extends NovaApplicationServiceProvider
 {

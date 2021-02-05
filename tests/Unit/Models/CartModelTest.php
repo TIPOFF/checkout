@@ -18,5 +18,4 @@ class CartModelTest extends TestCase
         $cart = Cart::factory()->create();
         $this->assertNotNull($cart);
     }
-
 }

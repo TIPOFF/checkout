@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Laravel\Nova\NovaCoreServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
 use ReflectionClass;
+use Tipoff\Checkout\CheckoutServiceProvider;
 use Tipoff\Checkout\Tests\Support\Models;
 use Tipoff\Checkout\Tests\Support\Nova;
-use Tipoff\Checkout\CheckoutServiceProvider;
 use Tipoff\Checkout\Tests\Support\Providers\NovaTestbenchServiceProvider;
 use Tipoff\Support\SupportServiceProvider;
 
@@ -57,7 +57,7 @@ class TestCase extends Orchestra
         ]);
 
         // Create stub tables to satisfy FK dependencies
-        foreach(config('checkout.model_class') as $class) {
+        foreach (config('checkout.model_class') as $class) {
             $class::createTable();
         }
     }
