@@ -1,7 +1,7 @@
 # Laravel Package for handling Checkout used in Ecommerce packages
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/tipoff/checkout.svg?style=flat-square)](https://packagist.org/packages/tipoff/checkout)
-[![GitHub Tests Action Status](https://img.shields.io/github/workflow/status/tipoff/checkout/run-tests?label=tests)](https://github.com/tipoff/checkout/actions?query=workflow%3ATests+branch%3Amaster)
+![Tests](https://github.com/tipoff/checkout/workflows/Tests/badge.svg)
 [![Total Downloads](https://img.shields.io/packagist/dt/tipoff/checkout.svg?style=flat-square)](https://packagist.org/packages/tipoff/checkout)
 
 ## Installation
