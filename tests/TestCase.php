@@ -36,23 +36,49 @@ class TestCase extends Orchestra
         ];
     }
 
+    // TODO - replace w/helper in future version of tipoff/support
+    private function createNovaResourceStub(string $novaClass, string $modelClass): void
+    {
+        if (class_exists($novaClass)) {
+            return;
+        }
+
+        $classBasename  = class_basename($novaClass);
+        $classNamespace = substr($novaClass, 0, strrpos($novaClass, '\\'));
+
+        $classDef = <<<EOT
+namespace {$classNamespace};
+
+use Illuminate\Http\Request;
+use Laravel\Nova\Resource;
+
+class {$classBasename} extends Resource
+{
+    public static \$model = \\{$modelClass}::class;
+
+    public function fields(Request \$request)
+    {
+    }
+}
+EOT;
+        // alias the anonymous class with your class name
+        eval($classDef);
+    }
+
     public function getEnvironmentSetUp($app)
     {
-        // Fix for Nova guessing namespace for local resources
-        $property = (new ReflectionClass($app))->getProperty('namespace');
-        $property->setAccessible(true);
-        $property->setValue($app, 'Tipoff\\Vouchers\\');
-
         $app['config']->set('checkout.model_class', [
             'user' => Models\User::class,
         ]);
 
-        $app['config']->set('checkout.nova_class', [
-        ]);
-
         // Create stub models for anything not already defined
-        foreach (config('tipoff.model_class') as $class) {
-            createModelStub($class);
+        foreach (config('tipoff.model_class') as $modelClass) {
+            createModelStub($modelClass);
+        }
+
+        // Create nova resource stubs for anything not already defined
+        foreach (config('checkout.nova_class') as $alias => $novaClass) {
+            $this->createNovaResourceStub($novaClass, config('tipoff.model_class.'.$alias));
         }
     }
 }
