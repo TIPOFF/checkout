@@ -2,9 +2,13 @@
 
 namespace Tipoff\Checkout\Tests;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Laravel\Nova\NovaCoreServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
+use ReflectionClass;
 use Tipoff\Checkout\CheckoutServiceProvider;
+use Tipoff\Checkout\Tests\Support\Models;
+use Tipoff\Checkout\Tests\Support\Providers\NovaTestbenchServiceProvider;
+use Tipoff\Support\SupportServiceProvider;
 
 class TestCase extends Orchestra
 {
@@ -12,30 +16,43 @@ class TestCase extends Orchestra
     {
         parent::setUp();
 
-        Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Tipoff\\Checkout\\Database\\Factories\\'.class_basename($modelName).'Factory'
-        );
+        $this->artisan('migrate', ['--database' => 'testing'])->run();
+
+        // Create stub tables for stub models to satisfy possible FK dependencies
+        foreach (config('tipoff.model_class') as $class) {
+            if (method_exists($class, 'createTable')) {
+                $class::createTable();
+            }
+        }
     }
 
     protected function getPackageProviders($app)
     {
         return [
+            NovaCoreServiceProvider::class,
+            NovaTestbenchServiceProvider::class,
+            SupportServiceProvider::class,
             CheckoutServiceProvider::class,
         ];
     }
 
     public function getEnvironmentSetUp($app)
     {
-        $app['config']->set('database.default', 'sqlite');
-        $app['config']->set('database.connections.sqlite', [
-            'driver' => 'sqlite',
-            'database' => ':memory:',
-            'prefix' => '',
+        // Fix for Nova guessing namespace for local resources
+        $property = (new ReflectionClass($app))->getProperty('namespace');
+        $property->setAccessible(true);
+        $property->setValue($app, 'Tipoff\\Vouchers\\');
+
+        $app['config']->set('checkout.model_class', [
+            'user' => Models\User::class,
         ]);
 
-        /*
-        include_once __DIR__.'/../database/migrations/create_checkout_table.php.stub';
-        (new \CreatePackageTable())->up();
-        */
+        $app['config']->set('checkout.nova_class', [
+        ]);
+
+        // Create stub models for anything not already defined
+        foreach (config('tipoff.model_class') as $class) {
+            createModelStub($class);
+        }
     }
 }

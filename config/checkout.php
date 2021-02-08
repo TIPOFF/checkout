@@ -2,4 +2,6 @@
 
 return [
 
+    'nova_class' => [
+    ],
 ];
