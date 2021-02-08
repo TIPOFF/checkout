@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Gate;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
 use Tipoff\Checkout\Nova\Order;
-use Tipoff\Checkout\Tests\Support\Nova\User;
 
 class NovaTestbenchServiceProvider extends NovaApplicationServiceProvider
 {

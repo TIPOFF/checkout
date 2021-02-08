@@ -4,7 +4,6 @@ namespace Tipoff\Checkout\Tests;
 
 use Laravel\Nova\NovaCoreServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
-use ReflectionClass;
 use Tipoff\Checkout\CheckoutServiceProvider;
 use Tipoff\Checkout\Tests\Support\Models;
 use Tipoff\Checkout\Tests\Support\Providers\NovaTestbenchServiceProvider;
@@ -43,7 +42,7 @@ class TestCase extends Orchestra
             return;
         }
 
-        $classBasename  = class_basename($novaClass);
+        $classBasename = class_basename($novaClass);
         $classNamespace = substr($novaClass, 0, strrpos($novaClass, '\\'));
 
         $classDef = <<<EOT
