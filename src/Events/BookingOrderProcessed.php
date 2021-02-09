@@ -12,7 +12,9 @@ use Tipoff\Checkout\Models\Order;
 
 class BookingOrderProcessed
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     public $order;
 
