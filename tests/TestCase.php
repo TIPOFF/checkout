@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests;
 
 use Laravel\Nova\NovaCoreServiceProvider;
-use Orchestra\Testbench\TestCase as Orchestra;
 use Tipoff\Checkout\CheckoutServiceProvider;
-use Tipoff\Checkout\Tests\Support\Models;
 use Tipoff\Checkout\Tests\Support\Providers\NovaPackageServiceProvider;
 use Tipoff\Support\SupportServiceProvider;
 use Tipoff\TestSupport\BaseTestCase;
