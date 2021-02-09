@@ -8,11 +8,11 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tipoff\Checkout\Events\BookingOrderProcessed;
-use Tipoff\Checkout\Notifications\PartialRedemptionVoucherCreated;
 use Tipoff\Checkout\Services\CheckoutService;
+use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
-class Cart extends Model
+class Cart extends BaseModel
 {
     use HasPackageFactory;
     use SoftDeletes;
@@ -26,9 +26,9 @@ class Cart extends Model
         'id',
     ];
 
-
     protected $casts = [
-        'expires_at' => 'datetime',];
+        'expires_at' => 'datetime',
+    ];
 
     public static function boot()
     {

@@ -6,9 +6,10 @@ namespace Tipoff\Checkout\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
-class CartItem extends Model
+class CartItem extends BaseModel
 {
     use HasPackageFactory;
 

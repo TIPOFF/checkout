@@ -6,8 +6,8 @@ namespace Tipoff\Discounts\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Checkout\Models\Order;
-use Tipoff\Checkout\Tests\Support\Models\User;
 use Tipoff\Checkout\Tests\TestCase;
+use Tipoff\TestSupport\Models\User;
 
 class OrderResourceTest extends TestCase
 {
