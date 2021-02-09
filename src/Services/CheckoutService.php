@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Services;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use Tipoff\Checkout\Models\Cart;
 
 class CheckoutService
@@ -75,7 +73,7 @@ class CheckoutService
             $cart->applyDiscount($deduction);
         }
 
-        if (is_a($deduction , app('voucher'))) {
+        if (is_a($deduction, app('voucher'))) {
             $cart->applyVoucher($deduction);
         }
 
