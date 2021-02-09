@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Tipoff\Support\Models\BaseModel;
+use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasPackageFactory;
 
-class Order extends Model
+class Order extends BaseModel
 {
     use HasPackageFactory;
+    use HasCreator;
 
     protected $guarded = [
         'id',
@@ -25,9 +27,6 @@ class Order extends Model
         parent::boot();
 
         static::creating(function ($order) {
-            if (auth()->check()) {
-                $order->creator_id = auth()->id();
-            }
             $order->generateOrderNumber();
         });
 
@@ -105,11 +104,6 @@ class Order extends Model
     public function discounts()
     {
         return $this->belongsToMany(app('discount'));
-    }
-
-    public function creator()
-    {
-        return $this->belongsTo(app('user'), 'creator_id');
     }
 
     public function notes()
