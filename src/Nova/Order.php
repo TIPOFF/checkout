@@ -49,8 +49,8 @@ class Order extends Resource
         return [
             ID::make()->sortable(),
             Text::make('Order Number')->sortable(),
-            BelongsTo::make('Customer', 'customer', config('checkout.nova_class.customer'))->sortable(),
-            BelongsTo::make('Location', 'location', config('checkout.nova_class.location'))->sortable(),
+            BelongsTo::make('Customer', 'customer', app()->getAlias('nova.customer'))->sortable(),
+            BelongsTo::make('Location', 'location', app()->getAlias('nova.location'))->sortable(),
             Currency::make('Amount')->asMinorUnits()->sortable(),
             Date::make('Created', 'created_at')->sortable()->exceptOnForms(),
         ];
@@ -60,18 +60,18 @@ class Order extends Resource
     {
         return [
             Text::make('Order Number')->exceptOnForms(),
-            BelongsTo::make('Customer', 'customer', config('checkout.nova_class.customer'))->searchable()->withSubtitles(),
-            BelongsTo::make('Location', 'location', config('checkout.nova_class.location')),
+            BelongsTo::make('Customer', 'customer', app()->getAlias('nova.customer'))->searchable()->withSubtitles(),
+            BelongsTo::make('Location', 'location', app()->getAlias('nova.location')),
             Currency::make('Amount')->asMinorUnits()->exceptOnForms(),
             Currency::make('Taxes', 'total_taxes')->asMinorUnits()->exceptOnForms(),
             Currency::make('Fees', 'total_fees')->asMinorUnits()->exceptOnForms(),
-            HasMany::make('Bookings', 'bookings', config('checkout.nova_class.booking')),
-            HasMany::make('Purchased Vouchers', 'purchasedVouchers', config('checkout.nova_class.voucher')),
-            HasMany::make('Payments', 'payments', config('checkout.nova_class.payment')),
-            HasMany::make('Invoices', 'invoices', config('checkout.nova_class.invoice')),
-            HasMany::make('Discounts', 'discounts', config('checkout.nova_class.discount')),
-            HasMany::make('Vouchers', 'voucher', config('checkout.nova_class.voucher')),
-            MorphMany::make('Notes', 'notes', config('checkout.nova_class.note')),
+            HasMany::make('Bookings', 'bookings', app()->getAlias('nova.booking')),
+            HasMany::make('Purchased Vouchers', 'purchasedVouchers', app()->getAlias('nova.voucher')),
+            HasMany::make('Payments', 'payments', app()->getAlias('nova.payment')),
+            HasMany::make('Invoices', 'invoices', app()->getAlias('nova.invoice')),
+            HasMany::make('Discounts', 'discounts', app()->getAlias('nova.discount')),
+            HasMany::make('Vouchers', 'voucher', app()->getAlias('nova.voucher')),
+            MorphMany::make('Notes', 'notes', app()->getAlias('nova.note')),
             new Panel('Data Fields', $this->dataFields()),
         ];
     }
@@ -80,7 +80,7 @@ class Order extends Resource
     {
         return [
             ID::make(),
-            BelongsTo::make('Creator', 'creator', config('checkout.nova_class.user'))->exceptOnForms(),
+            BelongsTo::make('Creator', 'creator', app()->getAlias('nova.user'))->exceptOnForms(),
             Date::make('Created At')->exceptOnForms(),
             Date::make('Updated At')->exceptOnForms(),
         ];
