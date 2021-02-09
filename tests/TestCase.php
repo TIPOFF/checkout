@@ -39,6 +39,8 @@ class TestCase extends Orchestra
 
     public function getEnvironmentSetUp($app)
     {
+        $app['config']->set('logging.default', 'stderr');
+
         $app['config']->set('tipoff.model_class.user', Models\User::class);
 
         // Create stub models for anything not already defined

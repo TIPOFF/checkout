@@ -7,7 +7,8 @@ namespace Tipoff\Checkout;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Tipoff\Checkout\Commands\CheckoutCommand;
-use Tipoff\Checkout\Services\CheckoutService;
+use Tipoff\Checkout\Services\CheckoutServiceImplementation;
+use Tipoff\Support\Contracts\Services\CheckoutService;
 
 class CheckoutServiceProvider extends PackageServiceProvider
 {
@@ -20,11 +21,6 @@ class CheckoutServiceProvider extends PackageServiceProvider
 
     public function configurePackage(Package $package): void
     {
-        /*
-         * This class is a Package Service Provider
-         *
-         * More info: https://github.com/spatie/laravel-package-tools
-         */
         $package
             ->name('checkout')
             ->hasConfigFile()
@@ -34,7 +30,7 @@ class CheckoutServiceProvider extends PackageServiceProvider
     public function registeringPackage()
     {
         $this->app->singleton(CheckoutService::class, function () {
-            return new CheckoutService();
+            return new CheckoutServiceImplementation();
         });
     }
 }

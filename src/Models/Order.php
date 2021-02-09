@@ -4,12 +4,34 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Models;
 
+use Assert\Assert;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Tipoff\Support\Contracts\Models\CustomerInterface;
+use Tipoff\Support\Contracts\Models\LocationInterface;
+use Tipoff\Support\Contracts\Models\OrderInterface;
+use Tipoff\Support\Contracts\Models\VoucherInterface;
+use Tipoff\Support\Contracts\Services\CustomerService;
+use Tipoff\Support\Contracts\Services\LocationService;
+use Tipoff\Support\Contracts\Services\VoucherService;
+use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
-class Order extends Model
+/**
+ * @property int|null id
+ * @property string order_number
+ * @property int amount
+ * @property int total_taxes
+ * @property int total_fees
+ * @property Carbon created_at
+ * @property Carbon updated_at
+ * // Raw Relation ID
+ * @property int|null partial_redemption_voucher_id
+ * @property int|null customer_id
+ * @property int|null location_id
+ * @property int|null creator_id
+ */
+class Order extends BaseModel implements OrderInterface
 {
     use HasPackageFactory;
 
@@ -25,29 +47,26 @@ class Order extends Model
         parent::boot();
 
         static::creating(function ($order) {
-            if (auth()->check()) {
-                $order->creator_id = auth()->id();
-            }
             $order->generateOrderNumber();
         });
 
         static::saving(function ($order) {
-            if (empty($order->customer_id)) {
-                throw new \Exception('An order must belong to a customer.');
-            }
-            if (empty($order->location_id)) {
-                throw new \Exception('An order must belong to a location.');
-            }
+            Assert::lazy()
+                ->that($order->customer_id, 'customer_id')->notEmpty('An order must belong to a customer.')
+                ->that($order->location_id, 'location_id')->notEmpty('An order must belong to a location.')
+                ->verifyNow();
         });
     }
 
-    public function generateOrderNumber()
+    public function generateOrderNumber(): self
     {
         do {
             $token = Str::of(Carbon::now('America/New_York')->format('ymdB'))->substr(1, 7) . Str::upper(Str::random(2));
         } while (self::where('order_number', $token)->first()); //check if the token already exists and if it does, try again
 
         $this->order_number = $token;
+
+        return $this;
     }
 
     public function getTotalAttribute()
@@ -57,9 +76,24 @@ class Order extends Model
         return '$' . number_format($charge, 2, '.', ',');
     }
 
-    public function hasPartialRedemptionVoucher()
+    public function hasPartialRedemptionVoucher(): bool
     {
         return ! empty($this->partial_redemption_voucher_id);
+    }
+
+    public function getCustomer(): ?CustomerInterface
+    {
+        return $this->customer;
+    }
+
+    public function getLocation(): ?LocationInterface
+    {
+        return $this->location;
+    }
+
+    public function getPartialRedemptionVoucher(): ?VoucherInterface
+    {
+        return app(VoucherService::class)->getVoucher($this->partial_redemption_voucher_id);
     }
 
     public function customer()
@@ -70,11 +104,6 @@ class Order extends Model
     public function location()
     {
         return $this->belongsTo(app('location'));
-    }
-
-    public function partialRedemptionVoucher()
-    {
-        return $this->belongsTo(app('voucher'), 'partial_redemption_voucher_id');
     }
 
     public function bookings()

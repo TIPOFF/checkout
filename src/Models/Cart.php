@@ -4,15 +4,39 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Models;
 
+use Brick\Money\Money;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tipoff\Checkout\Events\BookingOrderProcessed;
-use Tipoff\Checkout\Notifications\PartialRedemptionVoucherCreated;
-use Tipoff\Checkout\Services\CheckoutService;
+use Tipoff\Support\Contracts\Models\CartInterface;
+use Tipoff\Support\Contracts\Models\LocationInterface;
+use Tipoff\Support\Contracts\Models\PaymentInterface;
+use Tipoff\Support\Contracts\Models\UserInterface;
+use Tipoff\Support\Contracts\Services\DiscountService;
+use Tipoff\Support\Contracts\Services\LocationService;
+use Tipoff\Support\Contracts\Services\UserService;
+use Tipoff\Support\Contracts\Services\VoucherService;
+use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
-class Cart extends Model
+/**
+ * @property int|null id
+ * @property string code
+ * @property int amount
+ * @property int total_taxes
+ * @property int total_fees
+ * @property int total_deductions
+ * @property Carbon expires_at
+ * @property Carbon created_at
+ * @property Carbon updated_at
+ * // Raw Relation ID
+ * @property int|null user_id
+ * @property int|null location_id
+ * @property int|null creator_id
+ * @property int|null updater_id
+ */
+class Cart extends BaseModel implements CartInterface
 {
     use HasPackageFactory;
     use SoftDeletes;
@@ -26,9 +50,18 @@ class Cart extends Model
         'id',
     ];
 
-
     protected $casts = [
-        'expires_at' => 'datetime',];
+        'id' => 'integer',
+        'amount' => 'integer',
+        'total_taxes' => 'integer',
+        'total_fees' => 'integer',
+        'total_deductions' => 'integer',
+        'expires_at' => 'datetime',
+        'user_id' => 'integer',
+        'location_id' => 'integer',
+        'creator_id' => 'integer',
+        'updater_id' => 'integer',
+    ];
 
     public static function boot()
     {
@@ -47,53 +80,36 @@ class Cart extends Model
         });
     }
 
-    /**
-     * Mark coucher as used.
-     *
-     * @return self
-     */
-    public function markVouchersAsUsed()
+    public function markVouchersAsUsed(): self
     {
-        $orderId = $this->order_id;
-
-        $this->vouchers()->each(function ($voucher) use ($orderId) {
-            $voucher->redeem();
-            $voucher->order_id = $orderId;
-            $voucher->save();
-        });
+        if (app()->has(VoucherService::class)) {
+            app(VoucherService::class)->markVouchersAsUsed($this, $this->order_id);
+        }
 
         return $this;
     }
 
-    /**
-     * Issu vouchers in case of partial redemption.
-     *
-     * @return self
-     */
-    public function issuePartialRedemptionVoucher()
+    public function issuePartialRedemptionVoucher(): self
     {
         if ($this->total_deductions < $this->amount + $this->total_taxes + $this->total_fees) {
             return $this;
         }
 
-        app(CheckoutService::class)->issueCartPartialRedemptionVoucher($this);
+        if (app()->has(VoucherService::class)) {
+            app(VoucherService::class)->issueCartPartialRedemptionVoucher($this);
+        }
 
         return $this;
     }
 
-    /**
-     * Change cart to order.
-     *
-     * @return Order
-     */
-    public function processOrder(Model $payment)
+    public function processOrder(PaymentInterface $payment): Order
     {
         if (! $this->canConvert()) {
             throw new \Exception('Cart not valid.');
         }
 
         $order = Order::create([
-            'customer_id' => $payment->customer_id,
+            'customer_id' => $payment->getCustomer()->getId(),
             'location_id' => $this->location_id,
             'amount' => $this->amount,
             'total_taxes' => $this->total_taxes,
@@ -107,11 +123,10 @@ class Cart extends Model
             $cartItem->createBooking();
         }
 
-        $payment->order_id = $order->id;
-        $payment->save();
+        $payment->setOrder($order);
 
-        $this->markVouchersAsUsed();
-        $this->issuePartialRedemptionVoucher();
+        $this->markVouchersAsUsed()
+            ->issuePartialRedemptionVoucher();
         $order->refresh();
 
         /**
@@ -133,66 +148,64 @@ class Cart extends Model
         return $order;
     }
 
-    /**
-     * Apply deduction to cart.
-     *
-     * @param Model $deduction
-     * @return self
-     */
-    public function applyDeduction($deduction)
+    public function applyVoucherCode(string $code): self
     {
-        app(CheckoutService::class)->applyDeductionToCart($deduction, $this);
+        if (app()->has(VoucherService::class)) {
+            app(VoucherService::class)->applyCodeToCart($this, $code);
+
+            return $this->updateCartTotalDeductions();
+        }
 
         return $this;
     }
 
-    /**
-     * Apply deduction code to cart.
-     *
-     * @param string $code
-     * @return self
-     */
-    public function applyCode($code)
+    public function applyDiscountCode(string $code): self
     {
-        app(CheckoutService::class)->applyCodeToCart($code, $this);
+        if (app()->has(DiscountService::class)) {
+            app(DiscountService::class)->applyCodeToCart($this, $code);
+
+            return $this->updateCartTotalDeductions();
+        }
 
         return $this;
     }
 
-    /**
-     * Apply discount to cart.
-     *
-     * @param Model $discount
-     * @return self
-     */
-    public function applyDiscount($discount)
+    public function updateCartTotalDeductions(): self
     {
-        app(CheckoutService::class)->applyDiscountToCart($discount, $this);
+        $this->total_deductions = $this->getCartItemTotalDeductions()
+            ->plus($this->getVoucherDeductions())
+            ->plus($this->getDiscountDeductions())
+            ->getUnscaledAmount()
+            ->toInt();
+
+        $this->save();
 
         return $this;
     }
 
-    /**
-     * Apply voucher to cart.
-     *
-     * @param Model $voucher
-     * @return self
-     */
-    public function applyVoucher($voucher)
+    public function getCartItemTotalDeductions(): Money
     {
-        app(CheckoutService::class)->applyVoucherToCart($voucher, $this);
-
-        return $this;
+        return $this->cartItems->reduce(function (Money $totalDeductions, CartItem $cartItem) {
+            return $totalDeductions->plus(Money::ofMinor($cartItem->total_deductions ?? 0, 'USD'));
+        }, Money::ofMinor(0, 'USD'));
     }
 
-    public function vouchers()
+    public function getVoucherDeductions(): Money
     {
-        return $this->belongsToMany(app('voucher'))->withTimestamps();
+        if (app()->has(VoucherService::class)) {
+            return app(VoucherService::class)->calculateVoucherDeductions($this);
+        }
+
+        return Money::ofMinor(0, 'USD');
     }
 
-    public function discounts()
+    public function getDiscountDeductions(): Money
     {
-        return $this->belongsToMany(app('discount'))->withTimestamps();
+        if (app()->has(DiscountService::class)) {
+            return app(DiscountService::class)->calculateDiscountDeductions($this);
+        }
+
+        return Money::ofMinor(0, 'USD');
     }
 
     public function getDeductionCodesAttribute()
@@ -200,22 +213,12 @@ class Cart extends Model
         return $this->vouchers->concat($this->discounts);
     }
 
-    public function location()
-    {
-        return $this->belongsTo(app('location'));
-    }
-
     public function order()
     {
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * Check if cart can convert to order.
-     *
-     * @return bool
-     */
-    public function canConvert()
+    public function canConvert(): bool
     {
         if (empty($this->amount)) {
             return false;
@@ -232,53 +235,20 @@ class Cart extends Model
         return true;
     }
 
-    public function hasExpired()
+    public function hasExpired(): bool
     {
         $now = Carbon::now();
 
         return $this->expires_at->lt($now);
     }
 
-    public function hasInRoomMonitors()
+    public function hasInRoomMonitors(): bool
     {
         return $this->cartItems->contains(function (CartItem $item) {
-            return ($item->room->theme_id == 1 ||
-                $item->room->theme_id == 2);
+            return $item->getRoom()->hasInRoomMonitors();
         });
     }
 
-    /**
-     * Scope a query to apply filters.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param $filters array
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeFilter($query, $filters)
-    {
-        if (empty($filters)) {
-            return $query;
-        }
-
-        /*
-         * TODO - implement or remove function
-        foreach ($filters as $filterKey => $filterValue) {
-            switch ($filterKey) {
-                case '':
-                    // $query->where('', "");
-                    break;
-            }
-        }
-        */
-
-        return $query;
-    }
-
-    /**
-     * Get total amount.
-     *
-     * @return int
-     */
     public function getTotalAmountAttribute(): int
     {
         if ($this->total_deductions > $this->amount + $this->total_taxes + $this->total_fees) {
@@ -288,12 +258,7 @@ class Cart extends Model
         return $this->amount + $this->total_taxes + $this->total_fees - $this->total_deductions;
     }
 
-    /**
-     * Generate amount, total_taxes and total_fees.
-     *
-     * @return self
-     */
-    public function generatePricing()
+    public function generatePricing(): self
     {
         $amount = 0;
         $fees = 0;
@@ -326,18 +291,12 @@ class Cart extends Model
             ->exists();
     }
 
-    /**
-     * Add item to cart.
-     *
-     * @param CartItem $cartItem
-     * @return self
-     */
-    public function addItem(CartItem $cartItem)
+    public function addItem(CartItem $cartItem): self
     {
         if (! empty($this->cartItems)) {
-            $this->location_id = $cartItem->room->location_id;
+            $this->location_id = $cartItem->getRoom()->getLocation()->getId();
         } else {
-            if ($this->location_id = $cartItem->room->location_id) {
+            if ($this->location_id = $cartItem->getRoom()->getLocation()->getId()) {
                 throw new \Exception('Cust must contain items from single location.');
             }
         }
@@ -348,12 +307,7 @@ class Cart extends Model
         return $this;
     }
 
-    /**
-     * Release hold on all cart items.
-     *
-     * @return self
-     */
-    public function releaseItemsHolds()
+    public function releaseItemsHolds(): self
     {
         $this->cartItems->each(function ($item) {
             $item->releaseHold();
@@ -362,42 +316,24 @@ class Cart extends Model
         return $this;
     }
 
-    /**
-     * Get seconds to lock expiration.
-     *
-     * @return int
-     */
-    public function getExpiresIn()
+    public function getExpiresIn(): int
     {
         return Carbon::now()->diffInSeconds($this->expires_at);
     }
 
-    /**
-     * Update hold on all cart items.
-     *
-     * @return self
-     */
-    public function updateItemsHolds()
+    public function updateItemsHolds(): self
     {
+        // TODO - eliminate dependency on external package config
         $this->expires_at = now()->addSeconds(config('services.slot.hold.lifetime', 600));
 
-        $this->cartItems->each(function ($item) {
+        $this->cartItems->each(function (CartItem $item) {
             $item->setHold($this->user_id);
         });
 
         return $this;
     }
 
-    /**
-     * Add slot.
-     *
-     * @param string $slotNumber
-     * @param int $participants
-     * @param bool $isPrivate
-     *
-     * @return CartItem
-     */
-    public function addSlot($slotNumber, $participants, $isPrivate)
+    public function addSlot(string $slotNumber, int $participants, bool $isPrivate): CartItem
     {
         $item = CartItem::makeFromSlot($slotNumber, $participants, $isPrivate);
         $this->updateItemsHolds();
@@ -407,7 +343,7 @@ class Cart extends Model
         return $item;
     }
 
-    public function removeSlot($slotNumber): bool
+    public function removeSlot(string $slotNumber): bool
     {
         return $this->cartItems()
             ->where('slot_number', $slotNumber)
@@ -415,29 +351,12 @@ class Cart extends Model
             ->delete();
     }
 
-    /**
-     * Check if cart is empty.
-     *
-     * @return bool
-     */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return ! $this->cartItems()->exists();
     }
 
-    /**
-     * Scope a query to rows visible by user.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param $user array
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeVisibleBy($query, $user)
-    {
-        return $query;
-    }
-
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->whereDate('expires_at', '>', now())
             ->orWhere(function ($query) {
@@ -446,13 +365,18 @@ class Cart extends Model
             });
     }
 
-    /**
-     * Get cart total participants.
-     *
-     * @return int
-     */
-    public function getTotalParticipants()
+    public function getTotalParticipants(): int
     {
         return (int) $this->cartItems()->sum('participants');
+    }
+
+    public function getLocation(): ?LocationInterface
+    {
+        return app(LocationService::class)->getLocation($this->location_id);
+    }
+
+    public function getUser(): ?UserInterface
+    {
+        return app(UserService::class)->getUser($this->user_id);
     }
 }
