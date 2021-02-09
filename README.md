@@ -25,7 +25,7 @@ If you would like to use the Nova resources included with this package, you need
 
 ```php
 Nova::resources([
-    // TBD
+    \Tipoff\Checkout\Nova\Order::class,
 ]);
 ```
 
