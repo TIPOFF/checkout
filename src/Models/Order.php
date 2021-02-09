@@ -11,8 +11,6 @@ use Tipoff\Support\Contracts\Models\CustomerInterface;
 use Tipoff\Support\Contracts\Models\LocationInterface;
 use Tipoff\Support\Contracts\Models\OrderInterface;
 use Tipoff\Support\Contracts\Models\VoucherInterface;
-use Tipoff\Support\Contracts\Services\CustomerService;
-use Tipoff\Support\Contracts\Services\LocationService;
 use Tipoff\Support\Contracts\Services\VoucherService;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
