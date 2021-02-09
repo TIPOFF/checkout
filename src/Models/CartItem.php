@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Tipoff\Support\Traits\HasPackageFactory;
 
@@ -63,13 +64,14 @@ class CartItem extends Model
     /**
      * Create booking from item.
      *
-     * @return type
+     * @return Model
      */
     public function createBooking()
     {
         $slot = $this->createSlot();
 
-        return Booking::create([
+        /** @psalm-suppress UndefinedMethod */
+        return app('booking')::create([
             'order_id' => $this->cart->order_id,
             'slot_id' => $slot->id,
             'participants' => $this->participants,
@@ -90,7 +92,7 @@ class CartItem extends Model
      */
     public function getAmountPerParticipant()
     {
-        return floor($this->amount / $this->participants);
+        return (int) floor($this->amount / $this->participants);
     }
 
     /**
@@ -106,6 +108,8 @@ class CartItem extends Model
             return $query;
         }
 
+        /**
+         * TODO - implement or kill
         foreach ($filters as $filterKey => $filterValue) {
             switch ($filterKey) {
                 case '':
@@ -113,6 +117,7 @@ class CartItem extends Model
                     break;
             }
         }
+         */
 
         return $query;
     }
@@ -203,7 +208,7 @@ class CartItem extends Model
      */
     public function hasSlot()
     {
-        ! empty($this->slot_number);
+        return ! empty($this->slot_number);
     }
 
     /**
@@ -212,7 +217,8 @@ class CartItem extends Model
     public function getSlot()
     {
         // TODO - move to services
-        return call_user_func(class_basename(app('slot')), 'resolveSlot', $this->slot_number);
+        /** @psalm-suppress UndefinedMethod */
+        return app('slot')::resolveSlot($this->slot_number);
     }
 
     /**
@@ -226,6 +232,8 @@ class CartItem extends Model
         $this->amount = method_exists($this->rate, 'getAmount') ?  $this->rate->getAmount($this->participants, $this->is_private) : 0;
         $this->total_fees = method_exists($this->fee, 'generateTotalFeesByCartItem') ? $this->fee->generateTotalFeesByCartItem($this) : 0;
         $this->total_taxes = method_exists($this->rate, 'generateTotalTaxesByCartItem') ?   $this->tax->generateTotalTaxesByCartItem($this) : 0;
+
+        return $this;
     }
 
     /**
@@ -233,7 +241,7 @@ class CartItem extends Model
      */
     public function createSlot()
     {
-        $slot = $this->getSlot($this->slot_number);
+        $slot = $this->getSlot();
         $slot->save();
 
         return $slot;
@@ -273,7 +281,7 @@ class CartItem extends Model
      * @param $user array
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeVisibleBy($query, User $user)
+    public function scopeVisibleBy($query, $user)
     {
         return $query;
     }

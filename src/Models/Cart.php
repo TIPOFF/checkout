@@ -86,7 +86,7 @@ class Cart extends Model
      *
      * @return Order
      */
-    public function processOrder(Payment $payment)
+    public function processOrder(Model $payment)
     {
         if (! $this->canConvert()) {
             throw new \Exception('Cart not valid.');
@@ -114,6 +114,8 @@ class Cart extends Model
         $this->issuePartialRedemptionVoucher();
         $order->refresh();
 
+        /**
+         * TODO - ensure handled in Voucher package as event listener
         if ($order->hasPartialRedemptionVoucher()) {
             $order
                 ->partialRedemptionVoucher
@@ -121,6 +123,7 @@ class Cart extends Model
                 ->user
                 ->notify(new PartialRedemptionVoucherCreated($order->partialRedemptionVoucher));
         }
+         */
 
         $this->delete();
 
@@ -133,12 +136,14 @@ class Cart extends Model
     /**
      * Apply deduction to cart.
      *
-     * @param Voucher|Discount $deduction
+     * @param Model $deduction
      * @return self
      */
     public function applyDeduction($deduction)
     {
-        app(CheckoutService::class)->applyDeductionToCart($deduction, $cart);
+        app(CheckoutService::class)->applyDeductionToCart($deduction, $this);
+
+        return $this;
     }
 
     /**
@@ -149,29 +154,35 @@ class Cart extends Model
      */
     public function applyCode($code)
     {
-        return app(CheckoutService::class)->applyCodeToCart($code, $this);
+        app(CheckoutService::class)->applyCodeToCart($code, $this);
+
+        return $this;
     }
 
     /**
      * Apply discount to cart.
      *
-     * @param Discount $discount
+     * @param Model $discount
      * @return self
      */
     public function applyDiscount($discount)
     {
-        return app(CheckoutService::class)->applyDiscountToCart($discount, $this);
+        app(CheckoutService::class)->applyDiscountToCart($discount, $this);
+
+        return $this;
     }
 
     /**
      * Apply voucher to cart.
      *
-     * @param Voucher $voucher
+     * @param Model $voucher
      * @return self
      */
     public function applyVoucher($voucher)
     {
-        return app(CheckoutService::class)->applyVoucherToCart($voucher, $this);
+        app(CheckoutService::class)->applyVoucherToCart($voucher, $this);
+
+        return $this;
     }
 
     public function vouchers()
@@ -230,7 +241,7 @@ class Cart extends Model
 
     public function hasInRoomMonitors()
     {
-        return $this->cartItems->contains(function ($item, $key) {
+        return $this->cartItems->contains(function (CartItem $item) {
             return ($item->room->theme_id == 1 ||
                 $item->room->theme_id == 2);
         });
@@ -249,6 +260,8 @@ class Cart extends Model
             return $query;
         }
 
+        /*
+         * TODO - implement or remove function
         foreach ($filters as $filterKey => $filterValue) {
             switch ($filterKey) {
                 case '':
@@ -256,6 +269,7 @@ class Cart extends Model
                     break;
             }
         }
+        */
 
         return $query;
     }
@@ -296,6 +310,8 @@ class Cart extends Model
         $this->amount = ($amount > 0) ? $amount : 0;
         $this->total_fees = $fees;
         $this->total_taxes = $taxes;
+
+        return $this;
     }
 
     public function cartItems()
@@ -342,6 +358,8 @@ class Cart extends Model
         $this->cartItems->each(function ($item) {
             $item->releaseHold();
         });
+
+        return $this;
     }
 
     /**
@@ -351,7 +369,7 @@ class Cart extends Model
      */
     public function getExpiresIn()
     {
-        Carbon::now()->diffInSeconds($this->expires_at);
+        return Carbon::now()->diffInSeconds($this->expires_at);
     }
 
     /**
@@ -366,6 +384,8 @@ class Cart extends Model
         $this->cartItems->each(function ($item) {
             $item->setHold($this->user_id);
         });
+
+        return $this;
     }
 
     /**
@@ -383,6 +403,8 @@ class Cart extends Model
         $this->updateItemsHolds();
 
         $this->addItem($item);
+
+        return $item;
     }
 
     public function removeSlot($slotNumber): bool
@@ -410,7 +432,7 @@ class Cart extends Model
      * @param $user array
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeVisibleBy($query, User $user)
+    public function scopeVisibleBy($query, $user)
     {
         return $query;
     }

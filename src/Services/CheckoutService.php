@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Services;
 
-use App\Models\Cart;
-use App\Models\Fee;
-use App\Models\Voucher;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use Tipoff\Checkout\Models\Cart;
 
 class CheckoutService
 {
@@ -24,18 +23,19 @@ class CheckoutService
      *
      * @param string $code
      * @return mixed
+     * @psalm-suppress UndefinedMethod
      */
-    public function findDeductionByCode($code, $date)
+    public function findDeductionByCode($code)
     {
         if (strlen($code) < 4 && strlen($code) > 16) {
             return false;
         }
 
-        if ($voucher = Voucher::validAt()->where('code', $code)->first()) {
+        if ($voucher = app('voucher')::validAt()->where('code', $code)->first()) {
             return $voucher;
         }
 
-        if ($discount = Discount::available()->where('code', $code)->first()) {
+        if ($discount = app('discount')::available()->where('code', $code)->first()) {
             return $discount;
         }
 
@@ -64,17 +64,18 @@ class CheckoutService
     /**
      * Apply deduction to cart.
      *
-     * @param Voucher|Deduction $deduction
+     * @param Model $deduction
      * @param Cart $cart
      * @return Cart
      */
     public function applyDeductionToCart($deduction, $cart)
     {
-        if ($deduction instanceof Discount) {
+        // TODO - temporary ugliness, will be moved into discounts/vouchers services
+        if (is_a($deduction, app('discount'))) {
             $cart->applyDiscount($deduction);
         }
 
-        if ($deduction instanceof Voucher) {
+        if (is_a($deduction , app('voucher'))) {
             $cart->applyVoucher($deduction);
         }
 
@@ -84,31 +85,35 @@ class CheckoutService
     /**
      * Apply discount to cart.
      *
-     * @param Discount $discount
+     * @param Model $discount
      * @param Cart $cart
      * @return Cart
      */
     public function applyDiscountToCart($discount, $cart)
     {
         if (! in_array($discount->applies_to, [self::APPLICATION_ORDER, self::APPLICATION_PARTICIPANT])) {
-            return $this;
+            return $cart;
         }
 
         $cart->discounts()->syncWithoutDetaching([$discount->id]);
         $cart->total_deductions = $this->calculateCartDeductions($cart);
         $cart->save();
+
+        return $cart;
     }
 
     /**
      * Issue partial redemption voucher when total discounts are higher than total amount.
      *
      * @param  Cart $cart
-     * @return Voucher
+     * @return Model
      */
     public function issueCartPartialRedemptionVoucher($cart)
     {
         $order = $cart->order;
-        $voucher = Voucher::create([
+
+        /** @psalm-suppress UndefinedMethod */
+        $voucher = app('voucher')::create([
             'location_id' => $cart->location_id,
             'customer_id' => $cart->user_id,
             'voucher_type_id' => Cart::PARTIAL_REDEMPTION_VOUCHER_TYPE_ID,
@@ -196,7 +201,7 @@ class CheckoutService
     /**
      * Apply voucher to cart.
      *
-     * @param Voucher $voucher
+     * @param Model $voucher
      * @param Cart $cart
      * @return Cart
      */
@@ -214,23 +219,9 @@ class CheckoutService
             $cart->vouchers()->syncWithoutDetaching([$voucher->id]);
             $cart->total_deductions = $this->calculateCartDeductions($cart);
             $cart->save();
-
-            return;
         }
-    }
 
-    /**
-     * Generate random voucher code.
-     *
-     * @return string
-     */
-    public function generateVoucherCode()
-    {
-        do {
-            $code = Carbon::now('America/New_York')->format('ymd').Str::upper(Str::random(3));
-        } while (Voucher::where('code', $code)->first());
-
-        return $code;
+        return $cart;
     }
 
     /**
@@ -244,7 +235,7 @@ class CheckoutService
      */
     public function addPercentageToAmount($percentage, $amount)
     {
-        return $amount + ($amount * ($percentage / 100));
+        return $amount + ((int)  ($amount * ($percentage / 100)));
     }
 
     /**
