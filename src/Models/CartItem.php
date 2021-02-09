@@ -149,12 +149,12 @@ class CartItem extends Model
 
     public function getStartAtAttribute()
     {
-        return $this->getSlot()->start_at;
+        return $this->hasSlot() ? $this->getSlot()->start_at : null;
     }
 
     public function getFormattedStartAttribute()
     {
-        return $this->getSlot()->formatted_start;
+        return $this->hasSlot() ? $this->getSlot()->formatted_start : null;
     }
 
     /**
@@ -164,7 +164,7 @@ class CartItem extends Model
      */
     public function hasHold()
     {
-        return $this->getSlot()->hasHold();
+        return $this->hasSlot() ? $this->getSlot()->hasHold() : false;
     }
 
     /**
@@ -174,7 +174,7 @@ class CartItem extends Model
      */
     public function getHold()
     {
-        return $this->getSlot()->getHold();
+        return $this->hasSlot() ? $this->getSlot()->getHold() : null;
     }
 
     /**
@@ -184,7 +184,9 @@ class CartItem extends Model
      */
     public function releaseHold()
     {
-        $this->getSlot()->releaseHold();
+        if ($this->hasSlot()) {
+            $this->getSlot()->releaseHold();
+        }
 
         return $this;
     }
@@ -198,7 +200,11 @@ class CartItem extends Model
      */
     public function setHold($userId, $expiresAt = null)
     {
-        return $this->getSlot()->setHold($userId, $expiresAt);
+        if ($this->hasSlot()) {
+            $this->getSlot()->setHold($userId, $expiresAt);
+        }
+
+        return $this;
     }
 
     /**
@@ -208,17 +214,21 @@ class CartItem extends Model
      */
     public function hasSlot()
     {
-        return ! empty($this->slot_number);
+        return $this->getSlot() ? true : false;
     }
 
     /**
      * Get slot model.
+     * @psalm-suppress UndefinedMethod
      */
     public function getSlot()
     {
-        // TODO - move to services
-        /** @psalm-suppress UndefinedMethod */
-        return app('slot')::resolveSlot($this->slot_number);
+        // TODO - temporary ugliness until moved to services
+        if (method_exists(app('slot'), 'resolveSlot')) {
+            return app('slot')::resolveSlot($this->slot_number);
+        }
+
+        return null;
     }
 
     /**
@@ -228,7 +238,7 @@ class CartItem extends Model
      */
     public function generatePricing()
     {
-        // TODO - move to services
+        // TODO - temporary ugliness until moved to services / model interfaces
         $this->amount = method_exists($this->rate, 'getAmount') ?  $this->rate->getAmount($this->participants, $this->is_private) : 0;
         $this->total_fees = method_exists($this->fee, 'generateTotalFeesByCartItem') ? $this->fee->generateTotalFeesByCartItem($this) : 0;
         $this->total_taxes = method_exists($this->rate, 'generateTotalTaxesByCartItem') ?   $this->tax->generateTotalTaxesByCartItem($this) : 0;
@@ -241,10 +251,14 @@ class CartItem extends Model
      */
     public function createSlot()
     {
-        $slot = $this->getSlot();
-        $slot->save();
+        if ($this->hasSlot()) {
+            $slot = $this->getSlot();
+            $slot->save();
 
-        return $slot;
+            return $slot;
+        }
+
+        return null;
     }
 
     /**
@@ -254,11 +268,12 @@ class CartItem extends Model
      * @param int $participants
      * @param bool $isPrivate
      * @return self
+     * @psalm-suppress UndefinedMethod
      */
     public static function makeFromSlot($slotNumber, int $participants, bool $isPrivate)
     {
         // TODO - move to services
-        $slot = call_user_func(class_basename(app('slot')), 'resolveSlot', $slotNumber);
+        $slot = app('slot')::resolveSlot($slotNumber);
         $rate = $slot->getRate();
         $tax = $slot->getTax();
         $fee = $slot->getFee();
