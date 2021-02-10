@@ -2,9 +2,9 @@
 
 namespace Tipoff\Checkout\Policies;
 
-use Tipoff\Checkout\Models\CartItem;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Tipoff\Checkout\Models\CartItem;
 
 class CartItemPolicy
 {
