@@ -10,7 +10,5 @@ interface CartInterface extends BaseModelInterface
 {
     public function applyDeductionCode(string $code): CartInterface;
 
-    public function issuePartialRedemptionVoucher(): ?CartInterface;
-
     public function getTotalParticipants(): int;
 }

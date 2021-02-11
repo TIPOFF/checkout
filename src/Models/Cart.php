@@ -142,6 +142,27 @@ class Cart extends BaseModel implements CartInterface
         return $order;
     }
 
+    private function issuePartialRedemptionVoucher(): self
+    {
+        if ($this->total_deductions < $this->amount + $this->total_taxes + $this->total_fees) {
+            return $this;
+        }
+
+        if (app()->has(VoucherInterface::class)) {
+            /** @var VoucherInterface $voucherInterface */
+            $voucherInterface = app(VoucherInterface::class);
+
+            $amount = $this->total_deductions - ($this->amount + $this->total_taxes + $this->total_fees);
+            $voucher = $voucherInterface::issuePartialRedemptionVoucher($this->location_id,  $amount, $this->user_id);
+
+            $order = $this->order;
+            $order->partial_redemption_voucher_id = $voucher->getId();
+            $order->save();
+        }
+
+        return $this;
+    }
+
     public function vouchers()
     {
         return $this->belongsToMany(app('voucher'))->withTimestamps();
@@ -393,27 +414,6 @@ class Cart extends BaseModel implements CartInterface
         $deduction->applyToCart($this);
 
         return $this->updateTotalDeductions();
-    }
-
-    public function issuePartialRedemptionVoucher(): ?CartInterface
-    {
-        if ($this->total_deductions < $this->amount + $this->total_taxes + $this->total_fees) {
-            return $this;
-        }
-
-        if (app()->has(VoucherInterface::class)) {
-            /** @var VoucherInterface $voucherInterface */
-            $voucherInterface = app(VoucherInterface::class);
-
-            $amount = $this->total_deductions - ($this->amount + $this->total_taxes + $this->total_fees);
-            $voucher = $voucherInterface::issuePartialRedemptionVoucher($this->location_id,  $amount, $this->user_id);
-
-            $order = $this->order;
-            $order->partial_redemption_voucher_id = $voucher->getId();
-            $order->save();
-        }
-
-        return $this;
     }
 
     public function getTotalParticipants(): int
