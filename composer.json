@@ -16,8 +16,16 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "tipoff/authorization": "^1.0",
-        "tipoff/support": "^1.2.1"
+        "tipoff/authorization": "^1.0.1",
+        "tipoff/bookings": "dev-main",
+        "tipoff/discounts": "dev-main",
+        "tipoff/escape-room": "dev-main",
+        "tipoff/fees": "dev-main",
+        "tipoff/payments": "dev-main",
+        "tipoff/scheduling": "dev-main",
+        "tipoff/support": "1.2.2",
+        "tipoff/taxes": "dev-main",
+        "tipoff/vouchers": "dev-main"
     },
     "require-dev": {
         "tipoff/test-support": "^1.0.1"

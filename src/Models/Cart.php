@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Models;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Tipoff\Checkout\Events\BookingOrderProcessed;
 use Tipoff\Checkout\Services\CheckoutService;
+use Tipoff\Discounts\Models\Discount;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
+use Tipoff\Vouchers\Models\Voucher;
 
 class Cart extends BaseModel
 {
@@ -47,12 +50,7 @@ class Cart extends BaseModel
         });
     }
 
-    /**
-     * Mark coucher as used.
-     *
-     * @return self
-     */
-    public function markVouchersAsUsed()
+    public function markVouchersAsUsed(): self
     {
         $orderId = $this->order_id;
 
@@ -65,12 +63,7 @@ class Cart extends BaseModel
         return $this;
     }
 
-    /**
-     * Issu vouchers in case of partial redemption.
-     *
-     * @return self
-     */
-    public function issuePartialRedemptionVoucher()
+    public function issuePartialRedemptionVoucher(): self
     {
         if ($this->total_deductions < $this->amount + $this->total_taxes + $this->total_fees) {
             return $this;
@@ -81,12 +74,7 @@ class Cart extends BaseModel
         return $this;
     }
 
-    /**
-     * Change cart to order.
-     *
-     * @return Order
-     */
-    public function processOrder(Model $payment)
+    public function processOrder(Model $payment): Order
     {
         if (! $this->canConvert()) {
             throw new \Exception('Cart not valid.');
@@ -134,24 +122,16 @@ class Cart extends BaseModel
     }
 
     /**
-     * Apply deduction to cart.
-     *
-     * @param Model $deduction
+     * @param Discount|Voucher $deduction
      * @return self
      */
-    public function applyDeduction($deduction)
+    public function applyDeduction($deduction): self
     {
         app(CheckoutService::class)->applyDeductionToCart($deduction, $this);
 
         return $this;
     }
 
-    /**
-     * Apply deduction code to cart.
-     *
-     * @param string $code
-     * @return self
-     */
     public function applyCode($code)
     {
         app(CheckoutService::class)->applyCodeToCart($code, $this);
@@ -159,26 +139,14 @@ class Cart extends BaseModel
         return $this;
     }
 
-    /**
-     * Apply discount to cart.
-     *
-     * @param Model $discount
-     * @return self
-     */
-    public function applyDiscount($discount)
+    public function applyDiscount(Discount $discount): self
     {
         app(CheckoutService::class)->applyDiscountToCart($discount, $this);
 
         return $this;
     }
 
-    /**
-     * Apply voucher to cart.
-     *
-     * @param Model $voucher
-     * @return self
-     */
-    public function applyVoucher($voucher)
+    public function applyVoucher(Voucher $voucher): self
     {
         app(CheckoutService::class)->applyVoucherToCart($voucher, $this);
 
@@ -210,12 +178,7 @@ class Cart extends BaseModel
         return $this->belongsTo(Order::class);
     }
 
-    /**
-     * Check if cart can convert to order.
-     *
-     * @return bool
-     */
-    public function canConvert()
+    public function canConvert(): bool
     {
         if (empty($this->amount)) {
             return false;
@@ -239,7 +202,7 @@ class Cart extends BaseModel
         return $this->expires_at->lt($now);
     }
 
-    public function hasInRoomMonitors()
+    public function hasInRoomMonitors(): bool
     {
         return $this->cartItems->contains(function (CartItem $item) {
             return ($item->room->theme_id == 1 ||
@@ -247,14 +210,7 @@ class Cart extends BaseModel
         });
     }
 
-    /**
-     * Scope a query to apply filters.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param $filters array
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeFilter($query, $filters)
+    public function scopeFilter(Builder $query, array $filters): Builder
     {
         if (empty($filters)) {
             return $query;
@@ -274,11 +230,6 @@ class Cart extends BaseModel
         return $query;
     }
 
-    /**
-     * Get total amount.
-     *
-     * @return int
-     */
     public function getTotalAmountAttribute(): int
     {
         if ($this->total_deductions > $this->amount + $this->total_taxes + $this->total_fees) {
@@ -288,12 +239,7 @@ class Cart extends BaseModel
         return $this->amount + $this->total_taxes + $this->total_fees - $this->total_deductions;
     }
 
-    /**
-     * Generate amount, total_taxes and total_fees.
-     *
-     * @return self
-     */
-    public function generatePricing()
+    public function generatePricing(): self
     {
         $amount = 0;
         $fees = 0;
@@ -326,13 +272,7 @@ class Cart extends BaseModel
             ->exists();
     }
 
-    /**
-     * Add item to cart.
-     *
-     * @param CartItem $cartItem
-     * @return self
-     */
-    public function addItem(CartItem $cartItem)
+    public function addItem(CartItem $cartItem): self
     {
         if (! empty($this->cartItems)) {
             $this->location_id = $cartItem->room->location_id;
@@ -348,36 +288,21 @@ class Cart extends BaseModel
         return $this;
     }
 
-    /**
-     * Release hold on all cart items.
-     *
-     * @return self
-     */
-    public function releaseItemsHolds()
+    public function releaseItemsHolds(): self
     {
-        $this->cartItems->each(function ($item) {
+        $this->cartItems->each(function (CartItem $item) {
             $item->releaseHold();
         });
 
         return $this;
     }
 
-    /**
-     * Get seconds to lock expiration.
-     *
-     * @return int
-     */
-    public function getExpiresIn()
+    public function getExpiresIn(): int
     {
         return Carbon::now()->diffInSeconds($this->expires_at);
     }
 
-    /**
-     * Update hold on all cart items.
-     *
-     * @return self
-     */
-    public function updateItemsHolds()
+    public function updateItemsHolds(): self
     {
         $this->expires_at = now()->addSeconds(config('services.slot.hold.lifetime', 600));
 
@@ -388,16 +313,7 @@ class Cart extends BaseModel
         return $this;
     }
 
-    /**
-     * Add slot.
-     *
-     * @param string $slotNumber
-     * @param int $participants
-     * @param bool $isPrivate
-     *
-     * @return CartItem
-     */
-    public function addSlot($slotNumber, $participants, $isPrivate)
+    public function addSlot(string $slotNumber, int $participants, bool $isPrivate): CartItem
     {
         $item = CartItem::makeFromSlot($slotNumber, $participants, $isPrivate);
         $this->updateItemsHolds();
@@ -415,29 +331,17 @@ class Cart extends BaseModel
             ->delete();
     }
 
-    /**
-     * Check if cart is empty.
-     *
-     * @return bool
-     */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return ! $this->cartItems()->exists();
     }
 
-    /**
-     * Scope a query to rows visible by user.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param $user array
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeVisibleBy($query, $user)
+    public function scopeVisibleBy(Builder $query, $user): Builder
     {
         return $query;
     }
 
-    public function scopeActive($query)
+    public function scopeActive(Builder $query): Builder
     {
         return $query->whereDate('expires_at', '>', now())
             ->orWhere(function ($query) {
@@ -446,12 +350,7 @@ class Cart extends BaseModel
             });
     }
 
-    /**
-     * Get cart total participants.
-     *
-     * @return int
-     */
-    public function getTotalParticipants()
+    public function getTotalParticipants(): int
     {
         return (int) $this->cartItems()->sum('participants');
     }

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Models;
 
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Tipoff\Bookings\Models\Booking;
+use Tipoff\Scheduling\Models\Slot;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
@@ -62,17 +64,11 @@ class CartItem extends BaseModel
         });
     }
 
-    /**
-     * Create booking from item.
-     *
-     * @return Model
-     */
-    public function createBooking()
+    public function createBooking(): Booking
     {
         $slot = $this->createSlot();
 
-        /** @psalm-suppress UndefinedMethod */
-        return app('booking')::create([
+        return Booking::create([
             'order_id' => $this->cart->order_id,
             'slot_id' => $slot->id,
             'participants' => $this->participants,
@@ -86,24 +82,12 @@ class CartItem extends BaseModel
         ]);
     }
 
-    /**
-     * Get amount per participant.
-     *
-     * @return int
-     */
-    public function getAmountPerParticipant()
+    public function getAmountPerParticipant(): int
     {
         return (int) floor($this->amount / $this->participants);
     }
 
-    /**
-     * Scope a query to apply filters.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param $filters array
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeFilter($query, $filters)
+    public function scopeFilter(Builder $query, array $filters): Builder
     {
         if (empty($filters)) {
             return $query;
@@ -158,32 +142,17 @@ class CartItem extends BaseModel
         return $this->hasSlot() ? $this->getSlot()->formatted_start : null;
     }
 
-    /**
-     * Check if slot has locks.
-     *
-     * @return bool
-     */
-    public function hasHold()
+    public function hasHold(): bool
     {
         return $this->hasSlot() ? $this->getSlot()->hasHold() : false;
     }
 
-    /**
-     * Get hold for slot.
-     *
-     * @return object|null
-     */
-    public function getHold()
+    public function getHold(): ?object
     {
         return $this->hasSlot() ? $this->getSlot()->getHold() : null;
     }
 
-    /**
-     * Relese slot hold.
-     *
-     * @return self
-     */
-    public function releaseHold()
+    public function releaseHold(): self
     {
         if ($this->hasSlot()) {
             $this->getSlot()->releaseHold();
@@ -192,14 +161,7 @@ class CartItem extends BaseModel
         return $this;
     }
 
-    /**
-     * Create hold.
-     *
-     * @param int $userId
-     * @param Carbon|null $expiresAt
-     * @return self
-     */
-    public function setHold($userId, $expiresAt = null)
+    public function setHold(int $userId, ?Carbon $expiresAt = null): self
     {
         if ($this->hasSlot()) {
             $this->getSlot()->setHold($userId, $expiresAt);
@@ -208,49 +170,27 @@ class CartItem extends BaseModel
         return $this;
     }
 
-    /**
-     * Check if cart item has slot.
-     *
-     * @return bool
-     */
-    public function hasSlot()
+    public function hasSlot(): bool
     {
         return $this->getSlot() ? true : false;
     }
 
-    /**
-     * Get slot model.
-     * @psalm-suppress UndefinedMethod
-     */
-    public function getSlot()
+    public function getSlot(): ?Slot
     {
-        // TODO - temporary ugliness until moved to services
-        if (method_exists(app('slot'), 'resolveSlot')) {
-            return app('slot')::resolveSlot($this->slot_number);
-        }
-
-        return null;
+        return Slot::resolveSlot($this->slot_number);
     }
 
-    /**
-     * Generate amount, total_taxes and total_fees.
-     *
-     * @return self
-     */
-    public function generatePricing()
+    public function generatePricing(): self
     {
-        // TODO - temporary ugliness until moved to services / model interfaces
-        $this->amount = method_exists($this->rate, 'getAmount') ?  $this->rate->getAmount($this->participants, $this->is_private) : 0;
-        $this->total_fees = method_exists($this->fee, 'generateTotalFeesByCartItem') ? $this->fee->generateTotalFeesByCartItem($this) : 0;
-        $this->total_taxes = method_exists($this->rate, 'generateTotalTaxesByCartItem') ?   $this->tax->generateTotalTaxesByCartItem($this) : 0;
+        // TODO - move to services
+        $this->amount = $this->rate->getAmount($this->participants, $this->is_private);
+        $this->total_fees = $this->fee->generateTotalFeesByCartItem($this);
+        $this->total_taxes = $this->tax->generateTotalTaxesByCartItem($this);
 
         return $this;
     }
 
-    /**
-     * Turn virtual slot to slot.
-     */
-    public function createSlot()
+    public function createSlot(): ?Slot
     {
         if ($this->hasSlot()) {
             $slot = $this->getSlot();
@@ -262,19 +202,10 @@ class CartItem extends BaseModel
         return null;
     }
 
-    /**
-     * Make item from slot number.
-     *
-     * @param string $slotNumber
-     * @param int $participants
-     * @param bool $isPrivate
-     * @return self
-     * @psalm-suppress UndefinedMethod
-     */
-    public static function makeFromSlot($slotNumber, int $participants, bool $isPrivate)
+    public static function makeFromSlot(String $slotNumber, int $participants, bool $isPrivate): self
     {
         // TODO - move to services
-        $slot = app('slot')::resolveSlot($slotNumber);
+        $slot = Slot::resolveSlot($slotNumber);
         $rate = $slot->getRate();
         $tax = $slot->getTax();
         $fee = $slot->getFee();
@@ -290,14 +221,7 @@ class CartItem extends BaseModel
         ]);
     }
 
-    /**
-     * Scope a query to rows visible by user.
-     *
-     * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param $user array
-     * @return \Illuminate\Database\Eloquent\Builder
-     */
-    public function scopeVisibleBy($query, $user)
+    public function scopeVisibleBy(Builder $query, $user): Builder
     {
         return $query;
     }
