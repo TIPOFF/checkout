@@ -14,3 +14,9 @@ All notable changes to `checkout` will be documented in this file.
 ## 1.1.1 - 2021-02-10
 
 - fix composer
+
+## 2.0.0 - 2021-02-11
+
+- model policies
+- model interfaces
+- nova resources
