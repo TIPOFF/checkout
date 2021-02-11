@@ -394,7 +394,7 @@ class Cart extends BaseModel implements CartInterface
 
         $totalDeductions = static::activeDeductions()
             ->reduce(function (int $totalDeductions, CartDeduction $deduction) {
-                return $totalDeductions + $deduction::calculateCartDeduction($this);
+                return $totalDeductions + $deduction::calculateCartDeduction($this)->getUnscaledAmount()->toInt();
             }, $totalDeductions);
 
         $this->total_deductions = $totalDeductions;
