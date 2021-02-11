@@ -10,5 +10,5 @@ interface VoucherInterface extends BaseModelInterface, CartDeduction
 {
     public static function generateVoucherCode(): string;
 
-    public static function issuePartialRedemptionVoucher(int $locationId, int $amount, int $userId): VoucherInterface;
+    public static function issuePartialRedemptionVoucher(CartInterface $cart, int $locationId, int $amount, int $userId): VoucherInterface;
 }

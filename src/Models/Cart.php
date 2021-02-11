@@ -153,7 +153,7 @@ class Cart extends BaseModel implements CartInterface
             $voucherInterface = app(VoucherInterface::class);
 
             $amount = $this->total_deductions - ($this->amount + $this->total_taxes + $this->total_fees);
-            $voucher = $voucherInterface::issuePartialRedemptionVoucher($this->location_id,  $amount, $this->user_id);
+            $voucher = $voucherInterface::issuePartialRedemptionVoucher($this, $this->location_id,  $amount, $this->user_id);
 
             $order = $this->order;
             $order->partial_redemption_voucher_id = $voucher->getId();
