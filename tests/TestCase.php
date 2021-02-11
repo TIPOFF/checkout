@@ -9,7 +9,6 @@ use Spatie\Permission\PermissionServiceProvider;
 use Tipoff\Authorization\AuthorizationServiceProvider;
 use Tipoff\Checkout\CheckoutServiceProvider;
 use Tipoff\Checkout\Tests\Support\Providers\NovaPackageServiceProvider;
-use Tipoff\Discounts\DiscountsServiceProvider;
 use Tipoff\EscapeRoom\EscapeRoomServiceProvider;
 use Tipoff\Fees\FeesServiceProvider;
 use Tipoff\Payments\PaymentsServiceProvider;
@@ -17,7 +16,6 @@ use Tipoff\Scheduling\SchedulingServiceProvider;
 use Tipoff\Support\SupportServiceProvider;
 use Tipoff\Taxes\TaxesServiceProvider;
 use Tipoff\TestSupport\BaseTestCase;
-use Tipoff\Vouchers\VouchersServiceProvider;
 
 class TestCase extends BaseTestCase
 {
@@ -27,8 +25,6 @@ class TestCase extends BaseTestCase
             NovaCoreServiceProvider::class,
             NovaPackageServiceProvider::class,
             SupportServiceProvider::class,
-            DiscountsServiceProvider::class,
-            VouchersServiceProvider::class,
             EscapeRoomServiceProvider::class,
             PaymentsServiceProvider::class,
             SchedulingServiceProvider::class,

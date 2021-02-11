@@ -11,6 +11,25 @@ use Tipoff\Scheduling\Models\Slot;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
+/**
+ * @property int|null id
+ * @property string slot_number
+ * @property int participants
+ * @property bool is_private
+ * @property int amount
+ * @property int total_taxes
+ * @property int total_fees
+ * @property int total_deductions
+ * @property Carbon created_at
+ * @property Carbon updated_at
+ * // Raw Relation ID
+ * @property int|null room_id
+ * @property int|null rate_id
+ * @property int|null fee_id
+ * @property int|null tax_id
+ * @property int|null creator_id
+ * @property int|null updater_id
+ */
 class CartItem extends BaseModel
 {
     use HasPackageFactory;
@@ -29,12 +48,25 @@ class CartItem extends BaseModel
         'fee_id',
     ];
 
-
     protected $touches = [
         'cart',
     ];
 
-    protected $casts = [];
+    protected $casts = [
+        'id' => 'integer',
+        'participants' => 'integer',
+        'is_private' => 'boolean',
+        'amount' => 'integer',
+        'total_taxes' => 'integer',
+        'total_fees' => 'integer',
+        'total_deductions' => 'integer',
+        'room_id' => 'integer',
+        'rate_id' => 'integer',
+        'fee_id' => 'integer',
+        'tax_id' => 'integer',
+        'creator_id' => 'integer',
+        'updater_id' => 'integer',
+    ];
 
     protected static function boot()
     {

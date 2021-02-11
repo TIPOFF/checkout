@@ -8,29 +8,56 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use Tipoff\Checkout\Contracts\Models\CartDeduction;
+use Tipoff\Checkout\Contracts\Models\CartInterface;
+use Tipoff\Checkout\Contracts\Models\DiscountInterface;
+use Tipoff\Checkout\Contracts\Models\VoucherInterface;
 use Tipoff\Checkout\Events\BookingOrderProcessed;
-use Tipoff\Checkout\Services\CheckoutService;
-use Tipoff\Discounts\Models\Discount;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
-use Tipoff\Vouchers\Models\Voucher;
 
-class Cart extends BaseModel
+/**
+ * @property int|null id
+ * @property string code
+ * @property int amount
+ * @property int total_taxes
+ * @property int total_fees
+ * @property int total_deductions
+ * @property Carbon expires_at
+ * @property Carbon created_at
+ * @property Carbon updated_at
+ * // Raw Relation ID
+ * @property int|null user_id
+ * @property int|null location_id
+ * @property int|null creator_id
+ * @property int|null updater_id
+ */
+class Cart extends BaseModel implements CartInterface
 {
     use HasPackageFactory;
     use SoftDeletes;
-
-    /**
-     * Voucher type used in partial redemptions.
-     */
-    const PARTIAL_REDEMPTION_VOUCHER_TYPE_ID = 7;
 
     protected $guarded = [
         'id',
     ];
 
     protected $casts = [
+        'id' => 'integer',
+        'amount' => 'integer',
+        'total_taxes' => 'integer',
+        'total_fees' => 'integer',
+        'total_deductions' => 'integer',
         'expires_at' => 'datetime',
+        'user_id' => 'integer',
+        'location_id' => 'integer',
+        'creator_id' => 'integer',
+        'updater_id' => 'integer',
+    ];
+
+    private static array $deductionTypes = [
+        VoucherInterface::class,
+        DiscountInterface::class,
     ];
 
     public static function boot()
@@ -63,23 +90,13 @@ class Cart extends BaseModel
         return $this;
     }
 
-    public function issuePartialRedemptionVoucher(): self
-    {
-        if ($this->total_deductions < $this->amount + $this->total_taxes + $this->total_fees) {
-            return $this;
-        }
-
-        app(CheckoutService::class)->issueCartPartialRedemptionVoucher($this);
-
-        return $this;
-    }
-
     public function processOrder(Model $payment): Order
     {
         if (! $this->canConvert()) {
             throw new \Exception('Cart not valid.');
         }
 
+        /** @var Order $order */
         $order = Order::create([
             'customer_id' => $payment->customer_id,
             'location_id' => $this->location_id,
@@ -98,7 +115,11 @@ class Cart extends BaseModel
         $payment->order_id = $order->id;
         $payment->save();
 
-        $this->markVouchersAsUsed();
+        static::activeDeductions()
+            ->each(function (CartDeduction $deduction) {
+                $deduction::markCartDeductionsAsUsed($this);
+            });
+
         $this->issuePartialRedemptionVoucher();
         $order->refresh();
 
@@ -121,38 +142,6 @@ class Cart extends BaseModel
         return $order;
     }
 
-    /**
-     * @param Discount|Voucher $deduction
-     * @return self
-     */
-    public function applyDeduction($deduction): self
-    {
-        app(CheckoutService::class)->applyDeductionToCart($deduction, $this);
-
-        return $this;
-    }
-
-    public function applyCode($code)
-    {
-        app(CheckoutService::class)->applyCodeToCart($code, $this);
-
-        return $this;
-    }
-
-    public function applyDiscount(Discount $discount): self
-    {
-        app(CheckoutService::class)->applyDiscountToCart($discount, $this);
-
-        return $this;
-    }
-
-    public function applyVoucher(Voucher $voucher): self
-    {
-        app(CheckoutService::class)->applyVoucherToCart($voucher, $this);
-
-        return $this;
-    }
-
     public function vouchers()
     {
         return $this->belongsToMany(app('voucher'))->withTimestamps();
@@ -165,7 +154,10 @@ class Cart extends BaseModel
 
     public function getDeductionCodesAttribute()
     {
-        return $this->vouchers->concat($this->discounts);
+        return static::activeDeductions()
+            ->reduce(function (array $codes, CartDeduction $deduction) {
+                return array_merge($codes, $deduction->getCodesForCart($this));
+            }, []);
     }
 
     public function location()
@@ -348,6 +340,80 @@ class Cart extends BaseModel
                 $query->whereDate('expires_at', now())
                     ->whereTime('expires_at', '>', now());
             });
+    }
+
+    /******************************
+     * CartInterface Implementation
+     ******************************/
+
+    private static function activeDeductions(): Collection
+    {
+        return collect(static::$deductionTypes)
+            ->filter(function (string $type) {
+                return app()->has($type);
+            })
+            ->map(function (string $type) {
+                return app($type);
+            });
+    }
+
+    private function findDeductionByCode(string $code): ?CartDeduction
+    {
+        return static::activeDeductions()
+                ->first(function (CartDeduction $deduction) use ($code) {
+                    return $deduction::findDeductionByCode($code);
+                });
+    }
+
+    private function updateTotalDeductions(): self
+    {
+        $totalDeductions = $this->cartItems->reduce(function (int $totalDeductions, CartItem $cartItem) {
+            return $totalDeductions + $cartItem->total_deductions;
+        }, 0);
+
+        $totalDeductions = static::activeDeductions()
+            ->reduce(function (int $totalDeductions, CartDeduction $deduction) {
+                return $totalDeductions + $deduction::calculateCartDeduction($this);
+            }, $totalDeductions);
+
+        $this->total_deductions = $totalDeductions;
+        $this->save();
+
+        return $this;
+    }
+
+    public function applyDeductionCode(string $code): CartInterface
+    {
+        $deduction = $this->findDeductionByCode($code);
+
+        if (empty($deduction)) {
+            throw new \Exception("Code {$code} is invalid.");
+        }
+
+        $deduction->applyToCart($this);
+
+        return $this->updateTotalDeductions();
+    }
+
+    public function issuePartialRedemptionVoucher(): ?CartInterface
+    {
+        if ($this->total_deductions < $this->amount + $this->total_taxes + $this->total_fees) {
+            return $this;
+        }
+
+        if (app()->has(VoucherInterface::class)) {
+            /** @var VoucherInterface $voucherInterface */
+            $voucherInterface = app(VoucherInterface::class);
+
+            $amount = $this->total_deductions - ($this->amount + $this->total_taxes + $this->total_fees);
+            $voucher = $voucherInterface::issuePartialRedemptionVoucher($this->location_id,  $amount, $this->user_id);
+
+            $order = $this->order;
+            $order->partial_redemption_voucher_id = $voucher->getId();
+            $order->save();
+        }
+
+        return $this;
     }
 
     public function getTotalParticipants(): int
