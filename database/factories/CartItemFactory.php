@@ -28,6 +28,7 @@ class CartItemFactory extends Factory
             'cart_id' => randomOrCreate(Cart::class),
             'slot_number' => $this->faker->word,
             'participants' => $this->faker->numberBetween(1, 10),
+            'is_private' => $this->faker->boolean,
             'room_id' => randomOrCreate(app('room')),
             'rate_id' => randomOrCreate(app('rate')),
             'tax_id' => randomOrCreate(app('tax')),
