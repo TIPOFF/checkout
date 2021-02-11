@@ -208,7 +208,7 @@ class Cart extends BaseModel implements CartInterface
         return true;
     }
 
-    public function hasExpired()
+    public function hasExpired(): bool
     {
         $now = Carbon::now();
 
@@ -317,9 +317,10 @@ class Cart extends BaseModel implements CartInterface
 
     public function updateItemsHolds(): self
     {
+        // TODO - eliminate dependency on external package config
         $this->expires_at = now()->addSeconds(config('services.slot.hold.lifetime', 600));
 
-        $this->cartItems->each(function ($item) {
+        $this->cartItems->each(function (CartItem $item) {
             $item->setHold($this->user_id);
         });
 
@@ -336,7 +337,7 @@ class Cart extends BaseModel implements CartInterface
         return $item;
     }
 
-    public function removeSlot($slotNumber): bool
+    public function removeSlot(string $slotNumber): bool
     {
         return $this->cartItems()
             ->where('slot_number', $slotNumber)
@@ -386,7 +387,7 @@ class Cart extends BaseModel implements CartInterface
                 });
     }
 
-    private function updateTotalDeductions(): self
+    public function updateTotalDeductions(): self
     {
         $totalDeductions = $this->cartItems->reduce(function (int $totalDeductions, CartItem $cartItem) {
             return $totalDeductions + $cartItem->total_deductions;
