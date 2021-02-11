@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests;
 
 use Laravel\Nova\NovaCoreServiceProvider;
+use Spatie\Permission\PermissionServiceProvider;
+use Tipoff\Authorization\AuthorizationServiceProvider;
 use Tipoff\Checkout\CheckoutServiceProvider;
 use Tipoff\Checkout\Tests\Support\Providers\NovaPackageServiceProvider;
 use Tipoff\Support\SupportServiceProvider;
@@ -18,6 +20,8 @@ class TestCase extends BaseTestCase
             NovaCoreServiceProvider::class,
             NovaPackageServiceProvider::class,
             SupportServiceProvider::class,
+            AuthorizationServiceProvider::class,
+            PermissionServiceProvider::class,
             CheckoutServiceProvider::class,
         ];
     }

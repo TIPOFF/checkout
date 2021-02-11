@@ -16,15 +16,17 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "tipoff/support": "^1.2"
+        "tipoff/authorization": "^1.0",
+        "tipoff/support": "^1.2.1"
     },
     "require-dev": {
-        "tipoff/test-support": "^1.0"
+        "tipoff/test-support": "^1.0.1"
     },
     "autoload": {
         "psr-4": {
             "Tipoff\\Checkout\\": "src",
-            "Tipoff\\Checkout\\Database\\Factories\\": "database/factories"
+            "Tipoff\\Checkout\\Database\\Factories\\": "database/factories",
+            "Tipoff\\Checkout\\Database\\Seeders\\": "database/seeders"
         }
     },
     "autoload-dev": {
