@@ -4,12 +4,26 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Models;
 
+use Assert\Assert;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasPackageFactory;
 
+/**
+ * @property int|null id
+ * @property string order_number
+ * @property int amount
+ * @property int total_taxes
+ * @property int total_fees
+ * @property Carbon created_at
+ * @property Carbon updated_at
+ * // Raw Relation ID
+ * @property int|null customer_id
+ * @property int|null location_id
+ * @property int|null creator_id
+ */
 class Order extends BaseModel
 {
     use HasPackageFactory;
@@ -20,7 +34,15 @@ class Order extends BaseModel
         'order_number',
     ];
 
-    protected $casts = [];
+    protected $casts = [
+        'id' => 'integer',
+        'amount' => 'integer',
+        'total_taxes' => 'integer',
+        'total_fees' => 'integer',
+        'customer_id' => 'integer',
+        'location_id' => 'integer',
+        'creator_id' => 'integer',
+    ];
 
     protected static function boot()
     {
@@ -31,12 +53,10 @@ class Order extends BaseModel
         });
 
         static::saving(function ($order) {
-            if (empty($order->customer_id)) {
-                throw new \Exception('An order must belong to a customer.');
-            }
-            if (empty($order->location_id)) {
-                throw new \Exception('An order must belong to a location.');
-            }
+            Assert::lazy()
+                ->that($order->customer_id, 'customer_id')->notEmpty('An order must belong to a customer.')
+                ->that($order->location_id, 'location_id')->notEmpty('An order must belong to a location.')
+                ->verifyNow();
         });
     }
 
