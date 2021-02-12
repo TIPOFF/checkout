@@ -22,11 +22,11 @@
         "tipoff/fees": "dev-main",
         "tipoff/payments": "dev-main",
         "tipoff/scheduling": "dev-main",
-        "tipoff/support": "^1.2.6",
+        "tipoff/support": "^1.2.7",
         "tipoff/taxes": "dev-main"
     },
     "require-dev": {
-        "tipoff/test-support": "^1.0.1"
+        "tipoff/test-support": "^1.0.3"
     },
     "autoload": {
         "psr-4": {
