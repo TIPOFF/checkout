@@ -14,6 +14,9 @@ use Tipoff\Checkout\Contracts\Models\CartInterface;
 use Tipoff\Checkout\Contracts\Models\DiscountInterface;
 use Tipoff\Checkout\Contracts\Models\VoucherInterface;
 use Tipoff\Checkout\Events\BookingOrderProcessed;
+use Tipoff\Checkout\Exceptions\CartNotValidException;
+use Tipoff\Checkout\Exceptions\InvalidDeductionCodeException;
+use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
@@ -93,7 +96,7 @@ class Cart extends BaseModel implements CartInterface
     public function processOrder(Model $payment): Order
     {
         if (! $this->canConvert()) {
-            throw new \Exception('Cart not valid.');
+            throw new CartNotValidException();
         }
 
         /** @var Order $order */
@@ -122,17 +125,6 @@ class Cart extends BaseModel implements CartInterface
 
         $this->issuePartialRedemptionVoucher();
         $order->refresh();
-
-        /**
-         * TODO - ensure handled in Voucher package as event listener
-        if ($order->hasPartialRedemptionVoucher()) {
-            $order
-                ->partialRedemptionVoucher
-                ->customer
-                ->user
-                ->notify(new PartialRedemptionVoucherCreated($order->partialRedemptionVoucher));
-        }
-         */
 
         $this->delete();
 
@@ -291,7 +283,7 @@ class Cart extends BaseModel implements CartInterface
             $this->location_id = $cartItem->room->location_id;
         } else {
             if ($this->location_id = $cartItem->room->location_id) {
-                throw new \Exception('Cust must contain items from single location.');
+                throw new MultipleLocationException();
             }
         }
         $cartItem->cart()->associate($this);
@@ -409,7 +401,7 @@ class Cart extends BaseModel implements CartInterface
         $deduction = $this->findDeductionByCode($code);
 
         if (empty($deduction)) {
-            throw new \Exception("Code {$code} is invalid.");
+            throw new InvalidDeductionCodeException($code);
         }
 
         $deduction->applyToCart($this);
@@ -420,5 +412,23 @@ class Cart extends BaseModel implements CartInterface
     public function getTotalParticipants(): int
     {
         return (int) $this->cartItems()->sum('participants');
+    }
+
+    public function getCartItems(): array
+    {
+        return $this->cartItems->toArray();
+    }
+
+    public static function activeCart(int $userId): CartInterface
+    {
+        $cart = Cart::query()
+            ->where('user_id', $userId)
+            ->active()
+            ->orderByDesc('id')
+            ->first();
+
+        return $cart ?: static::create([
+            'user_id' => $userId,
+        ]);
     }
 }

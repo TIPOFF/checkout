@@ -14,11 +14,11 @@ interface CartDeduction
 
     public static function markCartDeductionsAsUsed(CartInterface $cart): void;
 
-    public function applyToCart(CartInterface $cart);
-
     /**
      * @param CartInterface $cart
      * @return array|string[]
      */
-    public function getCodesForCart(CartInterface $cart): array;
+    public static function getCodesForCart(CartInterface $cart): array;
+
+    public function applyToCart(CartInterface $cart);
 }

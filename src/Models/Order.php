@@ -7,6 +7,8 @@ namespace Tipoff\Checkout\Models;
 use Assert\Assert;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Tipoff\Checkout\Contracts\Models\OrderInterface;
+use Tipoff\Checkout\Contracts\Models\VoucherInterface;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasPackageFactory;
@@ -22,9 +24,10 @@ use Tipoff\Support\Traits\HasPackageFactory;
  * // Raw Relation ID
  * @property int|null customer_id
  * @property int|null location_id
+ * @property int|null partial_redemption_voucher_id
  * @property int|null creator_id
  */
-class Order extends BaseModel
+class Order extends BaseModel implements OrderInterface
 {
     use HasPackageFactory;
     use HasCreator;
@@ -41,6 +44,7 @@ class Order extends BaseModel
         'total_fees' => 'integer',
         'customer_id' => 'integer',
         'location_id' => 'integer',
+        'partial_redemption_voucher_id' => 'integer',
         'creator_id' => 'integer',
     ];
 
@@ -79,6 +83,14 @@ class Order extends BaseModel
     public function hasPartialRedemptionVoucher()
     {
         return ! empty($this->partial_redemption_voucher_id);
+    }
+
+    public function getPartialRedemptionVoucher(): ?VoucherInterface
+    {
+        /** @var VoucherInterface|null $result */
+        $result = findModel(VoucherInterface::class, $this->partial_redemption_voucher_id);
+
+        return $result;
     }
 
     public function customer()
@@ -129,5 +141,24 @@ class Order extends BaseModel
     public function notes()
     {
         return $this->morphMany(app('note'), 'noteable');
+    }
+
+    /******************************
+     * OrderInterface Implementation
+     ******************************/
+
+    public function getCustomerId(): ?int
+    {
+        return $this->customer_id;
+    }
+
+    public function getOrderNumber(): string
+    {
+        return $this->order_number;
+    }
+
+    public function getLocation()
+    {
+        return $this->location;
     }
 }
