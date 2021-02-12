@@ -20,3 +20,8 @@ All notable changes to `checkout` will be documented in this file.
 - model policies
 - model interfaces
 - nova resources
+
+## 2.0.1 - 2021-02-12
+
+- order interface
+- cart item interface
