@@ -4,29 +4,28 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout;
 
-use Spatie\LaravelPackageTools\Package;
-use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Tipoff\Checkout\Contracts\Models\CartInterface;
+use Tipoff\Checkout\Contracts\Models\CartItemInterface;
+use Tipoff\Checkout\Contracts\Models\OrderInterface;
 use Tipoff\Checkout\Models\Cart;
+use Tipoff\Checkout\Models\CartItem;
+use Tipoff\Checkout\Models\Order;
+use Tipoff\Support\TipoffPackage;
+use Tipoff\Support\TipoffServiceProvider;
 
-class CheckoutServiceProvider extends PackageServiceProvider
+class CheckoutServiceProvider extends TipoffServiceProvider
 {
-    public function boot()
-    {
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
-
-        parent::boot();
-    }
-
-    public function configurePackage(Package $package): void
+    public function configureTipoffPackage(TipoffPackage $package): void
     {
         $package
             ->name('checkout')
             ->hasConfigFile();
-    }
 
-    public function registeringPackage()
-    {
-        $this->app->bind(CartInterface::class, Cart::class);
+        $package
+            ->hasModelInterfaces([
+                CartInterface::class => Cart::class,
+                CartItemInterface::class => CartItem::class,
+                OrderInterface::class => Order::class,
+            ]);
     }
 }

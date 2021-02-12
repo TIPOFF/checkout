@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Models;
 
+use Brick\Money\Money;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Tipoff\Bookings\Models\Booking;
+use Tipoff\Checkout\Contracts\Models\CartItemInterface;
 use Tipoff\Scheduling\Models\Slot;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
@@ -30,7 +32,7 @@ use Tipoff\Support\Traits\HasPackageFactory;
  * @property int|null creator_id
  * @property int|null updater_id
  */
-class CartItem extends BaseModel
+class CartItem extends BaseModel implements CartItemInterface
 {
     use HasPackageFactory;
 
@@ -256,5 +258,45 @@ class CartItem extends BaseModel
     public function scopeVisibleBy(Builder $query, $user): Builder
     {
         return $query;
+    }
+
+    /******************************
+     * CartItemInterface Implementation
+     ******************************/
+
+    public function getSlotNumber(): ?string
+    {
+        return $this->slot_number;
+    }
+
+    public function getIsPrivate(): bool
+    {
+        return $this->is_private;
+    }
+
+    public function getParticipants(): int
+    {
+        return $this->participants;
+    }
+
+    public function getAmount(): Money
+    {
+        return Money::ofMinor($this->amount ?? 0, 'USD');
+    }
+
+    public function getTotalDeductions(): Money
+    {
+        return Money::ofMinor($this->total_deductions ?? 0, 'USD');
+    }
+
+    public function getTotalFees(): Money
+    {
+        return Money::ofMinor($this->total_fees ?? 0, 'USD');
+    }
+
+    public function getFee()
+    {
+        // TODO: return findModel(FeeInterface::class, $this->fee_id);
+        return $this->fee;
     }
 }
