@@ -29,8 +29,6 @@ use Tipoff\Support\Traits\HasPackageFactory;
  * @property int|null rate_id
  * @property int|null fee_id
  * @property int|null tax_id
- * @property int|null creator_id
- * @property int|null updater_id
  */
 class CartItem extends BaseModel implements CartItemInterface
 {
@@ -66,8 +64,6 @@ class CartItem extends BaseModel implements CartItemInterface
         'rate_id' => 'integer',
         'fee_id' => 'integer',
         'tax_id' => 'integer',
-        'creator_id' => 'integer',
-        'updater_id' => 'integer',
     ];
 
     protected static function boot()

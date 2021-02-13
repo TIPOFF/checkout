@@ -33,8 +33,6 @@ use Tipoff\Support\Traits\HasPackageFactory;
  * // Raw Relation ID
  * @property int|null user_id
  * @property int|null location_id
- * @property int|null creator_id
- * @property int|null updater_id
  */
 class Cart extends BaseModel implements CartInterface
 {
@@ -50,8 +48,6 @@ class Cart extends BaseModel implements CartInterface
         'expires_at' => 'datetime',
         'user_id' => 'integer',
         'location_id' => 'integer',
-        'creator_id' => 'integer',
-        'updater_id' => 'integer',
     ];
 
     private static array $deductionTypes = [
