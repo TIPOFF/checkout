@@ -25,7 +25,7 @@ class CheckoutServiceProvider extends TipoffServiceProvider
                 CartInterface::class => Cart::class,
                 CartItemInterface::class => CartItem::class,
                 OrderInterface::class => Order::class,
-            ]);
+            ])
             ->hasPolicies([
                 Cart::class => CartPolicy::class,
                 CartItem::class => CartItemPolicy::class,
