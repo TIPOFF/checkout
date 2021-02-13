@@ -41,10 +41,6 @@ class Cart extends BaseModel implements CartInterface
     use HasPackageFactory;
     use SoftDeletes;
 
-    protected $guarded = [
-        'id',
-    ];
-
     protected $casts = [
         'id' => 'integer',
         'amount' => 'integer',
