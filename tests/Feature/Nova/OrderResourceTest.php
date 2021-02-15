@@ -39,7 +39,7 @@ class OrderResourceTest extends TestCase
             'id',
             'order_number',
             'amount',
-            'created_at'
+            'created_at',
         ], $orderFields->toArray());
     }
 
@@ -66,8 +66,7 @@ class OrderResourceTest extends TestCase
             'customer',
             'location',
             'amount',
-            'created_at'
+            'created_at',
         ], $orderFields->toArray());
     }
-
 }
