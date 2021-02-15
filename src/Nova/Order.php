@@ -14,9 +14,9 @@ use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
-use Tipoff\Support\Nova\Resource;
+use Tipoff\Support\Nova\BaseResource;
 
-class Order extends Resource
+class Order extends BaseResource
 {
     public static $model = \Tipoff\Checkout\Models\Order::class;
 
