@@ -26,6 +26,11 @@ class Order extends Resource
         'order_number',
     ];
 
+    /** @psalm-suppress UndefinedClass */
+    protected array $filterClassList = [
+        \Tipoff\Locations\Nova\Filters\Location::class,
+    ];
+
     public static function indexQuery(NovaRequest $request, $query)
     {
         if ($request->user()->hasRole([
@@ -46,66 +51,44 @@ class Order extends Resource
 
     public function fieldsForIndex(NovaRequest $request)
     {
-        return [
+        return array_filter([
             ID::make()->sortable(),
             Text::make('Order Number')->sortable(),
-            BelongsTo::make('Customer', 'customer', app()->getAlias('nova.customer'))->sortable(),
-            BelongsTo::make('Location', 'location', app()->getAlias('nova.location'))->sortable(),
+            nova('customer') ? BelongsTo::make('Customer', 'customer', nova('customer'))->sortable() : null,
+            nova('location') ? BelongsTo::make('Location', 'location', nova('location'))->sortable() : null,
             Currency::make('Amount')->asMinorUnits()->sortable(),
             Date::make('Created', 'created_at')->sortable()->exceptOnForms(),
-        ];
+        ]);
     }
 
     public function fields(Request $request)
     {
-        return [
+        return array_filter([
             Text::make('Order Number')->exceptOnForms(),
-            BelongsTo::make('Customer', 'customer', app()->getAlias('nova.customer'))->searchable()->withSubtitles(),
-            BelongsTo::make('Location', 'location', app()->getAlias('nova.location')),
+            nova('customer') ? BelongsTo::make('Customer', 'customer', nova('customer'))->searchable()->withSubtitles() : null,
+            nova('location') ? BelongsTo::make('Location', 'location', nova('location')) : null,
             Currency::make('Amount')->asMinorUnits()->exceptOnForms(),
             Currency::make('Taxes', 'total_taxes')->asMinorUnits()->exceptOnForms(),
             Currency::make('Fees', 'total_fees')->asMinorUnits()->exceptOnForms(),
-            HasMany::make('Bookings', 'bookings', app()->getAlias('nova.booking')),
-            HasMany::make('Purchased Vouchers', 'purchasedVouchers', app()->getAlias('nova.voucher')),
-            HasMany::make('Payments', 'payments', app()->getAlias('nova.payment')),
-            HasMany::make('Invoices', 'invoices', app()->getAlias('nova.invoice')),
-            HasMany::make('Discounts', 'discounts', app()->getAlias('nova.discount')),
-            HasMany::make('Vouchers', 'voucher', app()->getAlias('nova.voucher')),
-            MorphMany::make('Notes', 'notes', app()->getAlias('nova.note')),
+            nova('booking') ? HasMany::make('Bookings', 'bookings', nova('booking')) : null,
+            nova('voucher') ? HasMany::make('Purchased Vouchers', 'purchasedVouchers', nova('voucher')) : null,
+            nova('payment') ? HasMany::make('Payments', 'payments', nova('payment')) : null,
+            nova('invoice') ? HasMany::make('Invoices', 'invoices', nova('invoice')) : null,
+            nova('discount') ? HasMany::make('Discounts', 'discounts', nova('discount')) : null,
+            nova('voucher') ? HasMany::make('Vouchers', 'voucher', nova('voucher')) : null,
+            nova('note') ? MorphMany::make('Notes', 'notes', nova('note')) : null,
             new Panel('Data Fields', $this->dataFields()),
-        ];
+        ]);
     }
 
-    protected function dataFields()
+    protected function dataFields(): array
     {
-        return [
-            ID::make(),
-            BelongsTo::make('Creator', 'creator', app()->getAlias('nova.user'))->exceptOnForms(),
-            Date::make('Created At')->exceptOnForms(),
-            Date::make('Updated At')->exceptOnForms(),
-        ];
-    }
-
-    public function cards(Request $request)
-    {
-        return [];
-    }
-
-    public function filters(Request $request)
-    {
-        return [
-            // TODO - resolve how these can be shared across packages
-            // new Filters\Location,
-        ];
-    }
-
-    public function lenses(Request $request)
-    {
-        return [];
-    }
-
-    public function actions(Request $request)
-    {
-        return [];
+        return array_merge(
+            parent::dataFields(),
+            $this->creatorDataFields(),
+            [
+                Date::make('Updated At')->exceptOnForms(),
+            ]
+        );
     }
 }
