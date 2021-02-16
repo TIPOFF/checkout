@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout;
 
-use Tipoff\Checkout\Contracts\Models\CartInterface;
-use Tipoff\Checkout\Contracts\Models\CartItemInterface;
-use Tipoff\Checkout\Contracts\Models\OrderInterface;
+use Tipoff\Support\Contracts\Checkout\CartInterface;
+use Tipoff\Support\Contracts\Checkout\CartItemInterface;
+use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Models\Order;

@@ -7,9 +7,13 @@ namespace Tipoff\Checkout\Models;
 use Brick\Money\Money;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Tipoff\Bookings\Models\Booking;
-use Tipoff\Checkout\Contracts\Models\CartItemInterface;
-use Tipoff\Scheduling\Models\Slot;
+use Tipoff\Support\Contracts\Bookings\BookingInterface;
+use Tipoff\Support\Contracts\Checkout\CartItemInterface;
+use Tipoff\Support\Contracts\EscapeRoom\RateInterface;
+use Tipoff\Support\Contracts\Fees\FeeInterface;
+use Tipoff\Support\Contracts\Scheduling\HoldInterface;
+use Tipoff\Support\Contracts\Scheduling\SlotInterface;
+use Tipoff\Support\Contracts\Taxes\TaxInterface;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
@@ -94,22 +98,27 @@ class CartItem extends BaseModel implements CartItemInterface
         });
     }
 
-    public function createBooking(): Booking
+    public function createBooking(): ?BookingInterface
     {
-        $slot = $this->createSlot();
+        if ($bookingInterface = findModelInterface(BookingInterface::class)) {
 
-        return Booking::create([
-            'order_id' => $this->cart->order_id,
-            'slot_id' => $slot->id,
-            'participants' => $this->participants,
-            'is_private' => $this->is_private,
-            'amount' => $this->amount,
-            'total_taxes' => $this->total_taxes,
-            'total_fees' => $this->total_fees,
-            'rate_id' => $this->rate_id,
-            'tax_id' => $this->tax_id,
-            'fee_id' => $this->fee_id,
-        ]);
+            $slot = $this->createSlot();
+
+            return $bookingInterface::create([
+                'order_id' => $this->cart->order_id,
+                'slot_id' => $slot->id,
+                'participants' => $this->participants,
+                'is_private' => $this->is_private,
+                'amount' => $this->amount,
+                'total_taxes' => $this->total_taxes,
+                'total_fees' => $this->total_fees,
+                'rate_id' => $this->rate_id,
+                'tax_id' => $this->tax_id,
+                'fee_id' => $this->fee_id,
+            ]);
+        }
+
+        return null;
     }
 
     public function getAmountPerParticipant(): int
@@ -164,28 +173,36 @@ class CartItem extends BaseModel implements CartItemInterface
 
     public function getStartAtAttribute()
     {
-        return $this->hasSlot() ? $this->getSlot()->start_at : null;
+        $slot = $this->getSlot();
+
+        return $slot ? $slot->getStartAt() : null;
     }
 
     public function getFormattedStartAttribute()
     {
-        return $this->hasSlot() ? $this->getSlot()->formatted_start : null;
+        $slot = $this->getSlot();
+
+        return $slot ? $slot->getFormattedStartAt() : null;
     }
 
     public function hasHold(): bool
     {
-        return $this->hasSlot() ? $this->getSlot()->hasHold() : false;
+        $slot = $this->getSlot();
+
+        return $slot ? $slot->hasHold() : false;
     }
 
-    public function getHold(): ?object
+    public function getHold(): ?HoldInterface
     {
-        return $this->hasSlot() ? $this->getSlot()->getHold() : null;
+        $slot = $this->getSlot();
+
+        return $slot ? $slot->getHold() : null;
     }
 
     public function releaseHold(): self
     {
-        if ($this->hasSlot()) {
-            $this->getSlot()->releaseHold();
+        if ($slot = $this->getSlot()) {
+            $slot->releaseHold();
         }
 
         return $this;
@@ -193,8 +210,8 @@ class CartItem extends BaseModel implements CartItemInterface
 
     public function setHold(int $userId, ?Carbon $expiresAt = null): self
     {
-        if ($this->hasSlot()) {
-            $this->getSlot()->setHold($userId, $expiresAt);
+        if ($slot = $this->getSlot()) {
+            $slot->setHold($userId, $expiresAt);
         }
 
         return $this;
@@ -205,25 +222,33 @@ class CartItem extends BaseModel implements CartItemInterface
         return $this->getSlot() ? true : false;
     }
 
-    public function getSlot(): ?Slot
+    public function getSlot(): ?SlotInterface
     {
-        return Slot::resolveSlot($this->slot_number);
+        /** @var SlotInterface $slotInterface */
+        if ($slotInterface = findModelInterface(SlotInterface::class)) {
+            return $slotInterface::resolveSlot($this->slot_number);
+        }
+
+        return null;
     }
 
     public function generatePricing(): self
     {
-        // TODO - move to services
-        $this->amount = $this->rate->getAmount($this->participants, $this->is_private);
-        $this->total_fees = $this->fee->generateTotalFeesByCartItem($this);
-        $this->total_taxes = $this->tax->generateTotalTaxesByCartItem($this);
+        $rate = $this->getRate();
+        $this->amount = $rate ? $rate->getTotalByCartItem($this) : 0;
+
+        $fee = $this->getFee();
+        $this->total_fees = $fee ? $fee->getTotalByCartItem($this) : 0;
+
+        $tax = $this->getTax();
+        $this->total_taxes = $tax ? $tax->getTotalByCartItem($this) : 0;
 
         return $this;
     }
 
-    public function createSlot(): ?Slot
+    public function createSlot(): ?SlotInterface
     {
-        if ($this->hasSlot()) {
-            $slot = $this->getSlot();
+        if ($slot = $this->getSlot()) {
             $slot->save();
 
             return $slot;
@@ -234,21 +259,23 @@ class CartItem extends BaseModel implements CartItemInterface
 
     public static function makeFromSlot(String $slotNumber, int $participants, bool $isPrivate): self
     {
-        // TODO - move to services
-        $slot = Slot::resolveSlot($slotNumber);
-        $rate = $slot->getRate();
-        $tax = $slot->getTax();
-        $fee = $slot->getFee();
+        /** @var SlotInterface $slotInterface */
+        if ($slotInterface = findModelInterface(SlotInterface::class)) {
+            $slot = $slotInterface::resolveSlot($slotNumber);
+            $rate = $slot->getRate();
+            $tax = $slot->getTax();
+            $fee = $slot->getFee();
 
-        return self::make([
-            'slot_number' => $slotNumber,
-            'participants' => $participants,
-            'is_private' => $isPrivate,
-            'room_id' => $slot->room_id,
-            'rate_id' => $rate->id,
-            'tax_id' => $tax->id,
-            'fee_id' => $fee->id,
-        ]);
+            return self::make([
+                'slot_number' => $slotNumber,
+                'participants' => $participants,
+                'is_private' => $isPrivate,
+                'room_id' => $slot->room_id,
+                'rate_id' => $rate ? $rate->getId() : null,
+                'tax_id' => $tax ? $tax->getId() : null,
+                'fee_id' => $fee ? $fee->getId() : null,
+            ]);
+        }
     }
 
     public function scopeVisibleBy(Builder $query, $user): Builder
@@ -290,9 +317,27 @@ class CartItem extends BaseModel implements CartItemInterface
         return Money::ofMinor($this->total_fees ?? 0, 'USD');
     }
 
-    public function getFee()
+    public function getFee(): ?FeeInterface
     {
-        // TODO: return findModel(FeeInterface::class, $this->fee_id);
-        return $this->fee;
+        /** @var FeeInterface $result */
+        $result = findModel(FeeInterface::class, $this->fee_id);
+
+        return $result;
+    }
+
+    public function getRate(): ?RateInterface
+    {
+        /** @var RateInterface $result */
+        $result = findModel(RateInterface::class, $this->rate_id);
+
+        return $result;
+    }
+
+    public function getTax(): ?TaxInterface
+    {
+        /** @var TaxInterface $result */
+        $result = findModel(TaxInterface::class, $this->tax_id);
+
+        return $result;
     }
 }

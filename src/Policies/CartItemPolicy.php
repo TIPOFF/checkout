@@ -6,7 +6,7 @@ namespace Tipoff\Checkout\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Tipoff\Checkout\Models\CartItem;
-use Tipoff\Support\Contracts\Models\UserInterface;
+use Tipoff\Support\Contracts\Authorization\UserInterface;
 
 class CartItemPolicy
 {

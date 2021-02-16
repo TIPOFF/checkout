@@ -6,13 +6,13 @@ namespace Tipoff\Checkout\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
-use Tipoff\Checkout\Contracts\Models\CartDeduction;
-use Tipoff\Checkout\Contracts\Models\CartInterface;
-use Tipoff\Checkout\Contracts\Models\DiscountInterface;
-use Tipoff\Checkout\Contracts\Models\VoucherInterface;
+use Tipoff\Support\Contracts\Checkout\CartDeduction;
+use Tipoff\Support\Contracts\Checkout\CartInterface;
+use Tipoff\Support\Contracts\Discounts\DiscountInterface;
+use Tipoff\Support\Contracts\Payments\PaymentInterface;
+use Tipoff\Support\Contracts\Vouchers\VoucherInterface;
 use Tipoff\Checkout\Events\BookingOrderProcessed;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\InvalidDeductionCodeException;
@@ -85,15 +85,17 @@ class Cart extends BaseModel implements CartInterface
         return $this;
     }
 
-    public function processOrder(Model $payment): Order
+    public function processOrder(PaymentInterface $payment): Order
     {
         if (! $this->canConvert()) {
             throw new CartNotValidException();
         }
 
+        $customer = $payment->getCustomer();
+
         /** @var Order $order */
         $order = Order::create([
-            'customer_id' => $payment->customer_id,
+            'customer_id' => $customer ? $customer->getId() : null,
             'location_id' => $this->location_id,
             'amount' => $this->amount,
             'total_taxes' => $this->total_taxes,
@@ -107,8 +109,7 @@ class Cart extends BaseModel implements CartInterface
             $cartItem->createBooking();
         }
 
-        $payment->order_id = $order->id;
-        $payment->save();
+        $payment->setOrder($order);
 
         static::activeDeductions()
             ->each(function (CartDeduction $deduction) {

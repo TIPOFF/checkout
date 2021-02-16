@@ -7,7 +7,7 @@ namespace Tipoff\Checkout\Tests\Unit\Policies;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\TestCase;
-use Tipoff\Support\Contracts\Models\UserInterface;
+use Tipoff\Support\Contracts\Authorization\UserInterface;
 
 class CartItemPolicyTest extends TestCase
 {
