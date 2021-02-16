@@ -22,7 +22,7 @@
         "tipoff/fees": "dev-main",
         "tipoff/payments": "dev-main",
         "tipoff/scheduling": "dev-main",
-        "tipoff/support": "^1.3.0",
+        "tipoff/support": "1.3.0 as 1.2.7",
         "tipoff/taxes": "dev-main"
     },
     "require-dev": {

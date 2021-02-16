@@ -10,56 +10,15 @@ use Tipoff\Checkout\Models\Order;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\TestSupport\Models\User;
 
-class OrderResourceTest extends TestCase
+class OrderResourceTestWithStubs extends TestCase
 {
     use DatabaseTransactions;
 
-    public function setUp(): void
-    {
-        $this->stubNovaResources = false;
-
-        parent::setUp();
-    }
-
-
     /** @test */
-    public function create()
+    public function index_with_stub_resources()
     {
-        $this->actingAs(User::factory()->create());
+        $this->createStubNovaResources();
 
-        $this->getJson('nova-api/orders/creation-fields')
-            ->assertStatus(403);
-    }
-
-    /** @test */
-    public function edit()
-    {
-        $this->actingAs(User::factory()->create());
-
-        $this->getJson('nova-api/orders/creation-fields')
-            ->assertStatus(403);
-    }
-
-    /** @test */
-    public function index_no_user()
-    {
-        $this->getJson('nova-api/orders')
-            ->assertStatus(401);
-    }
-
-    /** @test */
-    public function detail_no_user()
-    {
-        /** @var Order $order */
-        $order = Order::factory()->create();
-
-        $this->getJson("nova-api/orders/{$order->id}")
-            ->assertStatus(401);
-    }
-
-    /** @test */
-    public function index_without_stub_resources()
-    {
         Order::factory()->count(4)->create();
 
         $this->actingAs(User::factory()->create());
@@ -71,18 +30,22 @@ class OrderResourceTest extends TestCase
 
         $orderFields = collect($response->json('resources')[0]['fields'])->pluck('attribute');
 
-        $this->assertCount(4, $orderFields);
+        $this->assertCount(6, $orderFields);
         $this->assertEquals([
             'id',
             'order_number',
+            'customer',
+            'location',
             'amount',
             'created_at',
         ], $orderFields->toArray());
     }
 
     /** @test */
-    public function detail_with_no_stubs()
+    public function detail_with_stubs()
     {
+        $this->createStubNovaResources();
+
         /** @var Order $order */
         $order = Order::factory()->create();
 
@@ -106,14 +69,24 @@ class OrderResourceTest extends TestCase
 
         $this->assertEquals([
             'order_number',
+            'customer',
+            'location',
             'amount',
             'total_taxes',
             'total_fees',
-            'bookings', // TODO - remove when tipoff/bookings dependency is eliminated
+            'bookings',
+            'purchasedVouchers',
+            'payments',
+            'invoices',
+            'discounts',
+            'voucher',
+            'notes',
         ], $orderFields["Order Details: {$order->order_number}"]);
 
         $this->assertEquals([
             'id',
+            'creator',
+            'created_at',
             'updated_at',
         ], $orderFields["Data Fields"]);
     }
