@@ -94,8 +94,8 @@ class Cart extends BaseModel implements CartInterface
 
         $customer = $payment->getCustomer();
 
-        /** @var OrderInterface $order */
-        $order = Order::create([
+        /** @var Order $order */
+        $order = Order::query()->create([
             'customer_id' => $customer ? $customer->getId() : null,
             'location_id' => $this->location_id,
             'amount' => $this->amount,
