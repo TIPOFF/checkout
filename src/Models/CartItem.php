@@ -106,7 +106,7 @@ class CartItem extends BaseModel implements CartItemInterface
 
             return $bookingInterface::create([
                 'order_id' => $this->cart->order_id,
-                'slot_id' => $slot->id,
+                'slot_id' => $slot->getId(),
                 'participants' => $this->participants,
                 'is_private' => $this->is_private,
                 'amount' => $this->amount,
@@ -187,9 +187,7 @@ class CartItem extends BaseModel implements CartItemInterface
 
     public function hasHold(): bool
     {
-        $slot = $this->getSlot();
-
-        return $slot ? $slot->hasHold() : false;
+        return $this->getHold() ? true : false;
     }
 
     public function getHold(): ?HoldInterface
@@ -224,8 +222,8 @@ class CartItem extends BaseModel implements CartItemInterface
 
     public function getSlot(): ?SlotInterface
     {
-        /** @var SlotInterface $slotInterface */
         if ($slotInterface = findModelInterface(SlotInterface::class)) {
+            /** @var SlotInterface $slotInterface */
             return $slotInterface::resolveSlot($this->slot_number);
         }
 
@@ -257,11 +255,12 @@ class CartItem extends BaseModel implements CartItemInterface
         return null;
     }
 
-    public static function makeFromSlot(String $slotNumber, int $participants, bool $isPrivate): self
+    public static function makeFromSlot(String $slotNumber, int $participants, bool $isPrivate): ?self
     {
-        /** @var SlotInterface $slotInterface */
         if ($slotInterface = findModelInterface(SlotInterface::class)) {
+            /** @var SlotInterface $slotInterface */
             $slot = $slotInterface::resolveSlot($slotNumber);
+            $room = $slot->getRoom();
             $rate = $slot->getRate();
             $tax = $slot->getTax();
             $fee = $slot->getFee();
@@ -270,12 +269,14 @@ class CartItem extends BaseModel implements CartItemInterface
                 'slot_number' => $slotNumber,
                 'participants' => $participants,
                 'is_private' => $isPrivate,
-                'room_id' => $slot->room_id,
+                'room_id' => $room ? $room->getId() : null,
                 'rate_id' => $rate ? $rate->getId() : null,
                 'tax_id' => $tax ? $tax->getId() : null,
                 'fee_id' => $fee ? $fee->getId() : null,
             ]);
         }
+
+        return null;
     }
 
     public function scopeVisibleBy(Builder $query, $user): Builder

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Tipoff\Support\Contracts\Checkout\CartDeduction;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
+use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Discounts\DiscountInterface;
 use Tipoff\Support\Contracts\Payments\PaymentInterface;
 use Tipoff\Support\Contracts\Vouchers\VoucherInterface;
@@ -93,7 +94,7 @@ class Cart extends BaseModel implements CartInterface
 
         $customer = $payment->getCustomer();
 
-        /** @var Order $order */
+        /** @var OrderInterface $order */
         $order = Order::create([
             'customer_id' => $customer ? $customer->getId() : null,
             'location_id' => $this->location_id,
