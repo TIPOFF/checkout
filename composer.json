@@ -32,7 +32,6 @@
         "psr-4": {
             "Tipoff\\Checkout\\": "src",
             "Tipoff\\Checkout\\Database\\Factories\\": "database/factories",
-            "Tipoff\\Checkout\\Database\\Seeders\\": "database/seeders"
         }
     },
     "autoload-dev": {
