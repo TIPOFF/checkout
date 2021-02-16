@@ -21,7 +21,6 @@ class OrderResourceTest extends TestCase
         parent::setUp();
     }
 
-
     /** @test */
     public function create()
     {
