@@ -101,7 +101,6 @@ class CartItem extends BaseModel implements CartItemInterface
     public function createBooking(): ?BookingInterface
     {
         if ($bookingInterface = findModelInterface(BookingInterface::class)) {
-
             $slot = $this->createSlot();
 
             return $bookingInterface::create([

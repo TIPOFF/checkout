@@ -7,11 +7,11 @@ namespace Tipoff\Checkout\Tests\Unit\Models;
 use Brick\Money\Money;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Tipoff\Support\Contracts\Discounts\DiscountInterface;
-use Tipoff\Support\Contracts\Vouchers\VoucherInterface;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\TestCase;
+use Tipoff\Support\Contracts\Discounts\DiscountInterface;
+use Tipoff\Support\Contracts\Vouchers\VoucherInterface;
 use Tipoff\TestSupport\Models\User;
 
 class CartModelTest extends TestCase
