@@ -11,7 +11,9 @@ use Tipoff\Bookings\Models\Booking;
 use Tipoff\Checkout\Contracts\Models\CartItemInterface;
 use Tipoff\Scheduling\Models\Slot;
 use Tipoff\Support\Models\BaseModel;
+use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasPackageFactory;
+use Tipoff\Support\Traits\HasUpdater;
 
 /**
  * @property int|null id
@@ -33,6 +35,8 @@ use Tipoff\Support\Traits\HasPackageFactory;
 class CartItem extends BaseModel implements CartItemInterface
 {
     use HasPackageFactory;
+    use HasCreator;
+    use HasUpdater;
 
     protected $fillable = [
         'amount',
