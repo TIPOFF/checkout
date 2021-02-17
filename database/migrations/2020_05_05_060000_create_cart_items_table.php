@@ -25,6 +25,8 @@ class CreateCartItemsTable extends Migration
             $table->foreignIdFor(app('rate'));
             $table->foreignIdFor(app('tax'));
             $table->foreignIdFor(app('fee'));
+            $table->foreignIdFor(app('user'), 'creator_id');
+            $table->foreignIdFor(app('user'), 'updater_id');
             $table->timestamps();
         });
     }
