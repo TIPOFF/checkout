@@ -33,6 +33,8 @@ class CartItemFactory extends Factory
             'rate_id' => randomOrCreate(app('rate')),
             'tax_id' => randomOrCreate(app('tax')),
             'fee_id' => randomOrCreate(app('fee')),
+            'creator_id' => randomOrCreate(app('user')),
+            'updater_id' => randomOrCreate(app('user')),
         ];
     }
 }

@@ -28,7 +28,8 @@ class OrderFactory extends Factory
             'amount'       => $this->faker->numberBetween(100, 40000),
             'total_taxes'    => $this->faker->numberBetween(10, 5000),
             'total_fees'   => $this->faker->numberBetween(10, 5000),
-            'creator_id'   => randomOrCreate(app('user')),
+            'creator_id'        => randomOrCreate(app('user')),
+            'updater_id'        => randomOrCreate(app('user')),
         ];
     }
 }

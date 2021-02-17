@@ -25,6 +25,8 @@ class CartFactory extends Factory
     {
         return [
             'user_id' => randomOrCreate(app('user')),
+            'creator_id'        => randomOrCreate(app('user')),
+            'updater_id'        => randomOrCreate(app('user')),
         ];
     }
 }
