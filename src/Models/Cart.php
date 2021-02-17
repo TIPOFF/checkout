@@ -18,7 +18,9 @@ use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\InvalidDeductionCodeException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Support\Models\BaseModel;
+use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasPackageFactory;
+use Tipoff\Support\Traits\HasUpdater;
 
 /**
  * @property int|null id
@@ -36,8 +38,7 @@ use Tipoff\Support\Traits\HasPackageFactory;
  */
 class Cart extends BaseModel implements CartInterface
 {
-    use HasPackageFactory;
-    use SoftDeletes;
+    use HasPackageFactory, SoftDeletes, HasCreator, HasUpdater;
 
     protected $casts = [
         'id' => 'integer',
