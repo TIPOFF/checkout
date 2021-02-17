@@ -81,14 +81,12 @@ class Order extends BaseResource
         ]);
     }
 
-    protected function dataFields()
+    protected function dataFields(): array
     {
         return array_merge(
             parent::dataFields(),
             $this->creatorDataFields(),
-            [
-                Date::make('Updated At')->exceptOnForms(),
-            ],
+            $this->updaterDataFields()
         );
     }
 }

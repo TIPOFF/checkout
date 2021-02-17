@@ -20,8 +20,8 @@ class CreateCartsTable extends Migration
             $table->unsignedInteger('total_deductions'); // Deduction Amounts are in cents.
             $table->dateTime('expires_at')->nullable();
             $table->unsignedInteger('location_id')->nullable();
-            $table->foreignIdFor(app('user'), 'creator_id');
-            $table->foreignIdFor(app('user'), 'updater_id');
+            $table->foreignIdFor(app('user'), 'creator_id')->nullable();
+            $table->foreignIdFor(app('user'), 'updater_id')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
