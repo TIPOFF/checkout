@@ -18,7 +18,8 @@ class CreateOrdersTable extends Migration
             $table->unsignedInteger('amount'); // Amount is in cents. It is net, excluding taxes and fees. An accessor for total_amount adds the 3 columns
             $table->unsignedInteger('total_taxes'); // Taxes are in cents.
             $table->unsignedInteger('total_fees'); // Processing Fees are in cents.
-            $table->foreignIdFor(app('user'), 'creator_id')->nullable(); // Null if made through book online. Otherwise, the staff member that created the purchase.
+            $table->foreignIdFor(app('user'), 'creator_id');
+            $table->foreignIdFor(app('user'), 'updater_id');
             $table->timestamps();
         });
     }
