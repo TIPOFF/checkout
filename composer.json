@@ -18,7 +18,7 @@
         "php": "^7.4|^8.0",
         "tipoff/authorization": "^1.0.1",
         "tipoff/bookings": "^1.1",
-        "tipoff/escape-room": "^1.1",
+        "tipoff/escape-room": "^1.1.1",
         "tipoff/fees": "^2.0",
         "tipoff/payments": "^1.1",
         "tipoff/scheduling": "^1.1",
