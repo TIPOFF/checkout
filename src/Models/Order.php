@@ -12,6 +12,7 @@ use Tipoff\Checkout\Contracts\Models\VoucherInterface;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasPackageFactory;
+use Tipoff\Support\Traits\HasUpdater;
 
 /**
  * @property int|null id
@@ -29,8 +30,7 @@ use Tipoff\Support\Traits\HasPackageFactory;
  */
 class Order extends BaseModel implements OrderInterface
 {
-    use HasPackageFactory;
-    use HasCreator;
+    use HasPackageFactory, HasCreator, HasUpdater;
 
     protected $guarded = [
         'id',
