@@ -25,7 +25,6 @@ class OrderFactory extends Factory
     {
         return [
             'customer_id'  => randomOrCreate(app('customer')),
-            'location_id'  => randomOrCreate(app('location')),
             'amount'       => $this->faker->numberBetween(100, 40000),
             'total_taxes'    => $this->faker->numberBetween(10, 5000),
             'total_fees'   => $this->faker->numberBetween(10, 5000),
