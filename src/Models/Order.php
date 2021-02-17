@@ -30,7 +30,9 @@ use Tipoff\Support\Traits\HasUpdater;
  */
 class Order extends BaseModel implements OrderInterface
 {
-    use HasPackageFactory, HasCreator, HasUpdater;
+    use HasPackageFactory;
+    use HasCreator;
+    use HasUpdater;
 
     protected $guarded = [
         'id',
