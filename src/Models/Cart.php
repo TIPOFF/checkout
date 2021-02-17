@@ -38,7 +38,10 @@ use Tipoff\Support\Traits\HasUpdater;
  */
 class Cart extends BaseModel implements CartInterface
 {
-    use HasPackageFactory, SoftDeletes, HasCreator, HasUpdater;
+    use HasPackageFactory;
+    use SoftDeletes;
+    use HasCreator;
+    use HasUpdater;
 
     protected $casts = [
         'id' => 'integer',
