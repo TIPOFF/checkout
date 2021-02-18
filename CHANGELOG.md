@@ -25,3 +25,9 @@ All notable changes to `checkout` will be documented in this file.
 
 - order interface
 - cart item interface
+
+## 2.1.0 - 2021-02-17
+
+- add creator & updater to models
+- update location in order & cart migrations
+- update model policies
