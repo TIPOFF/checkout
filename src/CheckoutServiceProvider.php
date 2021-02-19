@@ -31,6 +31,9 @@ class CheckoutServiceProvider extends TipoffServiceProvider
                 CartItem::class => CartItemPolicy::class,
                 Order::class => OrderPolicy::class,
             ])
+            ->hasNovaResources([
+                \Tipoff\Checkout\Nova\Order::class,
+            ])
             ->name('checkout')
             ->hasConfigFile();
     }
