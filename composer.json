@@ -20,10 +20,10 @@
         "tipoff/bookings": "^1.1",
         "tipoff/escape-room": "^2.0",
         "tipoff/fees": "^2.0",
-        "tipoff/payments": "^1.1",
+        "tipoff/payments": "^2.0",
         "tipoff/scheduling": "^1.1",
-        "tipoff/support": "^1.4.0",
-        "tipoff/taxes": "^1.0.1"
+        "tipoff/support": "^1.4.2",
+        "tipoff/taxes": "^2.0.1"
     },
     "require-dev": {
         "tipoff/test-support": "^1.0.5"
