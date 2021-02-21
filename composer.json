@@ -20,6 +20,7 @@
         "tipoff/bookings": "^1.1",
         "tipoff/escape-room": "^2.0",
         "tipoff/fees": "^2.0",
+        "tipoff/locations": "^2.1.1",
         "tipoff/payments": "^2.0",
         "tipoff/scheduling": "^1.1",
         "tipoff/support": "^1.4.2",
