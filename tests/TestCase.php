@@ -11,6 +11,7 @@ use Tipoff\Checkout\CheckoutServiceProvider;
 use Tipoff\Checkout\Tests\Support\Providers\NovaPackageServiceProvider;
 use Tipoff\EscapeRoom\EscapeRoomServiceProvider;
 use Tipoff\Fees\FeesServiceProvider;
+use Tipoff\Locations\LocationsServiceProvider;
 use Tipoff\Payments\PaymentsServiceProvider;
 use Tipoff\Scheduling\SchedulingServiceProvider;
 use Tipoff\Support\SupportServiceProvider;
@@ -26,6 +27,7 @@ class TestCase extends BaseTestCase
             NovaPackageServiceProvider::class,
             SupportServiceProvider::class,
             EscapeRoomServiceProvider::class,
+            LocationsServiceProvider::class,
             PaymentsServiceProvider::class,
             SchedulingServiceProvider::class,
             FeesServiceProvider::class,
