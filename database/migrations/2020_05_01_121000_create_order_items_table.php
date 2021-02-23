@@ -5,22 +5,19 @@ declare(strict_types=1);
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use Tipoff\Checkout\Models\Cart;
-use Tipoff\Checkout\Models\CartItem;
+use Tipoff\Checkout\Models\Order;
 use Tipoff\Checkout\Models\OrderItem;
 
-class CreateCartItemsTable extends Migration
+class CreateOrdersTable extends Migration
 {
     public function up()
     {
-        Schema::create('cart_items', function (Blueprint $table) {
+        Schema::create('order_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Cart::class);
-            $table->foreignIdFor( CartItem::class, 'parent_id')->nullable();
+            $table->foreignIdFor(Order::class);
+            $table->foreignIdFor( OrderItem::class, 'parent_id')->nullable();
 
-            $table->foreignIdFor(OrderItem::class)->nullable();
-
-            // TODO - change to Type=>class mapping instead of Morph??  using morph forces the sellable to be a Model!
+            // TODO - TBD - change to Type=>class mapping instead of Morph??  using morph forces the sellable to be a Model!
             $table->morphs('sellable');
 
             // Opaque item identifier provided by Sellable
@@ -29,7 +26,7 @@ class CreateCartItemsTable extends Migration
             $table->string('description');
             $table->unsignedInteger('quantity');
 
-            // Field pair is handled together via cast to `DiscountableValue`
+            // Pair is handled as cast to `DiscountableValue`
             // TODO - TBD - is this price each?
             $table->unsignedInteger('amount')->default(0);
             $table->unsignedInteger('amount_discounts')->default(0);
@@ -40,8 +37,8 @@ class CreateCartItemsTable extends Migration
             $table->string('tax_code')->nullable();
             $table->json('meta_data')->nullable();
 
-            $table->foreignIdFor(app('user'), 'creator_id')->nullable();
-            $table->foreignIdFor(app('user'), 'updater_id')->nullable();
+            $table->foreignIdFor(app('user'), 'creator_id');
+            $table->foreignIdFor(app('user'), 'updater_id');
             $table->timestamps();
         });
     }
