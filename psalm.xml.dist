@@ -13,4 +13,23 @@
             <directory name="vendor"/>
         </ignoreFiles>
     </projectFiles>
+
+    <issueHandlers>
+        <!--
+         When using property annotations, psalm wants you to use the `__get(...)` and `__set(..)` methods
+         directly within the class instead of the now annotated properties.
+         https://github.com/vimeo/psalm/issues/721#issuecomment-387504151
+         -->
+      <UndefinedThisPropertyFetch>
+        <errorLevel type="suppress">
+          <directory name="src/Models" />
+        </errorLevel>
+      </UndefinedThisPropertyFetch>
+      <UndefinedThisPropertyAssignment>
+        <errorLevel type="suppress">
+          <directory name="src/Models" />
+        </errorLevel>
+      </UndefinedThisPropertyAssignment>
+    </issueHandlers>
+
 </psalm>
