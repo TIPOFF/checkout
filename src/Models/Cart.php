@@ -139,7 +139,7 @@ class Cart extends BaseModel implements CartInterface
             // Validate all discounts and vouchers remain valid
             $originalTotal = $this->getPricingDetail();
             $this->updatePricing();
-            if (!$originalTotal->isEqual($this->getPricingDetail())) {
+            if (! $originalTotal->isEqual($this->getPricingDetail())) {
                 throw new CartNotValidException();
             }
         });
@@ -300,7 +300,7 @@ class Cart extends BaseModel implements CartInterface
             $item = (new CartItem([
                 'item_id' => $itemId,
                 'description' => $sellable->getDescription(),
-                'quantity' => $quantity
+                'quantity' => $quantity,
             ]))->setAmount($amount);
 
             $item->sellable()->associate($sellable);
@@ -350,7 +350,7 @@ class Cart extends BaseModel implements CartInterface
     protected function updateItem(CartItem $cartItem): CartItem
     {
         // Validate item already exists in is in this cart
-        if (!$cartItem->getCart() || ($cartItem->getCart()->getId() !== $this->id)) {
+        if (! $cartItem->getCart() || ($cartItem->getCart()->getId() !== $this->id)) {
             throw new CartNotValidException();
         }
 
@@ -455,7 +455,7 @@ class Cart extends BaseModel implements CartInterface
     public function setLocationId(?int $locationId): self
     {
         if ($locationId) {
-            if ($this->location_id && !$this->location_id != $locationId) {
+            if ($this->location_id && ! $this->location_id != $locationId) {
                 throw new MultipleLocationException();
             }
 

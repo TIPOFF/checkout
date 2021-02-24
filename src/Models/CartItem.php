@@ -296,5 +296,6 @@ class CartItem extends BaseModel implements CartItemInterface
 
         return $this;
     }
+
     //endregion
 }

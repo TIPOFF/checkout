@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Objects;
 
-
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Support\Objects\DiscountableValue;
 
