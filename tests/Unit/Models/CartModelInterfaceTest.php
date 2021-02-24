@@ -106,7 +106,7 @@ class CartModelInterfaceTest extends TestCase
 
         $this->assertCount(1, $cart->getCartItems());
 
-        Event::assertDispatched(CartItemCreated::class,1);
+        Event::assertDispatched(CartItemCreated::class, 1);
         Event::assertNotDispatched(CartItemUpdated::class);
     }
 
@@ -129,7 +129,7 @@ class CartModelInterfaceTest extends TestCase
 
         $cart->upsertItem($cartItem);
 
-        Event::assertDispatched(CartItemCreated::class,1);
+        Event::assertDispatched(CartItemCreated::class, 1);
         Event::assertDispatched(CartItemUpdated::class, 1);
     }
 
@@ -172,7 +172,7 @@ class CartModelInterfaceTest extends TestCase
 
         $this->assertCount(2, $cart->getCartItems());
 
-        Event::assertDispatched(CartItemCreated::class,2);
+        Event::assertDispatched(CartItemCreated::class, 2);
         Event::assertNotDispatched(CartItemUpdated::class);
     }
 
@@ -203,7 +203,7 @@ class CartModelInterfaceTest extends TestCase
 
         $this->assertCount(0, $cart->getCartItems());
 
-        Event::assertDispatched(CartItemRemoved::class,2);
+        Event::assertDispatched(CartItemRemoved::class, 2);
     }
 
     /** @test */
@@ -233,7 +233,7 @@ class CartModelInterfaceTest extends TestCase
 
         $this->assertCount(1, $cart->getCartItems());
 
-        Event::assertDispatched(CartItemRemoved::class,1);
+        Event::assertDispatched(CartItemRemoved::class, 1);
     }
 
     /** @test */
@@ -259,7 +259,7 @@ class CartModelInterfaceTest extends TestCase
 
         $cart->delete();
 
-        Event::assertDispatched(CartItemRemoved::class,2);
+        Event::assertDispatched(CartItemRemoved::class, 2);
     }
 
     /** @test */
@@ -295,7 +295,7 @@ class CartModelInterfaceTest extends TestCase
         $this->assertCount(0, $cart1->getCartItems());
         $this->assertCount(0, $cart2->getCartItems());
 
-        Event::assertDispatched(CartItemRemoved::class,2);
+        Event::assertDispatched(CartItemRemoved::class, 2);
     }
 
     /** @test */

@@ -7,7 +7,6 @@ namespace Tipoff\Discounts\Tests\Feature\Checkout;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
-use Tipoff\Checkout\Models\Order;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\TestSupport\Models\User;

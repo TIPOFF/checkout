@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Tests\Unit\Models;
 
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
@@ -13,7 +12,6 @@ use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Events\Checkout\CartItemPurchaseVerification;
-use Tipoff\TestSupport\Models\User;
 
 class CartModelPurchaseTest extends TestCase
 {
@@ -112,7 +110,7 @@ class CartModelPurchaseTest extends TestCase
             ->withSellable(TestSellable::factory()->create())
             ->active()
             ->create([
-                'amount'  => 1000,
+                'amount' => 1000,
                 'cart_id' => $cart,
             ]);
 

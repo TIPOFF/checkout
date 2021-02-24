@@ -5,7 +5,6 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Tests\Support\Models;
 
-
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
 use Tipoff\Support\Contracts\Sellable\Sellable;
@@ -78,6 +77,7 @@ class TestSellable extends BaseModel implements Sellable
             $item
                 ->setLocationId($location ? $location->getId() : null)
                 ->setTaxCode('AB-12');
+
             return $cart->upsertItem($item);
         }
 
