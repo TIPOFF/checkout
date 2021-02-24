@@ -17,10 +17,6 @@ class CreateCartItemsTable extends Migration
             $table->id();
             $table->foreignIdFor(Cart::class);
             $table->foreignIdFor( CartItem::class, 'parent_id')->nullable();
-
-            $table->foreignIdFor(OrderItem::class)->nullable();
-
-            // TODO - change to Type=>class mapping instead of Morph??  using morph forces the sellable to be a Model!
             $table->morphs('sellable');
 
             // Opaque item identifier provided by Sellable
@@ -36,6 +32,7 @@ class CreateCartItemsTable extends Migration
 
             $table->unsignedInteger('tax')->default(0);
 
+            $table->dateTime('expires_at');
             $table->unsignedInteger('location_id')->nullable();
             $table->string('tax_code')->nullable();
             $table->json('meta_data')->nullable();

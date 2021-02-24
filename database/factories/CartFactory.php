@@ -24,9 +24,9 @@ class CartFactory extends Factory
     public function definition()
     {
         return [
-            'user_id' => randomOrCreate(app('user')),
-            'creator_id'        => randomOrCreate(app('user')),
-            'updater_id'        => randomOrCreate(app('user')),
+            'user_id'    => randomOrCreate(app('user')),
+            'creator_id' => randomOrCreate(app('user')),
+            'updater_id' => randomOrCreate(app('user')),
         ];
     }
 }

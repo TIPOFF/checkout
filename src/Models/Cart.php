@@ -9,32 +9,40 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
-use Tipoff\Checkout\Contracts\Models\CartDeduction;
-use Tipoff\Checkout\Contracts\Models\CartInterface;
+use Illuminate\Support\Facades\DB;
 use Tipoff\Checkout\Contracts\Models\DiscountInterface;
 use Tipoff\Checkout\Contracts\Models\VoucherInterface;
-use Tipoff\Checkout\Events\BookingOrderProcessed;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
-use Tipoff\Checkout\Exceptions\InvalidDeductionCodeException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
+use Tipoff\Checkout\Objects\CartPricingDetail;
+use Tipoff\Support\Contracts\Checkout\CartInterface;
+use Tipoff\Support\Contracts\Checkout\CartItemInterface;
+use Tipoff\Support\Contracts\Models\BaseModelInterface;
+use Tipoff\Support\Contracts\Sellable\Sellable;
+use Tipoff\Support\Events\Checkout\CartItemCreated;
+use Tipoff\Support\Events\Checkout\CartItemPurchaseVerification;
+use Tipoff\Support\Events\Checkout\CartItemUpdated;
+use Tipoff\Support\Events\Checkout\CartUpdated;
 use Tipoff\Support\Models\BaseModel;
+use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasPackageFactory;
 use Tipoff\Support\Traits\HasUpdater;
 
 /**
  * @property int|null id
- * @property string code
- * @property int amount
- * @property int total_taxes
- * @property int total_fees
- * @property int total_deductions
- * @property Carbon expires_at
+ * @property DiscountableValue $shipping
+ * @property int cart_discounts
+ * @property int cart_credits
+ * @property DiscountableValue $item_amount
+ * @property int tax
  * @property Carbon created_at
  * @property Carbon updated_at
  * // Raw Relation ID
  * @property int|null user_id
  * @property int|null location_id
+ * @property int|null creator_id
+ * @property int|null updater_id
  */
 class Cart extends BaseModel implements CartInterface
 {
@@ -45,13 +53,15 @@ class Cart extends BaseModel implements CartInterface
 
     protected $casts = [
         'id' => 'integer',
-        'amount' => 'integer',
-        'total_taxes' => 'integer',
-        'total_fees' => 'integer',
-        'total_deductions' => 'integer',
-        'expires_at' => 'datetime',
+        'shipping' => \Tipoff\Support\Casts\DiscountableValue::class,
+        'item_amount' => \Tipoff\Support\Casts\DiscountableValue::class,
+        'cart_discounts' => 'integer',
+        'cart_credits' => 'integer',
+        'tax' => 'integer',
         'user_id' => 'integer',
         'location_id' => 'integer',
+        'creator_id' => 'integer',
+        'updater_id' => 'integer',
     ];
 
     private static array $deductionTypes = [
@@ -63,110 +73,16 @@ class Cart extends BaseModel implements CartInterface
     {
         parent::boot();
 
-        static::saving(function ($cart) {
-            $cart->generatePricing();
-
-            if (empty($cart->total_deductions)) {
-                $cart->total_deductions = 0;
-            }
-        });
-
-        static::deleting(function ($cart) {
-            $cart->releaseItemsHolds();
+        static::deleting(function (Cart $cart) {
+            $cart->cartItems()->isRootItem()->get()->each->delete();
         });
     }
 
-    public function markVouchersAsUsed(): self
+    //region RELATIONSHIPS
+
+    public function cartItems()
     {
-        $orderId = $this->order_id;
-
-        $this->vouchers()->each(function ($voucher) use ($orderId) {
-            $voucher->redeem();
-            $voucher->order_id = $orderId;
-            $voucher->save();
-        });
-
-        return $this;
-    }
-
-    public function processOrder(Model $payment): Order
-    {
-        if (! $this->canConvert()) {
-            throw new CartNotValidException();
-        }
-
-        /** @var Order $order */
-        $order = Order::create([
-            'customer_id' => $payment->customer_id,
-            'location_id' => $this->location_id,
-            'amount' => $this->amount,
-            'total_taxes' => $this->total_taxes,
-            'total_fees' => $this->total_fees,
-        ]);
-
-        $this->order_id = $order->id;
-        $this->save();
-
-        foreach ($this->cartItems()->get() as $cartItem) {
-            $cartItem->createBooking();
-        }
-
-        $payment->order_id = $order->id;
-        $payment->save();
-
-        static::activeDeductions()
-            ->each(function (CartDeduction $deduction) {
-                $deduction::markCartDeductionsAsUsed($this);
-            });
-
-        $this->issuePartialRedemptionVoucher();
-        $order->refresh();
-
-        $this->delete();
-
-        event(new BookingOrderProcessed($order));
-        // Event Listeners send confirmation email, update slot, block slot if private game. Will also need to send notification to staff.
-
-        return $order;
-    }
-
-    private function issuePartialRedemptionVoucher(): self
-    {
-        if ($this->total_deductions < $this->amount + $this->total_taxes + $this->total_fees) {
-            return $this;
-        }
-
-        if (app()->has(VoucherInterface::class)) {
-            /** @var VoucherInterface $voucherInterface */
-            $voucherInterface = app(VoucherInterface::class);
-
-            $amount = $this->total_deductions - ($this->amount + $this->total_taxes + $this->total_fees);
-            $voucher = $voucherInterface::issuePartialRedemptionVoucher($this, $this->location_id,  $amount, $this->user_id);
-
-            $order = $this->order;
-            $order->partial_redemption_voucher_id = $voucher->getId();
-            $order->save();
-        }
-
-        return $this;
-    }
-
-    public function vouchers()
-    {
-        return $this->belongsToMany(app('voucher'))->withTimestamps();
-    }
-
-    public function discounts()
-    {
-        return $this->belongsToMany(app('discount'))->withTimestamps();
-    }
-
-    public function getDeductionCodesAttribute()
-    {
-        return static::activeDeductions()
-            ->reduce(function (array $codes, CartDeduction $deduction) {
-                return array_merge($codes, $deduction->getCodesForCart($this));
-            }, []);
+        return $this->hasMany(CartItem::class);
     }
 
     public function location()
@@ -179,241 +95,183 @@ class Cart extends BaseModel implements CartInterface
         return $this->belongsTo(Order::class);
     }
 
-    public function canConvert(): bool
-    {
-        if (empty($this->amount)) {
-            return false;
-        }
+    //endregion
 
-        if (! $this->cartItems()->exists()) {
-            return false;
-        }
-
-        if ($this->hasExpired()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function hasExpired(): bool
-    {
-        $now = Carbon::now();
-
-        return $this->expires_at->lt($now);
-    }
-
-    public function hasInRoomMonitors(): bool
-    {
-        return $this->cartItems->contains(function (CartItem $item) {
-            return ($item->room->theme_id == 1 ||
-                $item->room->theme_id == 2);
-        });
-    }
-
-    public function scopeFilter(Builder $query, array $filters): Builder
-    {
-        if (empty($filters)) {
-            return $query;
-        }
-
-        /*
-         * TODO - implement or remove function
-        foreach ($filters as $filterKey => $filterValue) {
-            switch ($filterKey) {
-                case '':
-                    // $query->where('', "");
-                    break;
-            }
-        }
-        */
-
-        return $query;
-    }
-
-    public function getTotalAmountAttribute(): int
-    {
-        if ($this->total_deductions > $this->amount + $this->total_taxes + $this->total_fees) {
-            return 0;
-        }
-
-        return $this->amount + $this->total_taxes + $this->total_fees - $this->total_deductions;
-    }
-
-    public function generatePricing(): self
-    {
-        $amount = 0;
-        $fees = 0;
-        $taxes = 0;
-
-        if (! empty($this->cartItems()->exists())) {
-            foreach ($this->cartItems()->get() as $item) {
-                $amount += $item->amount;
-                $fees += $item->total_fees;
-                $taxes += $item->total_taxes;
-            }
-        }
-
-        $this->amount = ($amount > 0) ? $amount : 0;
-        $this->total_fees = $fees;
-        $this->total_taxes = $taxes;
-
-        return $this;
-    }
-
-    public function cartItems()
-    {
-        return $this->hasMany(CartItem::class);
-    }
-
-    public function hasSlot(string $slotNumber): bool
-    {
-        return $this->cartItems()
-            ->where('slot_number', $slotNumber)
-            ->exists();
-    }
-
-    public function addItem(CartItem $cartItem): self
-    {
-        if (! empty($this->cartItems)) {
-            $this->location_id = $cartItem->room->location_id;
-        } else {
-            if ($this->location_id = $cartItem->room->location_id) {
-                throw new MultipleLocationException();
-            }
-        }
-        $cartItem->cart()->associate($this);
-        $cartItem->save();
-        $this->save();
-
-        return $this;
-    }
-
-    public function releaseItemsHolds(): self
-    {
-        $this->cartItems->each(function (CartItem $item) {
-            $item->releaseHold();
-        });
-
-        return $this;
-    }
-
-    public function getExpiresIn(): int
-    {
-        return Carbon::now()->diffInSeconds($this->expires_at);
-    }
-
-    public function updateItemsHolds(): self
-    {
-        // TODO - eliminate dependency on external package config
-        $this->expires_at = now()->addSeconds(config('services.slot.hold.lifetime', 600));
-
-        $this->cartItems->each(function (CartItem $item) {
-            $item->setHold($this->user_id);
-        });
-
-        return $this;
-    }
-
-    public function addSlot(string $slotNumber, int $participants, bool $isPrivate): CartItem
-    {
-        $item = CartItem::makeFromSlot($slotNumber, $participants, $isPrivate);
-        $this->updateItemsHolds();
-
-        $this->addItem($item);
-
-        return $item;
-    }
-
-    public function removeSlot(string $slotNumber): bool
-    {
-        return $this->cartItems()
-            ->where('slot_number', $slotNumber)
-            ->first()
-            ->delete();
-    }
-
-    public function isEmpty(): bool
-    {
-        return ! $this->cartItems()->exists();
-    }
-
-    public function scopeVisibleBy(Builder $query, $user): Builder
-    {
-        return $query;
-    }
+    //region SCOPES
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->whereDate('expires_at', '>', now())
-            ->orWhere(function ($query) {
-                $query->whereDate('expires_at', now())
-                    ->whereTime('expires_at', '>', now());
+        return $query->whereDoesntHave('cartItems', function (Builder $query) {
+            $query->expired();
+        });
+    }
+
+    //endregion
+
+    //region PURCHASING
+
+    /**
+     * Performs final verification that cart is purchasable.  This includes
+     * - basic validation of cart and item expirations
+     * - dispatch of CartItemPurchased event allowing Sellable ability to abort
+     * - confirmation application of discounts and credits results in identical total
+     *
+     * @return $this
+     */
+    public function verifyPurchasable(): self
+    {
+        DB::transaction(function () {
+            // Must have at least one item
+            if ($this->cartItems->isEmpty()) {
+                throw new CartNotValidException();
+            }
+
+            // All items must be active
+            if ($this->cartItems->first->isExpired()) {
+                throw new CartNotValidException();
+            }
+
+            // Ensure all items remain purchasable
+            $this->cartItems->each(function (CartItem $cartItem) {
+                CartItemPurchaseVerification::dispatch($cartItem);
             });
-    }
 
-    /******************************
-     * CartInterface Implementation
-     ******************************/
-
-    private static function activeDeductions(): Collection
-    {
-        return collect(static::$deductionTypes)
-            ->filter(function (string $type) {
-                return app()->has($type);
-            })
-            ->map(function (string $type) {
-                return app($type);
-            });
-    }
-
-    private function findDeductionByCode(string $code): ?CartDeduction
-    {
-        return static::activeDeductions()
-                ->first(function (CartDeduction $deduction) use ($code) {
-                    return $deduction::findDeductionByCode($code);
-                });
-    }
-
-    public function updateTotalDeductions(): self
-    {
-        $totalDeductions = $this->cartItems->reduce(function (int $totalDeductions, CartItem $cartItem) {
-            return $totalDeductions + $cartItem->total_deductions;
-        }, 0);
-
-        $totalDeductions = static::activeDeductions()
-            ->reduce(function (int $totalDeductions, CartDeduction $deduction) {
-                return $totalDeductions + $deduction::calculateCartDeduction($this)->getUnscaledAmount()->toInt();
-            }, $totalDeductions);
-
-        $this->total_deductions = $totalDeductions;
-        $this->save();
+            // Validate all discounts and vouchers remain valid
+            $originalTotal = $this->getPricingDetail();
+            $this->updatePricing();
+            if (!$originalTotal->isEqual($this->getPricingDetail())) {
+                throw new CartNotValidException();
+            }
+        });
 
         return $this;
     }
 
-    public function applyDeductionCode(string $code): CartInterface
+    public function completePurchase(?BaseModelInterface $payment): Order
     {
-        $deduction = $this->findDeductionByCode($code);
+        DB::transaction(function () use ($payment) {
+            /**
+             * - Create order from cart summary
+             * - Create orderitem for each cartitem, dispatch OrderItemCreated
+             * - Dispatch OrderCreated event
+             */
+        });
+    }
 
-        if (empty($deduction)) {
-            throw new InvalidDeductionCodeException($code);
+    //endregion
+
+    //region PRICING
+
+    public function getBalanceDue(): int
+    {
+        return $this->getPricingDetail()->getBalanceDue();
+    }
+
+    protected function getPricingDetail(): CartPricingDetail
+    {
+        return new CartPricingDetail($this);
+    }
+
+    protected function getCartTotal(): DiscountableValue
+    {
+        // Cart total includes cart discounts, but not cart credits
+        // Shipping and taxes are also not included
+        return $this->getItemAmount()
+            ->addDiscounts($this->cart_discounts);
+    }
+
+    public function updatePricing(): self
+    {
+        // Reset All
+        $this->resetDiscounts()
+            ->resetTaxes()
+            ->resetCredits();
+
+        // Calculate ALl - order is important!
+        $this->calculateDiscounts()
+            ->calculateTaxes()
+            ->calculateCredits();
+
+        return $this->saveAll();
+    }
+
+    protected function resetDiscounts(): self
+    {
+        $this->cartItems->each(function (CartItem $cartItem) {
+            $cartItem->setAmount($cartItem->getAmount()->reset());
+        });
+        $this->setShipping($this->getShipping()->reset());
+        $this->cart_discounts = 0;
+
+        return $this;
+    }
+
+    protected function resetTaxes(): self
+    {
+        $this->cartItems->each(function (CartItem $cartItem) {
+            $cartItem->tax = 0;
+        });
+        $this->tax = 0;
+
+        return $this;
+    }
+
+    protected function resetCredits(): self
+    {
+        $this->cart_credits = 0;
+
+        return $this;
+    }
+
+    protected function calculateDiscounts(): self
+    {
+        if ($service = findService(DiscountInterface::class)) {
+            // TBD
         }
 
-        $deduction->applyToCart($this);
+        $this->item_amount = $this->cartItems->reduce(function (DiscountableValue $itemAmount, CartItem $cartItem) {
+            return $itemAmount->add($cartItem->getAmount());
+        }, new DiscountableValue(0));
 
-        return $this->updateTotalDeductions();
+        return $this;
     }
 
-    public function getTotalParticipants(): int
+    protected function calculateTaxes(): self
     {
-        return (int) $this->cartItems()->sum('participants');
+        /** @var TaxRequest $service
+        if ($service = findService(TaxRequest::class)) {
+            $taxRequest = $service::createTaxRequest();
+
+            $this->cartItems->each(function (CartItem $cartItem) use ($taxRequest) {
+                $taxRequest->createTaxRequestItem($cartItem->getId(), $cartItem->getLocation()->getId(), $cartItem->getTaxCode(), $cartItem->getAmount()->getDiscountedAmount());
+            });
+
+            $taxRequest->calculateTax();
+
+            $this->cartItems->each(function (CartItem $cartItem) use ($taxRequest) {
+                $taxRequest = $taxRequest->getTaxRequestItem($cartItem->getId());
+                $cartItem->tax = $taxRequest ? $taxRequest->getTax() : 0;
+            });
+        }
+        */
+
+        $this->tax = $this->cartItems->sum->tax;
+
+        return $this;
     }
 
-    public function getCartItems(): array
+    protected function calculateCredits(): self
     {
-        return $this->cartItems->toArray();
+        if ($service = findService(VoucherInterface::class)) {
+            // TBD
+        }
+
+        return $this;
     }
+
+    //endregion
+
+    //region INTERFACE IMPLEMENTATION
 
     public static function activeCart(int $userId): CartInterface
     {
@@ -427,4 +285,200 @@ class Cart extends BaseModel implements CartInterface
             'user_id' => $userId,
         ]);
     }
+
+    public static function createItem(Sellable $sellable, string $itemId, $amount, int $quantity = 1): CartItemInterface
+    {
+        // Model instance is required for morph
+        if ($sellable instanceof Model) {
+            $item = (new CartItem([
+                'item_id' => $itemId,
+                'description' => $sellable->getDescription(),
+                'quantity' => $quantity
+            ]))->setAmount($amount);
+
+            $item->sellable()->associate($sellable);
+
+            return $item;
+        }
+
+        throw new \InvalidArgumentException();
+    }
+
+    public function upsertItem(CartItemInterface $cartItem): CartItemInterface
+    {
+        if ($cartItem instanceof CartItem) {
+            if ($cartItem->getCart()) {
+                return $this->updateItem($cartItem);
+            }
+
+            return $this->insertItem($cartItem);
+        }
+
+        throw new CartNotValidException();
+    }
+
+    protected function insertItem(CartItem $cartItem): CartItem
+    {
+        // Ensure item is unique
+        if ($this->findItem($cartItem->getSellable(), $cartItem->getItemId())) {
+            throw new CartNotValidException();
+        }
+
+        // Validate location is allowed
+        $this->setLocationId($cartItem->getLocationId());
+
+        $this->cartItems()->save($cartItem);
+
+        CartItemCreated::dispatch($cartItem);
+        $cartItem->save();
+
+        $this->load('cartItems');
+        $this->updatePricing();
+
+        CartUpdated::dispatch($this);
+
+        return $cartItem->load('cart');
+    }
+
+    protected function updateItem(CartItem $cartItem): CartItem
+    {
+        // Validate item already exists in is in this cart
+        if (!$cartItem->getCart() || ($cartItem->getCart()->getId() !== $this->id)) {
+            throw new CartNotValidException();
+        }
+
+        // Validate location is allowed
+        $this->setLocationId($cartItem->getLocationId());
+
+        CartItemUpdated::dispatch($cartItem);
+        $cartItem->save();
+
+        $this->load('cartItems');
+        $this->updatePricing();
+
+        CartUpdated::dispatch($this);
+
+        return $cartItem->load('cart');
+    }
+
+    public function findItem(Sellable $sellable, string $itemId): ?CartItemInterface
+    {
+        /** @var CartItem|null $result */
+        $result = $this->cartItems()->bySellableId($sellable, $itemId)->first();
+
+        return $result;
+    }
+
+    public function removeItem(Sellable $sellable, string $itemId): CartInterface
+    {
+        $this->cartItems()->bySellableId($sellable, $itemId)->get()->each->delete();
+
+        $this->load('cartItems');
+        $this->updatePricing();
+
+        CartUpdated::dispatch($this);
+
+        return $this;
+    }
+
+    public function getCartItems(): Collection
+    {
+        return $this->cartItems;
+    }
+
+    public function getItemAmount(): DiscountableValue
+    {
+        return $this->item_amount;
+    }
+
+    public function getTax(): int
+    {
+        return $this->tax;
+    }
+
+    public function setShipping($shipping): CartInterface
+    {
+        $this->shipping = $shipping;
+
+        return $this;
+    }
+
+    public function getShipping(): DiscountableValue
+    {
+        return $this->shipping;
+    }
+
+    public function getCartDiscounts(): int
+    {
+        return $this->cart_discounts;
+    }
+
+    public function addCartDiscounts(int $value): CartInterface
+    {
+        $total = $this->getCartTotal();
+
+        // Ensure total cart discount never exceeds discounted total
+        $maxDiscount = $total->getDiscountedAmount();
+
+        $this->cart_discounts = max($maxDiscount, $this->cart_discounts + $value);
+
+        // Ensure credit remains valid for possible change in cart discount
+        return $this->addCartCredits(0);
+    }
+
+    public function getCartCredits(): int
+    {
+        return $this->cart_credits;
+    }
+
+    public function addCartCredits(int $value): CartInterface
+    {
+        // For credit calculations, include tax amount owed
+        $total = $this->getCartTotal()
+            ->add(new DiscountableValue($this->tax));
+
+        // Ensure total cart credit never exceeds discounted total
+        $maxCredit = $total->getDiscountedAmount();
+
+        $this->cart_credits = max($maxCredit, $this->cart_credits + $value);
+
+        return $this;
+    }
+
+    public function setLocationId(?int $locationId): self
+    {
+        if ($locationId) {
+            if ($this->location_id && !$this->location_id != $locationId) {
+                throw new MultipleLocationException();
+            }
+
+            $this->location_id = $locationId;
+        }
+
+        return $this;
+    }
+
+    public function getLocationId(): ?int
+    {
+        return $this->location_id;
+    }
+
+    public function applyCode(string $code): CartInterface
+    {
+        // TODO: Implement applyCode() method.
+    }
+
+    //endregion
+
+    //region PROTECTED HELPERS
+
+    protected function saveAll(): self
+    {
+        $this->cartItems->each->save();
+        $this->save();
+
+        return $this;
+    }
+
+    //endregion
 }

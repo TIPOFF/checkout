@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Schema;
 use Tipoff\Checkout\Models\Order;
 use Tipoff\Checkout\Models\OrderItem;
 
-class CreateOrdersTable extends Migration
+class CreateOrderItemsTable extends Migration
 {
     public function up()
     {
@@ -17,7 +17,6 @@ class CreateOrdersTable extends Migration
             $table->foreignIdFor(Order::class);
             $table->foreignIdFor( OrderItem::class, 'parent_id')->nullable();
 
-            // TODO - TBD - change to Type=>class mapping instead of Morph??  using morph forces the sellable to be a Model!
             $table->morphs('sellable');
 
             // Opaque item identifier provided by Sellable

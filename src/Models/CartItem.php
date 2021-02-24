@@ -4,33 +4,42 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Models;
 
-use Brick\Money\Money;
+use Assert\Assert;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Tipoff\Bookings\Models\Booking;
-use Tipoff\Checkout\Contracts\Models\CartItemInterface;
-use Tipoff\Scheduling\Models\Slot;
+use Illuminate\Support\Arr;
+use Tipoff\Support\Contracts\Checkout\CartInterface;
+use Tipoff\Support\Contracts\Checkout\CartItemInterface;
+use Tipoff\Support\Contracts\Sellable\Sellable;
+use Tipoff\Support\Events\Checkout\CartItemRemoved;
 use Tipoff\Support\Models\BaseModel;
+use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasPackageFactory;
 use Tipoff\Support\Traits\HasUpdater;
 
 /**
  * @property int|null id
- * @property string slot_number
- * @property int participants
- * @property bool is_private
- * @property int amount
- * @property int total_taxes
- * @property int total_fees
- * @property int total_deductions
+ * @property string item_id
+ * @property Sellable sellable
+ * @property string description
+ * @property int quantity
+ * @property DiscountableValue amount
+ * @property int tax
+ * @property string|null tax_code
+ * @property array|null meta_data
+ * @property Carbon expires_at
  * @property Carbon created_at
  * @property Carbon updated_at
  * // Raw Relation ID
- * @property int|null room_id
- * @property int|null rate_id
- * @property int|null fee_id
- * @property int|null tax_id
+ * @property int|null cart_id
+ * @property int|null parent_id
+ * @property int|null sellable_id
+ * @property string|null sellable_type
+ * @property int|null order_item_id
+ * @property int|null location_id
+ * @property int|null creator_id
+ * @property int|null updater_id
  */
 class CartItem extends BaseModel implements CartItemInterface
 {
@@ -39,17 +48,10 @@ class CartItem extends BaseModel implements CartItemInterface
     use HasUpdater;
 
     protected $fillable = [
-        'amount',
-        'total_taxes',
-        'total_fees',
-        'total_deductions',
-        'slot_number',
-        'participants',
-        'is_private',
-        'room_id',
-        'rate_id',
-        'tax_id',
-        'fee_id',
+        'item_id',
+        'description',
+        'quantity',
+        'expires_at',
     ];
 
     protected $touches = [
@@ -58,245 +60,241 @@ class CartItem extends BaseModel implements CartItemInterface
 
     protected $casts = [
         'id' => 'integer',
-        'participants' => 'integer',
-        'is_private' => 'boolean',
-        'amount' => 'integer',
-        'total_taxes' => 'integer',
-        'total_fees' => 'integer',
-        'total_deductions' => 'integer',
-        'room_id' => 'integer',
-        'rate_id' => 'integer',
-        'fee_id' => 'integer',
-        'tax_id' => 'integer',
+        'amount' => \Tipoff\Support\Casts\DiscountableValue::class,
+        'quantity' => 'integer',
+        'tax' => 'integer',
+        'meta_data' => 'json',
+        'expires_at' => 'datetime',
+        // Raw relation id access
+        'sellable_id' => 'integer',
+        'cart_id' => 'integer',
+        'parent_id' => 'integer',
+        'order_item_id' => 'integer',
+        'location_id' => 'integer',
+        'creator_id' => 'integer',
+        'updater_id' => 'integer',
     ];
 
     protected static function boot()
     {
         parent::boot();
 
-        static::saving(function (CartItem $item) {
-            if ($item->hasSlot()) {
-                $item->setHold($item->cart->user_id);
-            }
-
-            if (empty($item->total_deductions)) {
-                $item->total_deductions = 0;
-            }
-
-            $item->generatePricing();
-        });
-
-        static::deleting(function ($item) {
-            $item->releaseHold();
-        });
-
-        static::deleted(function ($item) {
-            tap($item->cart, function ($cart) {
-                $cart->generatePricing();
-                $cart->save();
-            });
+        static::deleting(function (CartItem $item) {
+            CartItemRemoved::dispatch($item);
         });
     }
 
-    public function createBooking(): Booking
+    public function __construct(array $attributes = [])
     {
-        $slot = $this->createSlot();
-
-        return Booking::create([
-            'order_id' => $this->cart->order_id,
-            'slot_id' => $slot->id,
-            'participants' => $this->participants,
-            'is_private' => $this->is_private,
-            'amount' => $this->amount,
-            'total_taxes' => $this->total_taxes,
-            'total_fees' => $this->total_fees,
-            'rate_id' => $this->rate_id,
-            'tax_id' => $this->tax_id,
-            'fee_id' => $this->fee_id,
-        ]);
+        parent::__construct(array_merge([
+            'expires_at' => Carbon::now()->addMonths(3),    // TODO - move default to const or config
+        ], $attributes));
     }
 
-    public function getAmountPerParticipant(): int
-    {
-        return (int) floor($this->amount / $this->participants);
-    }
-
-    public function scopeFilter(Builder $query, array $filters): Builder
-    {
-        if (empty($filters)) {
-            return $query;
-        }
-
-        /**
-         * TODO - implement or kill
-        foreach ($filters as $filterKey => $filterValue) {
-            switch ($filterKey) {
-                case '':
-                    // $query->where('', "");
-                    break;
-            }
-        }
-         */
-
-        return $query;
-    }
-
-    public function room()
-    {
-        return $this->belongsTo(app('room'));
-    }
+    //region RELATIONSHIPS
 
     public function cart()
     {
         return $this->belongsTo(Cart::class);
     }
 
-    public function fee()
+    public function parent()
     {
-        return $this->belongsTo(app('fee'));
+        return $this->belongsTo(CartItem::class);
     }
 
-    public function rate()
+    public function children()
     {
-        return $this->belongsTo(app('rate'));
+        return $this->hasMany(CartItem::class, 'parent_id', 'id');
     }
 
-    public function tax()
+    public function orderItem()
     {
-        return $this->belongsTo(app('tax'));
+        return $this->hasOne(OrderItem::class);
     }
 
-    public function getStartAtAttribute()
+    public function sellable()
     {
-        return $this->hasSlot() ? $this->getSlot()->start_at : null;
+        return $this->morphTo();
     }
 
-    public function getFormattedStartAttribute()
+    //endregion
+
+    //region SCOPES
+
+    public function scopeBySellableId(Builder $query, Sellable $sellable, string $itemId): Builder
     {
-        return $this->hasSlot() ? $this->getSlot()->formatted_start : null;
+        return $query->where(function ($query) use ($sellable, $itemId) {
+            $query->where('sellable_type', '=', $sellable->getMorphClass());
+            $query->where('item_id', '=', $itemId);
+        });
     }
 
-    public function hasHold(): bool
+    public function scopeActive(Builder $query, bool $isActive = true): Builder
     {
-        return $this->hasSlot() ? $this->getSlot()->hasHold() : false;
+        return $query->where('expires_at', $isActive ? '>' : '<=', Carbon::now());
     }
 
-    public function getHold(): ?object
+    public function scopeExpired(Builder $query): Builder
     {
-        return $this->hasSlot() ? $this->getSlot()->getHold() : null;
+        return $this->scopeActive($query, false);
     }
 
-    public function releaseHold(): self
+    public function scopeIsRootItem(Builder $query): Builder
     {
-        if ($this->hasSlot()) {
-            $this->getSlot()->releaseHold();
+        return $query->whereNull('parent_id');
+    }
+
+    public function scopeIsChildItem(Builder $query): Builder
+    {
+        return $query->whereNotNull('parent_id');
+    }
+
+    //endregion
+
+    public function delete()
+    {
+        // Delete children - this is recursive
+        $this->children()->get()->each->delete();
+
+        return parent::delete();
+    }
+
+    public function isExpired(): bool
+    {
+        return $this->expires_at->isPast();
+    }
+
+    //region CartItemInterface Implementation
+
+    public function getCart(): ?CartInterface
+    {
+        return $this->cart;
+    }
+
+    public function getRootItem(): ?CartItemInterface
+    {
+        $rootItem = $parentItem = $this->getParentItem();
+        while ($parentItem && $parentItem->getParentItem()) {
+            $rootItem = $parentItem;
+            $parentItem = $parentItem->getParentItem();
         }
+
+        return $rootItem;
+    }
+
+    public function getSellable(): Sellable
+    {
+        return $this->sellable;
+    }
+
+    public function getItemId(): string
+    {
+        return $this->item_id;
+    }
+
+    public function getQuantity(): int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): CartItemInterface
+    {
+        $this->quantity = $quantity;
 
         return $this;
     }
 
-    public function setHold(int $userId, ?Carbon $expiresAt = null): self
+    public function getDescription(): string
     {
-        if ($this->hasSlot()) {
-            $this->getSlot()->setHold($userId, $expiresAt);
-        }
+        return $this->description;
+    }
+
+    public function setDescription(string $description): CartItemInterface
+    {
+        $this->description = $description;
 
         return $this;
     }
 
-    public function hasSlot(): bool
+    public function getAmount(): DiscountableValue
     {
-        return $this->getSlot() ? true : false;
+        return $this->amount;
     }
 
-    public function getSlot(): ?Slot
+    public function setAmount($amount): self
     {
-        return Slot::resolveSlot($this->slot_number);
-    }
-
-    public function generatePricing(): self
-    {
-        // TODO - move to services
-        $this->amount = $this->rate->getAmount($this->participants, $this->is_private);
-        $this->total_fees = $this->fee->generateTotalFeesByCartItem($this);
-        $this->total_taxes = $this->tax->generateTotalTaxesByCartItem($this);
+        $this->amount = $amount;
 
         return $this;
     }
 
-    public function createSlot(): ?Slot
+    public function getLocationId(): ?int
     {
-        if ($this->hasSlot()) {
-            $slot = $this->getSlot();
-            $slot->save();
+        return $this->location_id;
+    }
 
-            return $slot;
+    public function setLocationId(?int $locationId): CartItemInterface
+    {
+        if ($cart = $this->getCart()) {
+            $cart->setLocationId($locationId);
         }
 
-        return null;
+        $this->location_id = $locationId;
+
+        return $this;
     }
 
-    public static function makeFromSlot(String $slotNumber, int $participants, bool $isPrivate): self
+    public function getTaxCode(): ?string
     {
-        // TODO - move to services
-        $slot = Slot::resolveSlot($slotNumber);
-        $rate = $slot->getRate();
-        $tax = $slot->getTax();
-        $fee = $slot->getFee();
-
-        return self::make([
-            'slot_number' => $slotNumber,
-            'participants' => $participants,
-            'is_private' => $isPrivate,
-            'room_id' => $slot->room_id,
-            'rate_id' => $rate->id,
-            'tax_id' => $tax->id,
-            'fee_id' => $fee->id,
-        ]);
+        return $this->tax_code;
     }
 
-    public function scopeVisibleBy(Builder $query, $user): Builder
+    public function setTaxCode(?string $taxCode): CartItemInterface
     {
-        return $query;
+        $this->tax_code = $taxCode;
+
+        return $this;
     }
 
-    /******************************
-     * CartItemInterface Implementation
-     ******************************/
-
-    public function getSlotNumber(): ?string
+    public function getExpiresAt(): Carbon
     {
-        return $this->slot_number;
+        return $this->expires_at;
     }
 
-    public function getIsPrivate(): bool
+    public function setExpiresAt(Carbon $expiresAt): CartItemInterface
     {
-        return $this->is_private;
+        Assert::that($expiresAt->isFuture())->true();
+        $this->expires_at = $expiresAt;
+
+        return $this;
     }
 
-    public function getParticipants(): int
+    public function getParentItem(): ?CartItemInterface
     {
-        return $this->participants;
+        return $this->parent;
     }
 
-    public function getAmount(): Money
+    public function setParentItem(?CartItemInterface $parent): CartItemInterface
     {
-        return Money::ofMinor($this->amount ?? 0, 'USD');
+        Assert::that($parent->getId())->notNull();
+
+        $this->parent()->associate($parent);
+
+        return $this;
     }
 
-    public function getTotalDeductions(): Money
+    public function getMetaData(?string $key, $default)
     {
-        return Money::ofMinor($this->total_deductions ?? 0, 'USD');
+        return Arr::get($this->meta_data, $key, $default);
     }
 
-    public function getTotalFees(): Money
+    public function setMetaData(?string $key, $value): CartItemInterface
     {
-        return Money::ofMinor($this->total_fees ?? 0, 'USD');
-    }
+        $metaData = $this->meta_data ?? [];
+        $this->meta_data = Arr::set($metaData, $key, $value);
 
-    public function getFee()
-    {
-        // TODO: return findModel(FeeInterface::class, $this->fee_id);
-        return $this->fee;
+        return $this;
     }
+    //endregion
 }

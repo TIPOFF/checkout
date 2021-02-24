@@ -6,6 +6,7 @@ namespace Tipoff\Checkout\Tests\Unit\Models;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Checkout\Models\CartItem;
+use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 
 class CartItemModelTest extends TestCase
@@ -15,7 +16,10 @@ class CartItemModelTest extends TestCase
     /** @test */
     public function create()
     {
-        $cart = CartItem::factory()->create();
+        TestSellable::createTable();
+        $sellable = TestSellable::factory()->create();
+
+        $cart = CartItem::factory()->withSellable($sellable)->create();
         $this->assertNotNull($cart);
     }
 }

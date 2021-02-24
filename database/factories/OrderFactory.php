@@ -6,6 +6,7 @@ namespace Tipoff\Checkout\Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Tipoff\Checkout\Models\Order;
+use Tipoff\Support\Contracts\Sellable\Sellable;
 
 class OrderFactory extends Factory
 {
