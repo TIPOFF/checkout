@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Contracts\Models;
 
 use Brick\Money\Money;
+use Tipoff\Support\Contracts\Checkout\CartInterface;
 
 interface CartDeduction
 {

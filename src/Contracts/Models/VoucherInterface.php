@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Contracts\Models;
 
+use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Models\BaseModelInterface;
 
 interface VoucherInterface extends BaseModelInterface, CartDeduction

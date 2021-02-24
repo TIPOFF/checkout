@@ -47,7 +47,9 @@ class CartModelPurchaseTest extends TestCase
     /** @test */
     public function cart_items_are_verified()
     {
-        Event::fake();
+        Event::fake([
+            CartItemPurchaseVerification::class,
+        ]);
 
         /** @var Cart $cart */
         $cart = Cart::factory()->create();

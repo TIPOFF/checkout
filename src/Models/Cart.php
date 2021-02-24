@@ -149,13 +149,16 @@ class Cart extends BaseModel implements CartInterface
 
     public function completePurchase(?BaseModelInterface $payment): Order
     {
-        DB::transaction(function () use ($payment) {
+        DB::transaction(function () {
             /**
              * - Create order from cart summary
              * - Create orderitem for each cartitem, dispatch OrderItemCreated
              * - Dispatch OrderCreated event
              */
         });
+
+        // TODO - placeholder to keep psalm happy
+        return new Order();
     }
 
     //endregion
@@ -225,9 +228,11 @@ class Cart extends BaseModel implements CartInterface
 
     protected function calculateDiscounts(): self
     {
+        /*
         if ($service = findService(DiscountInterface::class)) {
             // TBD
         }
+        */
 
         $this->item_amount = $this->cartItems->reduce(function (DiscountableValue $itemAmount, CartItem $cartItem) {
             return $itemAmount->add($cartItem->getAmount());
@@ -238,7 +243,7 @@ class Cart extends BaseModel implements CartInterface
 
     protected function calculateTaxes(): self
     {
-        /** @var TaxRequest $service
+        /**
         if ($service = findService(TaxRequest::class)) {
             $taxRequest = $service::createTaxRequest();
 
@@ -262,9 +267,11 @@ class Cart extends BaseModel implements CartInterface
 
     protected function calculateCredits(): self
     {
+        /*
         if ($service = findService(VoucherInterface::class)) {
             // TBD
         }
+        */
 
         return $this;
     }
@@ -466,6 +473,7 @@ class Cart extends BaseModel implements CartInterface
     public function applyCode(string $code): CartInterface
     {
         // TODO: Implement applyCode() method.
+        return $this;
     }
 
     //endregion

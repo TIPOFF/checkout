@@ -110,11 +110,6 @@ class Order extends BaseModel implements OrderInterface
         return $this->belongsTo(app('voucher'), 'partial_redemption_voucher_id');
     }
 
-    public function bookings()
-    {
-        return $this->hasMany(app('booking'));
-    }
-
     public function purchasedVouchers()
     {
         return $this->hasMany(app('voucher'), 'purchase_order_id');

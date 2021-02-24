@@ -36,7 +36,7 @@ class CartItemFactory extends Factory
             'amount' => (new DiscountableValue($this->faker->numberBetween(1000, 5000)))
                 ->addDiscounts($this->faker->optional(0.5, 0)->numberBetween(500, 1000)),
             'tax' => $this->faker->optional(0.5, 0)->numberBetween(500, 1000),
-            // 'location_id' => $this->faker->optional()->passthrough(randomOrCreate(app('location'))),
+            'location_id' => $this->faker->optional()->passthrough(randomOrCreate(app('location'))),
             'tax_code' => $this->faker->optional()->asciify('********'),
             'creator_id' => randomOrCreate(app('user')),
             'updater_id' => randomOrCreate(app('user')),
