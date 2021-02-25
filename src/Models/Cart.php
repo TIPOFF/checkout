@@ -131,7 +131,7 @@ class Cart extends BaseModel implements CartInterface
         // Cart total includes cart discounts, but not cart credits
         // Shipping and taxes are also not included
         return $this->getItemAmount()
-            ->addDiscounts($this->discounts);
+            ->addDiscounts($this->getDiscounts());
     }
 
     public function updatePricing(): self
@@ -315,7 +315,7 @@ class Cart extends BaseModel implements CartInterface
         // Ensure total cart discount never exceeds discounted total
         $maxDiscount = $total->getDiscountedAmount();
 
-        $this->discounts = max($maxDiscount, $this->discounts + $value);
+        $this->discounts = max(0, min($maxDiscount, $this->discounts + $value));
 
         // Ensure credit remains valid for possible change in cart discount
         return $this->addCredits(0);
@@ -330,12 +330,12 @@ class Cart extends BaseModel implements CartInterface
     {
         // For credit calculations, include tax amount owed
         $total = $this->getCartTotal()
-            ->add(new DiscountableValue($this->tax));
+            ->add(new DiscountableValue($this->getTax()));
 
         // Ensure total cart credit never exceeds discounted total
         $maxCredit = $total->getDiscountedAmount();
 
-        $this->credits = max($maxCredit, $this->credits + $value);
+        $this->credits = max(0, min($maxCredit, $this->credits + $value));
 
         return $this;
     }
