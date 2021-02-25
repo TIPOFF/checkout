@@ -14,7 +14,7 @@ use Tipoff\Checkout\Contracts\Models\VoucherInterface;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Checkout\Objects\CartPricingDetail;
-use Tipoff\Checkout\Traits\IsItemContainer;
+use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
 use Tipoff\Support\Contracts\Models\BaseModelInterface;

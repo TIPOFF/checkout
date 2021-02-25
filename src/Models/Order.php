@@ -8,7 +8,7 @@ use Assert\Assert;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Tipoff\Checkout\Traits\IsItemContainer;
+use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Checkout\OrderItemInterface;
 use Tipoff\Support\Contracts\Sellable\Sellable;

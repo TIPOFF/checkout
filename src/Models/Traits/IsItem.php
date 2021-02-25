@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\Traits;
+namespace Tipoff\Checkout\Models\Traits;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;

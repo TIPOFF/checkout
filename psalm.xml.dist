@@ -30,6 +30,16 @@
           <directory name="src/Models" />
         </errorLevel>
       </UndefinedThisPropertyAssignment>
+      <UndefinedMagicPropertyFetch>
+        <errorLevel type="suppress">
+          <directory name="src/Models" />
+        </errorLevel>
+      </UndefinedMagicPropertyFetch>
+      <UndefinedMagicPropertyAssignment>
+        <errorLevel type="suppress">
+          <directory name="src/Models" />
+        </errorLevel>
+      </UndefinedMagicPropertyAssignment>
     </issueHandlers>
 
 </psalm>

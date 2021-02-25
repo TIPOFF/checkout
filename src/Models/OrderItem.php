@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Models;
 
-use Tipoff\Checkout\Traits\IsItem;
+use Tipoff\Checkout\Models\Traits\IsItem;
 use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Checkout\OrderItemInterface;
-use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 

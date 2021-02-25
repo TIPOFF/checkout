@@ -7,7 +7,7 @@ namespace Tipoff\Checkout\Models;
 use Assert\Assert;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Tipoff\Checkout\Traits\IsItem;
+use Tipoff\Checkout\Models\Traits\IsItem;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
 use Tipoff\Support\Events\Checkout\CartItemRemoved;
