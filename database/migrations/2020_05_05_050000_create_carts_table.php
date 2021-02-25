@@ -13,6 +13,7 @@ class CreateCartsTable extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
+            // TODO - TBD - status of customer vs user
             $table->foreignIdFor(app('user'));
 
             $table->foreignIdFor(Order::class)->nullable();

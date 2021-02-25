@@ -28,6 +28,20 @@ trait IsItemContainer
     use HasCreator;
     use HasUpdater;
 
+    //region RELATIONSHIPS
+
+    public function user()
+    {
+        return $this->belongsTo(app('user'));
+    }
+
+    public function location()
+    {
+        return $this->belongsTo(app('location'));
+    }
+
+    //endregion
+
     //region INTERFACE IMPLEMENTATION
 
     public function getItemAmount(): DiscountableValue

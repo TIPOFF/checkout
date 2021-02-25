@@ -54,6 +54,11 @@ trait IsItem
         return $this->morphTo();
     }
 
+    public function location()
+    {
+        return $this->belongsTo(app('location'));
+    }
+
     //endregion
 
     //region SCOPES

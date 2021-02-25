@@ -15,6 +15,7 @@ class AddCheckoutPermissions extends Migration
 
             foreach ([
                          'view orders',
+                         'view order items',
                      ] as $name) {
                 app(Permission::class)::findOrCreate($name, null);
             };

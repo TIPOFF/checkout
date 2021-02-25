@@ -6,10 +6,12 @@ namespace Tipoff\Discounts\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Checkout\Models\Order;
+use Tipoff\Checkout\Models\OrderItem;
+use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\TestSupport\Models\User;
 
-class OrderResourceTest extends TestCase
+class OrderItemResourceTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -17,11 +19,14 @@ class OrderResourceTest extends TestCase
     public function index()
     {
         $this->logToStderr($this->app);
-        Order::factory()->count(4)->create();
+        TestSellable::createTable();
+        $sellable = TestSellable::factory()->create();
+
+        OrderItem::factory()->count(4)->withSellable($sellable)->create();
 
         $this->actingAs(User::factory()->create());
 
-        $response = $this->getJson('nova-api/orders')
+        $response = $this->getJson('nova-api/order-items')
             ->assertOk();
 
         $this->assertCount(4, $response->json('resources'));
