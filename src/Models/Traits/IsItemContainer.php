@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Models\Traits;
 
 use Carbon\Carbon;
-use Tipoff\Support\Contracts\Checkout\BaseItemContainerInterface;
-use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasUpdater;
