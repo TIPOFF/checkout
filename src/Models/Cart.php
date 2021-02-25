@@ -4,24 +4,26 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Models;
 
+use Assert\Assert;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
-use Tipoff\Checkout\Contracts\Models\DiscountInterface;
-use Tipoff\Checkout\Contracts\Models\VoucherInterface;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
+use Tipoff\Checkout\Exceptions\InvalidDeductionCodeException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Checkout\Objects\CartPricingDetail;
+use Tipoff\Checkout\Services\Cart\CompletePurchase;
+use Tipoff\Checkout\Services\Cart\VerifyPurchasable;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
-use Tipoff\Support\Contracts\Models\BaseModelInterface;
+use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
+use Tipoff\Support\Contracts\Checkout\Discounts\DiscountInterface;
+use Tipoff\Support\Contracts\Checkout\Vouchers\VoucherInterface;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Contracts\Taxes\TaxRequest;
 use Tipoff\Support\Events\Checkout\CartItemCreated;
-use Tipoff\Support\Events\Checkout\CartItemPurchaseVerification;
 use Tipoff\Support\Events\Checkout\CartItemUpdated;
 use Tipoff\Support\Events\Checkout\CartUpdated;
 use Tipoff\Support\Models\BaseModel;
@@ -30,6 +32,9 @@ use Tipoff\Support\Traits\HasPackageFactory;
 
 /**
  * @property int credits
+ * // Relations
+ * @property Order|null order
+ * @property Collection cartItems
  */
 class Cart extends BaseModel implements CartInterface
 {
@@ -58,6 +63,12 @@ class Cart extends BaseModel implements CartInterface
     public static function boot()
     {
         parent::boot();
+
+        static::saving(function (Cart $cart) {
+            Assert::lazy()
+                ->that($cart->user_id, 'user_id')->notEmpty('A cart must belong to a user.')
+                ->verifyNow();
+        });
 
         static::deleting(function (Cart $cart) {
             $cart->cartItems()->isRootItem()->get()->each->delete();
@@ -89,57 +100,16 @@ class Cart extends BaseModel implements CartInterface
 
     //endregion
 
-    //region PURCHASING
+    //region SERVICE WRAPPERS
 
-    /**
-     * Performs final verification that cart is purchasable.  This includes
-     * - basic validation of cart and item expirations
-     * - dispatch of CartItemPurchased event allowing Sellable ability to abort
-     * - confirmation application of discounts and credits results in identical total
-     *
-     * @return $this
-     */
     public function verifyPurchasable(): self
     {
-        DB::transaction(function () {
-            // Must have at least one item
-            if ($this->cartItems->isEmpty()) {
-                throw new CartNotValidException();
-            }
-
-            // All items must be active
-            if ($this->cartItems->first->isExpired()) {
-                throw new CartNotValidException();
-            }
-
-            // Ensure all items remain purchasable
-            $this->cartItems->each(function (CartItem $cartItem) {
-                CartItemPurchaseVerification::dispatch($cartItem);
-            });
-
-            // Validate all discounts and vouchers remain valid
-            $originalTotal = $this->getPricingDetail();
-            $this->updatePricing();
-            if (! $originalTotal->isEqual($this->getPricingDetail())) {
-                throw new CartNotValidException();
-            }
-        });
-
-        return $this;
+        return app(VerifyPurchasable::class)($this);
     }
 
-    public function completePurchase(?BaseModelInterface $payment): Order
+    public function completePurchase(): Order
     {
-        DB::transaction(function () {
-            /**
-             * - Create order from cart summary
-             * - Create orderitem for each cartitem, dispatch OrderItemCreated
-             * - Dispatch OrderCreated event
-             */
-        });
-
-        // TODO - placeholder to keep psalm happy
-        return new Order();
+        return app(CompletePurchase::class)($this);
     }
 
     //endregion
@@ -151,7 +121,7 @@ class Cart extends BaseModel implements CartInterface
         return $this->getPricingDetail()->getBalanceDue();
     }
 
-    protected function getPricingDetail(): CartPricingDetail
+    public function getPricingDetail(): CartPricingDetail
     {
         return new CartPricingDetail($this);
     }
@@ -181,45 +151,45 @@ class Cart extends BaseModel implements CartInterface
 
     protected function resetDiscounts(): self
     {
-        $this->cartItems->each(function (CartItem $cartItem) {
-            $cartItem->setAmount($cartItem->getAmount()->reset());
-        });
-        $this->setShipping($this->getShipping()->reset());
-        $this->discounts = 0;
+        if (findService(DiscountInterface::class)) {
+            $this->cartItems->each(function (CartItem $cartItem) {
+                $cartItem->setAmount($cartItem->getAmount()->reset());
+            });
+            $this->setShipping($this->getShipping()->reset());
+            $this->discounts = 0;
+        }
 
-        return $this;
+        return $this->updateItemAmount();
     }
 
     protected function resetTaxes(): self
     {
-        $this->cartItems->each(function (CartItem $cartItem) {
-            $cartItem->tax = 0;
-        });
-        $this->tax = 0;
+        if (findService(TaxRequest::class)) {
+            $this->cartItems->each(function (CartItem $cartItem) {
+                $cartItem->tax = 0;
+            });
+        }
 
-        return $this;
+        return $this->updateTax();
     }
 
     protected function resetCredits(): self
     {
-        $this->credits = 0;
+        if (findService(VoucherInterface::class)) {
+            $this->credits = 0;
+        }
 
         return $this;
     }
 
     protected function calculateDiscounts(): self
     {
-        /*
         if ($service = findService(DiscountInterface::class)) {
-            // TBD
+            /** @var DiscountInterface $service */
+            $service::calculateAdjustments($this);
         }
-        */
 
-        $this->item_amount = $this->cartItems->reduce(function (DiscountableValue $itemAmount, CartItem $cartItem) {
-            return $itemAmount->add($cartItem->getAmount());
-        }, new DiscountableValue(0));
-
-        return $this;
+        return $this->updateItemAmount();
     }
 
     protected function calculateTaxes(): self
@@ -245,18 +215,15 @@ class Cart extends BaseModel implements CartInterface
             });
         }
 
-        $this->tax = $this->cartItems->sum->tax;
-
-        return $this;
+        return $this->updateTax();
     }
 
     protected function calculateCredits(): self
     {
-        /*
         if ($service = findService(VoucherInterface::class)) {
-            // TBD
+            /** @var VoucherInterface $service */
+            $service::calculateAdjustments($this);
         }
-        */
 
         return $this;
     }
@@ -388,13 +355,39 @@ class Cart extends BaseModel implements CartInterface
 
     public function applyCode(string $code): CartInterface
     {
-        // TODO: Implement applyCode() method.
-        return $this;
+        $deduction = $this->findDeductionByCode($code);
+
+        if (empty($deduction)) {
+            throw new InvalidDeductionCodeException($code);
+        }
+
+        $deduction->applyToCart($this);
+
+        return $this->updatePricing();
     }
 
     //endregion
 
     //region PROTECTED HELPERS
+
+    protected static function activeDeductions(): Collection
+    {
+        return collect(static::$deductionTypes)
+            ->filter(function (string $type) {
+                return app()->has($type);
+            })
+            ->map(function (string $type) {
+                return app($type);
+            });
+    }
+
+    protected function findDeductionByCode(string $code): ?CodedCartAdjustment
+    {
+        return static::activeDeductions()
+            ->first(function (CodedCartAdjustment $deduction) use ($code) {
+                return $deduction::findByCode($code);
+            });
+    }
 
     protected function insertItem(CartItem $cartItem): CartItem
     {

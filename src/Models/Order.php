@@ -17,6 +17,13 @@ use Tipoff\Support\Traits\HasPackageFactory;
 
 /**
  * @property string order_number
+ * // Relations
+ * @property Collection orderItems
+ * @property Collection invoices
+ * @property Collection payments
+ * @property Collection vouchers
+ * @property Collection discounts
+ * @property Collection notes
  */
 class Order extends BaseModel implements OrderInterface
 {
@@ -39,6 +46,22 @@ class Order extends BaseModel implements OrderInterface
         'creator_id' => 'integer',
         'updater_id' => 'integer',
     ];
+
+    public static function createFromCart(Cart $cart): self
+    {
+        // Build by field to avoid fillable permissions
+        $order = new static;
+
+        $order->user()->associate($cart->user);
+        $order->shipping = $cart->getShipping();
+        $order->item_amount = $cart->getItemAmount();
+        $order->discounts = $cart->getDiscounts();
+        $order->tax = $cart->getTax();
+        $order->location_id = $cart->getLocationId();
+        $order->save();
+
+        return $order;
+    }
 
     protected static function boot()
     {

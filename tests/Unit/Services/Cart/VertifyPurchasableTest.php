@@ -2,18 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\Tests\Unit\Models;
+namespace Tipoff\Checkout\Tests\Unit\Services\Cart;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
+use Tipoff\Checkout\Services\Cart\VerifyPurchasable;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Events\Checkout\CartItemPurchaseVerification;
 
-class CartModelPurchaseTest extends TestCase
+class VertifyPurchasableTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -38,7 +39,8 @@ class CartModelPurchaseTest extends TestCase
                 'cart_id' => $cart,
             ]);
 
-        $result = $cart->updatePricing()->verifyPurchasable();
+        $handler = $this->app->make(VerifyPurchasable::class);
+        $result = ($handler)($cart->refresh()->updatePricing());
         $this->assertEquals($result->id, $cart->id);
     }
 
@@ -60,7 +62,8 @@ class CartModelPurchaseTest extends TestCase
                 'cart_id' => $cart,
             ]);
 
-        $result = $cart->updatePricing()->verifyPurchasable();
+        $handler = $this->app->make(VerifyPurchasable::class);
+        $result = ($handler)($cart->refresh()->updatePricing());
         $this->assertEquals($result->id, $cart->id);
 
         Event::assertDispatched(CartItemPurchaseVerification::class, 1);
@@ -73,7 +76,9 @@ class CartModelPurchaseTest extends TestCase
         $cart = Cart::factory()->create();
 
         $this->expectException(CartNotValidException::class);
-        $cart->verifyPurchasable();
+
+        $handler = $this->app->make(VerifyPurchasable::class);
+        ($handler)($cart->refresh()->updatePricing());
     }
 
     /** @test */
@@ -97,7 +102,9 @@ class CartModelPurchaseTest extends TestCase
             ]);
 
         $this->expectException(CartNotValidException::class);
-        $cart->verifyPurchasable();
+
+        $handler = $this->app->make(VerifyPurchasable::class);
+        ($handler)($cart->refresh()->updatePricing());
     }
 
     /** @test */
@@ -114,10 +121,12 @@ class CartModelPurchaseTest extends TestCase
                 'cart_id' => $cart,
             ]);
 
-        $cart->updatePricing();
+        $cart->refresh()->updatePricing();
         $cart->getItems()->first->setAmount(1234);
 
         $this->expectException(CartNotValidException::class);
-        $cart->verifyPurchasable();
+
+        $handler = $this->app->make(VerifyPurchasable::class);
+        ($handler)($cart);
     }
 }

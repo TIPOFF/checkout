@@ -2,13 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Discounts\Tests\Feature\Checkout;
+namespace Tipoff\Checkout\Tests\Feature\Checkout;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
 use Tipoff\Checkout\Models\Cart;
-use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
+use Tipoff\Support\Events\Checkout\CartItemCreated;
+use Tipoff\Support\Events\Checkout\CartItemPurchaseVerification;
+use Tipoff\Support\Events\Checkout\OrderCreated;
+use Tipoff\Support\Events\Checkout\OrderItemCreated;
 use Tipoff\TestSupport\Models\User;
 
 class CheckoutTest extends TestCase
@@ -23,58 +28,15 @@ class CheckoutTest extends TestCase
     }
 
     /** @test */
-    public function add_sellable_to_cart()
+    public function checkout_with_payment_simulation()
     {
-        $this->actingAs(User::factory()->create());
+        Event::fake([
+            CartItemCreated::class,
+            CartItemPurchaseVerification::class,
+            OrderItemCreated::class,
+            OrderCreated::class,
+        ]);
 
-        /** @var TestSellable $sellable */
-        $sellable = TestSellable::factory()->create();
-
-        $sellable->addToCart(4);
-
-        $this->assertDatabaseCount('carts', 1);
-        $this->assertDatabaseCount('cart_items', 1);
-
-        /** @var CartItem $cartItem */
-        $cartItem = CartItem::all()->first();
-        $this->assertEquals($cartItem->sellable_id, $sellable->id);
-        $this->assertEquals($cartItem->sellable_type, $sellable->getMorphClass());
-        $this->assertEquals(4, $cartItem->getQuantity());
-
-        /** @var Cart $cart */
-        $cart = Cart::all()->first();
-        $this->assertEquals(4000, $cart->getBalanceDue());
-    }
-
-    /** @test */
-    public function update_sellable_in_cart()
-    {
-        $user = User::factory()->create();
-        $this->actingAs($user);
-
-        /** @var TestSellable $sellable */
-        $sellable = TestSellable::factory()->create();
-        $sellable->addToCart(4);
-
-        $sellable->upsertToCart(5);
-
-        $this->assertDatabaseCount('carts', 1);
-        $this->assertDatabaseCount('cart_items', 1);
-
-        /** @var CartItem $cartItem */
-        $cartItem = CartItem::all()->first();
-        $this->assertEquals($cartItem->sellable_id, $sellable->id);
-        $this->assertEquals($cartItem->sellable_type, $sellable->getMorphClass());
-        $this->assertEquals(5, $cartItem->getQuantity());
-
-        /** @var Cart $cart */
-        $cart = Cart::all()->first();
-        $this->assertEquals(5000, $cart->getBalanceDue());
-    }
-
-    /** @test */
-    public function add_item_with_fee_to_cart()
-    {
         $user = User::factory()->create();
         $this->actingAs($user);
 
@@ -82,11 +44,76 @@ class CheckoutTest extends TestCase
         $sellable = TestSellable::factory()->create();
         $sellable->upsertToCartWithFee(4, 5000);
 
-        $this->assertDatabaseCount('carts', 1);
-        $this->assertDatabaseCount('cart_items', 2);
+        // APP LEVEL CHECKOUT SIMULATION
+        // - final verification
+        // - capture payment
+        // - create order from cart
+        // - associate payment with order
+        DB::transaction(function () use ($user) {
 
-        /** @var Cart $cart */
-        $cart = Cart::all()->first();
-        $this->assertEquals(9000, $cart->getBalanceDue());
+            $cart = Cart::activeCart($user->id);
+
+            // Final check all is good to go
+            $cart->verifyPurchasable();
+
+            // Authorize Payment for balance due
+            if ($ccAmountDue = $cart->getBalanceDue()) {
+                $this->assertGreaterThan(0, $ccAmountDue);
+                // PAYMENT RESPONSIBILITY
+                // $payment = fn($user, $cart->getLocationId(), $ccAmountDue);
+            }
+
+            // With payment confirmed, complete purchase
+            $order = $cart->completePurchase();
+            $this->assertNotNull($order);
+
+            // PAYMENT RESPONSIBILITY
+            // Associate payment with order
+            // $payment->order()->associate($order);
+            // $payment->save();
+            // new Transaction()??
+        });
+
+        Event::assertDispatched(CartItemCreated::class, 2);
+        Event::assertDispatched(CartItemPurchaseVerification::class, 2);
+        Event::assertDispatched(OrderItemCreated::class, 2);
+        Event::assertDispatched(OrderCreated::class, 1);
+    }
+
+    /** @test */
+    public function checkout_without_payment_simulation()
+    {
+        Event::fake([
+            CartItemCreated::class,
+            CartItemPurchaseVerification::class,
+            OrderItemCreated::class,
+            OrderCreated::class,
+        ]);
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        /** @var TestSellable $sellable */
+        $sellable = TestSellable::factory()->create();
+        $sellable->upsertToCartWithFee(4, 5000);
+
+        // APP LEVEL CHECKOUT SIMULATION
+        // - final verification
+        // - create order from cart
+        DB::transaction(function () use ($user) {
+            $cart = Cart::activeCart($user->id);
+
+            // Final check all is good to go
+            $cart->verifyPurchasable();
+
+            // With payment confirmed, complete purchase
+            $order = $cart->completePurchase();
+            $this->assertNotNull($order);
+        });
+
+        Event::assertDispatched(CartItemCreated::class, 2);
+        Event::assertDispatched(CartItemPurchaseVerification::class, 2);
+        Event::assertDispatched(OrderItemCreated::class, 2);
+        Event::assertDispatched(OrderCreated::class, 1);
     }
 }

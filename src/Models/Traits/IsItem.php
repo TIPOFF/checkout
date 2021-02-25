@@ -7,6 +7,7 @@ namespace Tipoff\Checkout\Models\Traits;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasCreator;
@@ -24,6 +25,10 @@ use Tipoff\Support\Traits\HasUpdater;
  * @property array|null meta_data
  * @property Carbon created_at
  * @property Carbon updated_at
+ * // Relations
+ * @property mixed parent
+ * @property mixed location
+ * @property Collection children
  * // Raw Relation ID
  * @property int|null parent_id
  * @property int|null sellable_id
@@ -110,6 +115,17 @@ trait IsItem
         return $this->parent;
     }
 
+    public function getRootItem()
+    {
+        $rootItem = $parentItem = $this->getParentItem();
+        while ($parentItem && $parentItem->getParentItem()) {
+            $rootItem = $parentItem;
+            $parentItem = $parentItem->getParentItem();
+        }
+
+        return $rootItem;
+    }
+
     public function getItemId(): string
     {
         return $this->item_id;
@@ -127,12 +143,12 @@ trait IsItem
 
     public function getAmount(): DiscountableValue
     {
-        return $this->amount;
+        return $this->amount ?? new DiscountableValue(0);
     }
 
     public function getTax(): int
     {
-        return $this->tax;
+        return $this->tax ?? 0;
     }
 
     public function getLocationId(): ?int
@@ -145,7 +161,7 @@ trait IsItem
         return $this->tax_code;
     }
 
-    public function getMetaData(?string $key, $default)
+    public function getMetaData(?string $key, $default = null)
     {
         return Arr::get($this->meta_data, $key, $default);
     }

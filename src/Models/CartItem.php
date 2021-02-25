@@ -103,17 +103,6 @@ class CartItem extends BaseModel implements CartItemInterface
         return $this->cart;
     }
 
-    public function getRootItem(): ?CartItemInterface
-    {
-        $rootItem = $parentItem = $this->getParentItem();
-        while ($parentItem && $parentItem->getParentItem()) {
-            $rootItem = $parentItem;
-            $parentItem = $parentItem->getParentItem();
-        }
-
-        return $rootItem;
-    }
-
     public function setQuantity(int $quantity): CartItemInterface
     {
         $this->quantity = $quantity;
@@ -171,11 +160,6 @@ class CartItem extends BaseModel implements CartItemInterface
         $this->expires_at = $expiresAt;
 
         return $this;
-    }
-
-    public function getParentItem(): ?CartItemInterface
-    {
-        return $this->parent;
     }
 
     public function setParentItem(?CartItemInterface $parent): CartItemInterface

@@ -23,7 +23,6 @@ class TestCase extends BaseTestCase
             NovaPackageServiceProvider::class,
             SupportServiceProvider::class,
             LocationsServiceProvider::class,
-            PaymentsServiceProvider::class,
             AuthorizationServiceProvider::class,
             PermissionServiceProvider::class,
             CheckoutServiceProvider::class,
