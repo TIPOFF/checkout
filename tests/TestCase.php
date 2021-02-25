@@ -10,7 +10,6 @@ use Tipoff\Authorization\AuthorizationServiceProvider;
 use Tipoff\Checkout\CheckoutServiceProvider;
 use Tipoff\Checkout\Tests\Support\Providers\NovaPackageServiceProvider;
 use Tipoff\Locations\LocationsServiceProvider;
-use Tipoff\Payments\PaymentsServiceProvider;
 use Tipoff\Support\SupportServiceProvider;
 use Tipoff\TestSupport\BaseTestCase;
 

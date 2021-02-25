@@ -50,7 +50,6 @@ class CheckoutTest extends TestCase
         // - create order from cart
         // - associate payment with order
         DB::transaction(function () use ($user) {
-
             $cart = Cart::activeCart($user->id);
 
             // Final check all is good to go
