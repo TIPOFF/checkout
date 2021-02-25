@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tipoff\Discounts\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Tipoff\Checkout\Models\Order;
 use Tipoff\Checkout\Models\OrderItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
