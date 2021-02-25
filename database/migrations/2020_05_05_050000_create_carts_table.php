@@ -24,18 +24,16 @@ class CreateCartsTable extends Migration
             $table->unsignedInteger('shipping_discounts')->default(0);
 
             // Additional cart-level discounts not reflected in cart item discounts
-            $table->unsignedInteger('cart_discounts')->default(0);
+            $table->unsignedInteger('discounts')->default(0);
 
             // Accumulated cart-level credits from vouchers pending redemption
-            $table->unsignedInteger('cart_credits')->default(0);
+            $table->unsignedInteger('credits')->default(0);
 
             // Direct calculation from sum(amount)/sum(amount_discounts) in cart_items
-            // TODO - TBD - duplicate values for easy reporting?  Or always calculate?
             $table->unsignedInteger('item_amount')->default(0);
             $table->unsignedInteger('item_amount_discounts')->default(0);
 
             // Direct calculation from sum(tax) in cart_items
-            // TODO - TBD - duplicate values for easy reporting?  Or always calculate?
             $table->unsignedInteger('tax')->default(0);
 
             // Direct calculation as unique(location_id) from cart_items

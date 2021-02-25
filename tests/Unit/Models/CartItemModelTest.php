@@ -19,7 +19,7 @@ class CartItemModelTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        $cart = CartItem::factory()->withSellable($sellable)->create();
-        $this->assertNotNull($cart);
+        $model = CartItem::factory()->withSellable($sellable)->create();
+        $this->assertNotNull($model);
     }
 }

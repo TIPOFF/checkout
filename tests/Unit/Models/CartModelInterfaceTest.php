@@ -104,7 +104,7 @@ class CartModelInterfaceTest extends TestCase
         $cartItem = $cart->upsertItem($cartItem);
         $this->assertNotNull($cartItem->getId());
 
-        $this->assertCount(1, $cart->getCartItems());
+        $this->assertCount(1, $cart->getItems());
 
         Event::assertDispatched(CartItemCreated::class, 1);
         Event::assertNotDispatched(CartItemUpdated::class);
@@ -144,7 +144,7 @@ class CartModelInterfaceTest extends TestCase
         /** @var CartItem $cartItem */
         $cartItem = Cart::createItem($sellable, 'item-id', 1234, 2);
         $cart->upsertItem($cartItem);
-        $this->assertCount(1, $cart->getCartItems());
+        $this->assertCount(1, $cart->getItems());
 
         $this->expectException(CartNotValidException::class);
 
@@ -170,7 +170,7 @@ class CartModelInterfaceTest extends TestCase
             ->setParentItem($parent);
         $cart->upsertItem($child);
 
-        $this->assertCount(2, $cart->getCartItems());
+        $this->assertCount(2, $cart->getItems());
 
         Event::assertDispatched(CartItemCreated::class, 2);
         Event::assertNotDispatched(CartItemUpdated::class);
@@ -197,11 +197,11 @@ class CartModelInterfaceTest extends TestCase
             ->setParentItem($parent);
         $cart->upsertItem($child);
 
-        $this->assertCount(2, $cart->getCartItems());
+        $this->assertCount(2, $cart->getItems());
 
         $cart->removeItem($sellableParent, 'parent');
 
-        $this->assertCount(0, $cart->getCartItems());
+        $this->assertCount(0, $cart->getItems());
 
         Event::assertDispatched(CartItemRemoved::class, 2);
     }
@@ -227,11 +227,11 @@ class CartModelInterfaceTest extends TestCase
             ->setParentItem($parent);
         $cart->upsertItem($child);
 
-        $this->assertCount(2, $cart->getCartItems());
+        $this->assertCount(2, $cart->getItems());
 
         $cart->removeItem($sellableChild, 'item-id');
 
-        $this->assertCount(1, $cart->getCartItems());
+        $this->assertCount(1, $cart->getItems());
 
         Event::assertDispatched(CartItemRemoved::class, 1);
     }
@@ -284,16 +284,16 @@ class CartModelInterfaceTest extends TestCase
         $item2 = Cart::createItem($sellable, 'item', 1010);
         $item2 = $cart2->upsertItem($item2);
 
-        $this->assertCount(1, $cart1->getCartItems());
-        $this->assertCount(1, $cart2->getCartItems());
+        $this->assertCount(1, $cart1->getItems());
+        $this->assertCount(1, $cart2->getItems());
 
         $cart1->removeItem($sellable, 'item');
-        $this->assertCount(0, $cart1->getCartItems());
-        $this->assertCount(1, $cart2->getCartItems());
+        $this->assertCount(0, $cart1->getItems());
+        $this->assertCount(1, $cart2->getItems());
 
         $cart2->removeItem($sellable, 'item');
-        $this->assertCount(0, $cart1->getCartItems());
-        $this->assertCount(0, $cart2->getCartItems());
+        $this->assertCount(0, $cart1->getItems());
+        $this->assertCount(0, $cart2->getItems());
 
         Event::assertDispatched(CartItemRemoved::class, 2);
     }
@@ -309,13 +309,13 @@ class CartModelInterfaceTest extends TestCase
         $item1 = Cart::createItem($sellable, 'item', 1010);
         $cart1->upsertItem($item1);
 
-        $this->assertCount(1, $cart1->getCartItems());
+        $this->assertCount(1, $cart1->getItems());
 
         $cart1->removeItem($sellable, 'item1');
-        $this->assertCount(1, $cart1->getCartItems());
+        $this->assertCount(1, $cart1->getItems());
 
         $cart1->removeItem($sellable, 'item');
-        $this->assertCount(0, $cart1->getCartItems());
+        $this->assertCount(0, $cart1->getItems());
     }
 
     /** @test */
@@ -357,7 +357,7 @@ class CartModelInterfaceTest extends TestCase
         $item1 = Cart::createItem($sellable, 'item', 1010);
         $cart1->upsertItem($item1);
 
-        $this->assertCount(1, $cart1->getCartItems());
+        $this->assertCount(1, $cart1->getItems());
 
         $item = $cart1->findItem($sellable, 'item1');
         $this->assertNull($item);

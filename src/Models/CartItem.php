@@ -7,45 +7,23 @@ namespace Tipoff\Checkout\Models;
 use Assert\Assert;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
+use Tipoff\Checkout\Traits\IsItem;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
-use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Events\Checkout\CartItemRemoved;
 use Tipoff\Support\Models\BaseModel;
-use Tipoff\Support\Objects\DiscountableValue;
-use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasPackageFactory;
-use Tipoff\Support\Traits\HasUpdater;
 
 /**
- * @property int|null id
- * @property string item_id
- * @property Sellable sellable
- * @property string description
- * @property int quantity
- * @property DiscountableValue amount
- * @property int tax
- * @property string|null tax_code
- * @property array|null meta_data
  * @property Carbon expires_at
- * @property Carbon created_at
- * @property Carbon updated_at
  * // Raw Relation ID
  * @property int|null cart_id
- * @property int|null parent_id
- * @property int|null sellable_id
- * @property string|null sellable_type
  * @property int|null order_item_id
- * @property int|null location_id
- * @property int|null creator_id
- * @property int|null updater_id
  */
 class CartItem extends BaseModel implements CartItemInterface
 {
     use HasPackageFactory;
-    use HasCreator;
-    use HasUpdater;
+    use IsItem;
 
     protected $fillable = [
         'item_id',
@@ -69,7 +47,6 @@ class CartItem extends BaseModel implements CartItemInterface
         'sellable_id' => 'integer',
         'cart_id' => 'integer',
         'parent_id' => 'integer',
-        'order_item_id' => 'integer',
         'location_id' => 'integer',
         'creator_id' => 'integer',
         'updater_id' => 'integer',
@@ -98,37 +75,9 @@ class CartItem extends BaseModel implements CartItemInterface
         return $this->belongsTo(Cart::class);
     }
 
-    public function parent()
-    {
-        return $this->belongsTo(CartItem::class);
-    }
-
-    public function children()
-    {
-        return $this->hasMany(CartItem::class, 'parent_id', 'id');
-    }
-
-    public function orderItem()
-    {
-        return $this->hasOne(OrderItem::class);
-    }
-
-    public function sellable()
-    {
-        return $this->morphTo();
-    }
-
     //endregion
 
     //region SCOPES
-
-    public function scopeBySellableId(Builder $query, Sellable $sellable, string $itemId): Builder
-    {
-        return $query->where(function ($query) use ($sellable, $itemId) {
-            $query->where('sellable_type', '=', $sellable->getMorphClass());
-            $query->where('item_id', '=', $itemId);
-        });
-    }
 
     public function scopeActive(Builder $query, bool $isActive = true): Builder
     {
@@ -140,32 +89,14 @@ class CartItem extends BaseModel implements CartItemInterface
         return $this->scopeActive($query, false);
     }
 
-    public function scopeIsRootItem(Builder $query): Builder
-    {
-        return $query->whereNull('parent_id');
-    }
-
-    public function scopeIsChildItem(Builder $query): Builder
-    {
-        return $query->whereNotNull('parent_id');
-    }
-
     //endregion
-
-    public function delete()
-    {
-        // Delete children - this is recursive
-        $this->children()->get()->each->delete();
-
-        return parent::delete();
-    }
 
     public function isExpired(): bool
     {
         return $this->expires_at->isPast();
     }
 
-    //region CartItemInterface Implementation
+    //region INTERFACE IMPLEMENTATION
 
     public function getCart(): ?CartInterface
     {
@@ -183,31 +114,11 @@ class CartItem extends BaseModel implements CartItemInterface
         return $rootItem;
     }
 
-    public function getSellable(): Sellable
-    {
-        return $this->sellable;
-    }
-
-    public function getItemId(): string
-    {
-        return $this->item_id;
-    }
-
-    public function getQuantity(): int
-    {
-        return $this->quantity;
-    }
-
     public function setQuantity(int $quantity): CartItemInterface
     {
         $this->quantity = $quantity;
 
         return $this;
-    }
-
-    public function getDescription(): string
-    {
-        return $this->description;
     }
 
     public function setDescription(string $description): CartItemInterface
@@ -217,11 +128,6 @@ class CartItem extends BaseModel implements CartItemInterface
         return $this;
     }
 
-    public function getAmount(): DiscountableValue
-    {
-        return $this->amount;
-    }
-
     public function setAmount($amount): self
     {
         $this->amount = $amount;
@@ -229,9 +135,11 @@ class CartItem extends BaseModel implements CartItemInterface
         return $this;
     }
 
-    public function getLocationId(): ?int
+    public function setTax(int $tax): CartItemInterface
     {
-        return $this->location_id;
+        $this->tax = $tax;
+
+        return $this;
     }
 
     public function setLocationId(?int $locationId): CartItemInterface
@@ -243,11 +151,6 @@ class CartItem extends BaseModel implements CartItemInterface
         $this->location_id = $locationId;
 
         return $this;
-    }
-
-    public function getTaxCode(): ?string
-    {
-        return $this->tax_code;
     }
 
     public function setTaxCode(?string $taxCode): CartItemInterface
@@ -280,19 +183,6 @@ class CartItem extends BaseModel implements CartItemInterface
         Assert::that($parent->getId())->notNull();
 
         $this->parent()->associate($parent);
-
-        return $this;
-    }
-
-    public function getMetaData(?string $key, $default)
-    {
-        return Arr::get($this->meta_data, $key, $default);
-    }
-
-    public function setMetaData(?string $key, $value): CartItemInterface
-    {
-        $metaData = $this->meta_data ?? [];
-        $this->meta_data = Arr::set($metaData, $key, $value);
 
         return $this;
     }

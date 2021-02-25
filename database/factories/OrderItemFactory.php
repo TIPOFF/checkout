@@ -9,17 +9,19 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
+use Tipoff\Checkout\Models\Order;
+use Tipoff\Checkout\Models\OrderItem;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Objects\DiscountableValue;
 
-class CartItemFactory extends Factory
+class OrderItemFactory extends Factory
 {
-    protected $model = CartItem::class;
+    protected $model = OrderItem::class;
 
     public function definition()
     {
         return [
-            'cart_id' => randomOrCreate(Cart::class),
+            'order_id' => randomOrCreate(Order::class),
             'item_id' => $this->faker->unique()->asciify('********'),
             'description' => $this->faker->words(3, true),
             'quantity' => $this->faker->optional(0.5, 1)->numberBetween(1, 5),
@@ -39,15 +41,6 @@ class CartItemFactory extends Factory
             return [
                 'sellable_type' => $sellable->getMorphClass(),
                 'sellable_id' => $sellable->getKey(),
-            ];
-        });
-    }
-
-    public function active(bool $isActive = true): self
-    {
-        return $this->state(function (array $attributes) use ($isActive) {
-            return [
-                'expires_at' => $isActive ? Carbon::now()->addDays(3) : Carbon::now()->subDays(3),
             ];
         });
     }

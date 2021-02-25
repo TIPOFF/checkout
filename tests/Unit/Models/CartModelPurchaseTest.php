@@ -115,7 +115,7 @@ class CartModelPurchaseTest extends TestCase
             ]);
 
         $cart->updatePricing();
-        $cart->getCartItems()->first->setAmount(1234);
+        $cart->getItems()->first->setAmount(1234);
 
         $this->expectException(CartNotValidException::class);
         $cart->verifyPurchasable();

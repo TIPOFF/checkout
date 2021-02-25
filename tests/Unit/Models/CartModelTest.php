@@ -34,7 +34,7 @@ class CartModelTest extends TestCase
         /** @var Cart $cart */
         $cart = Cart::factory()->create();
 
-        $cartItems = $cart->getCartItems();
+        $cartItems = $cart->getItems();
         $this->assertCount(0, $cartItems);
 
         CartItem::factory()
@@ -46,7 +46,7 @@ class CartModelTest extends TestCase
 
         $cart->refresh();
 
-        $cartItems = $cart->getCartItems();
+        $cartItems = $cart->getItems();
         $this->assertCount(3, $cartItems);
     }
 }

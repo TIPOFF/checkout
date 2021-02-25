@@ -19,7 +19,7 @@
         "tipoff/authorization": "^1.0.1",
         "tipoff/locations": "^2.2.1",
         "tipoff/payments": "^2.0",
-        "tipoff/support": "dev-pdbreen/feature/checkout-interfaces as 1.4.4"
+        "tipoff/support": "dev-pdbreen/feature/order-interfaces as 1.4.6"
     },
     "require-dev": {
         "tipoff/test-support": "^1.0.5"
