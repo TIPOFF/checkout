@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Tests\Support\Traits;
 
-
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\TestSupport\Models\TestSellable;
