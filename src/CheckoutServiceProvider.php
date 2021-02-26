@@ -34,7 +34,7 @@ class CheckoutServiceProvider extends TipoffServiceProvider
             ->hasNovaResources([
                 \Tipoff\Checkout\Nova\Order::class,
             ])
-            ->hasRoute('api')
+            ->hasApiRoute('api')
             ->name('checkout')
             ->hasConfigFile();
     }
