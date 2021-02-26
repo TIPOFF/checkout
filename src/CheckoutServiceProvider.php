@@ -40,6 +40,7 @@ class CheckoutServiceProvider extends TipoffServiceProvider
                 Nova\Order::class,
                 Nova\OrderItem::class,
             ])
+            ->hasApiRoute('api')
             ->name('checkout')
             ->hasConfigFile();
     }
