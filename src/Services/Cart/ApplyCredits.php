@@ -16,6 +16,7 @@ class ApplyCredits
     public function __invoke(Cart $cart): Cart
     {
         if ($service = findService(VoucherInterface::class)) {
+            /** @var VoucherInterface $service */
             $this->resetCredits($cart)->calculateAdjustments($service, $cart);
         }
 

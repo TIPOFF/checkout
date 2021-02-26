@@ -16,6 +16,7 @@ class ApplyDiscounts
     public function __invoke(Cart $cart): Cart
     {
         if ($service = findService(DiscountInterface::class)) {
+            /** @var DiscountInterface $service */
             $this->resetDiscounts($cart)->calculateAdjustments($service, $cart);
         }
 

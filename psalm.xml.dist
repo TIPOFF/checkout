@@ -39,6 +39,7 @@
       <UndefinedMagicPropertyAssignment>
         <errorLevel type="suppress">
           <directory name="src/Models" />
+          <directory name="src/Services" />
         </errorLevel>
       </UndefinedMagicPropertyAssignment>
     </issueHandlers>
