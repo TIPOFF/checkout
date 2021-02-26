@@ -56,6 +56,7 @@ class Order extends BaseModel implements OrderInterface
         $order->shipping = $cart->getShipping();
         $order->item_amount = $cart->getItemAmount();
         $order->discounts = $cart->getDiscounts();
+        $order->credits = $cart->getCredits();
         $order->tax = $cart->getTax();
         $order->location_id = $cart->getLocationId();
         $order->save();

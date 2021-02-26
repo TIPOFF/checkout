@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
-use Tipoff\Checkout\Objects\CartPricingDetail;
+use Tipoff\Checkout\Objects\ContainerPricingDetail;
 use Tipoff\Checkout\Services\Cart\ApplyCode;
 use Tipoff\Checkout\Services\Cart\ApplyCredits;
 use Tipoff\Checkout\Services\Cart\ApplyDiscounts;
@@ -20,6 +20,7 @@ use Tipoff\Checkout\Services\Cart\ApplyTaxes;
 use Tipoff\Checkout\Services\Cart\CompletePurchase;
 use Tipoff\Checkout\Services\Cart\VerifyPurchasable;
 use Tipoff\Checkout\Services\CartItem\AddToCart;
+use Tipoff\Checkout\Services\CartItem\RemoveFromCart;
 use Tipoff\Checkout\Services\CartItem\UpdateInCart;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
@@ -62,6 +63,10 @@ class Cart extends BaseModel implements CartInterface
             Assert::lazy()
                 ->that($cart->user_id, 'user_id')->notEmpty('A cart must belong to a user.')
                 ->verifyNow();
+        });
+
+        static::saved(function (Cart $cart) {
+            CartUpdated::dispatch($cart);
         });
 
         static::deleting(function (Cart $cart) {
@@ -113,11 +118,6 @@ class Cart extends BaseModel implements CartInterface
     public function getBalanceDue(): int
     {
         return $this->getPricingDetail()->getBalanceDue();
-    }
-
-    public function getPricingDetail(): CartPricingDetail
-    {
-        return new CartPricingDetail($this);
     }
 
     protected function getCartTotal(): DiscountableValue
@@ -180,13 +180,13 @@ class Cart extends BaseModel implements CartInterface
     {
         // Model instance is required for morph
         if ($sellable instanceof Model) {
-            $item = (new CartItem([
-                'item_id' => $itemId,
-                'description' => $sellable->getDescription(),
-                'quantity' => $quantity,
-            ]))->setAmount($amount);
+            $item = new CartItem;
 
-            $item->sellable()->associate($sellable);
+            $item->item_id = $itemId;
+            $item->setDescription($sellable->getDescription())
+                ->setQuantity($quantity)
+                ->setAmount($amount)
+                ->setSellable($sellable);
 
             return $item;
         }
@@ -222,8 +222,6 @@ class Cart extends BaseModel implements CartInterface
         $this->load('cartItems');
         $this->updatePricing();
 
-        CartUpdated::dispatch($this);
-
         return $this;
     }
 
@@ -250,11 +248,6 @@ class Cart extends BaseModel implements CartInterface
 
         // Ensure credit remains valid for possible change in cart discount
         return $this->addCredits(0);
-    }
-
-    public function getCredits(): int
-    {
-        return $this->credits;
     }
 
     public function addCredits(int $value): CartInterface

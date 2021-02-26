@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Models\Traits;
 
 use Carbon\Carbon;
+use Tipoff\Checkout\Objects\ContainerPricingDetail;
 use Tipoff\Support\Contracts\Checkout\BaseItemInterface;
 use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasCreator;
@@ -14,6 +15,7 @@ use Tipoff\Support\Traits\HasUpdater;
  * @property int|null id
  * @property DiscountableValue $shipping
  * @property int discounts
+ * @property int credits
  * @property DiscountableValue $item_amount
  * @property int tax
  * @property Carbon created_at
@@ -54,6 +56,11 @@ trait IsItemContainer
     //endregion
 
     //region HELPERS
+
+    public function getPricingDetail(): ContainerPricingDetail
+    {
+        return new ContainerPricingDetail($this);
+    }
 
     protected function updateItemAmount(): self
     {
@@ -98,6 +105,11 @@ trait IsItemContainer
     public function getDiscounts(): int
     {
         return $this->discounts ?? 0;
+    }
+
+    public function getCredits(): int
+    {
+        return $this->credits ?? 0;
     }
 
     public function getLocationId(): ?int

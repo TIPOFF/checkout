@@ -7,8 +7,6 @@ namespace Tipoff\Checkout\Services\CartItem;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
-use Tipoff\Support\Events\Checkout\CartItemUpdated;
-use Tipoff\Support\Events\Checkout\CartUpdated;
 
 class UpdateInCart
 {
@@ -22,13 +20,10 @@ class UpdateInCart
         // Validate location is allowed
         $cart->setLocationId($cartItem->getLocationId());
 
-        CartItemUpdated::dispatch($cartItem);
         $cartItem->save();
 
         $cart->load('cartItems');
         $cart->updatePricing();
-
-        CartUpdated::dispatch($cart);
 
         return $cartItem->load('cart');
     }

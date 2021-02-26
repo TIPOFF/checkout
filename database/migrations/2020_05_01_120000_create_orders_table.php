@@ -25,6 +25,9 @@ class CreateOrdersTable extends Migration
             // Additional order-level discounts not reflected in order item discounts
             $table->unsignedInteger('discounts')->default(0);
 
+            // Credits applied from vouchers redemption
+            $table->unsignedInteger('credits')->default(0);
+
             // Direct calculation from sum(amount)/sum(amount_discounts) in order_items
             $table->unsignedInteger('item_amount')->default(0);
             $table->unsignedInteger('item_amount_discounts')->default(0);

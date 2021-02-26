@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Tipoff\Checkout\Models\Traits\IsItem;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
+use Tipoff\Support\Events\Checkout\CartItemCreated;
 use Tipoff\Support\Events\Checkout\CartItemRemoved;
+use Tipoff\Support\Events\Checkout\CartItemUpdated;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
@@ -24,13 +26,6 @@ class CartItem extends BaseModel implements CartItemInterface
 {
     use HasPackageFactory;
     use IsItem;
-
-    protected $fillable = [
-        'item_id',
-        'description',
-        'quantity',
-        'expires_at',
-    ];
 
     protected $touches = [
         'cart',
@@ -56,16 +51,21 @@ class CartItem extends BaseModel implements CartItemInterface
     {
         parent::boot();
 
+        static::creating(function (CartItem $item) {
+            $item->expires_at = $item->expires_at ?? Carbon::now()->addMonths(3);    // TODO - move default to const or config
+        });
+
+        static::creating(function (CartItem $item) {
+            CartItemCreated::dispatch($item);
+        });
+
+        static::updating(function (CartItem $item) {
+            CartItemUpdated::dispatch($item);
+        });
+
         static::deleting(function (CartItem $item) {
             CartItemRemoved::dispatch($item);
         });
-    }
-
-    public function __construct(array $attributes = [])
-    {
-        parent::__construct(array_merge([
-            'expires_at' => Carbon::now()->addMonths(3),    // TODO - move default to const or config
-        ], $attributes));
     }
 
     //region RELATIONSHIPS
@@ -93,7 +93,7 @@ class CartItem extends BaseModel implements CartItemInterface
 
     public function isExpired(): bool
     {
-        return $this->expires_at->isPast();
+        return $this->expires_at && $this->expires_at->isPast();
     }
 
     //region INTERFACE IMPLEMENTATION

@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Objects;
 
 use Tipoff\Checkout\Models\Cart;
+use Tipoff\Checkout\Models\Order;
 use Tipoff\Support\Objects\DiscountableValue;
 
-class CartPricingDetail
+class ContainerPricingDetail
 {
     private DiscountableValue $itemAmount;
     private DiscountableValue $shipping;
@@ -15,13 +16,16 @@ class CartPricingDetail
     private int $credits;
     private int $tax;
 
-    public function __construct(Cart $cart)
+    /**
+     * @param Cart|Order $container
+     */
+    public function __construct($container)
     {
-        $this->itemAmount = $cart->getItemAmount();
-        $this->shipping = $cart->getShipping();
-        $this->discounts = $cart->discounts ?? 0;
-        $this->credits = $cart->credits ?? 0;
-        $this->tax = $cart->tax ?? 0;
+        $this->itemAmount = $container->getItemAmount();
+        $this->shipping = $container->getShipping();
+        $this->discounts = $container->getDiscounts();
+        $this->credits = $container->getCredits();
+        $this->tax = $container->getTax();
     }
 
     public function getBalanceDue(): int
@@ -35,7 +39,7 @@ class CartPricingDetail
         return $balance->getDiscountedAmount();
     }
 
-    public function isEqual(CartPricingDetail $other): bool
+    public function isEqual(ContainerPricingDetail $other): bool
     {
         return $this->itemAmount->isEqual($other->itemAmount) &&
             $this->shipping->isEqual($other->shipping) &&
