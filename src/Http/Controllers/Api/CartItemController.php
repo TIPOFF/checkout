@@ -11,7 +11,6 @@ use Tipoff\Checkout\Http\Requests\CartItem\IndexCartItems;
 use Tipoff\Checkout\Http\Requests\CartItem\ShowCartItem;
 use Tipoff\Checkout\Http\Requests\CartItem\StoreCartItem;
 use Tipoff\Checkout\Http\Requests\CartItem\UpdateCartItem;
-use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Transformers\CartItemTransformer;
 use Tipoff\Support\Http\Controllers\Api\BaseApiController;
