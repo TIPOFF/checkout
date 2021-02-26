@@ -4,12 +4,8 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Services\Cart;
 
-use Illuminate\Support\Facades\DB;
-use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Models\Cart;
-use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Support\Contracts\Checkout\Vouchers\VoucherInterface;
-use Tipoff\Support\Events\Checkout\CartItemPurchaseVerification;
 
 class ApplyCredits
 {
@@ -36,5 +32,4 @@ class ApplyCredits
 
         return $this;
     }
-
 }
