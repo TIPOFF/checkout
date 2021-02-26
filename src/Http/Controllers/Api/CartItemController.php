@@ -27,8 +27,8 @@ class CartItemController extends BaseApiController
     public function index(IndexCartItems $request): JsonResponse
     {
         $cartItems = CartItem::paginate(
-                $request->getPageSize()
-            );
+            $request->getPageSize()
+        );
 
         return fractal($cartItems, $this->transformer)
             ->respond();
