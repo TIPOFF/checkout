@@ -9,15 +9,11 @@ use Illuminate\Support\Facades\Event;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
-use Tipoff\Checkout\Services\Cart\CompletePurchase;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\Support\Traits\InteractsWithCarts;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Events\Checkout\CartItemCreated;
 use Tipoff\Support\Events\Checkout\CartItemUpdated;
-use Tipoff\Support\Events\Checkout\OrderCreated;
-use Tipoff\Support\Events\Checkout\OrderItemCreated;
-use Tipoff\TestSupport\Models\User;
 
 class UpdateInCartTest extends TestCase
 {
