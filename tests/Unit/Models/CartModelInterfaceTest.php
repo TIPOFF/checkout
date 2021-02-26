@@ -6,7 +6,6 @@ namespace Tipoff\Checkout\Tests\Unit\Models;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
-use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -84,8 +83,6 @@ class CartModelInterfaceTest extends TestCase
         Event::assertDispatched(CartItemCreated::class, 1);
         Event::assertNotDispatched(CartItemUpdated::class);
     }
-
-
 
     /** @test */
     public function can_remove_linked_parent_from_cart()
