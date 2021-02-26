@@ -34,6 +34,7 @@
         <errorLevel type="suppress">
           <directory name="src/Models" />
           <directory name="src/Services" />
+          <directory name="src/Transformers" />
         </errorLevel>
       </UndefinedMagicPropertyFetch>
       <UndefinedMagicPropertyAssignment>

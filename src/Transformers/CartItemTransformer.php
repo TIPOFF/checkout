@@ -9,31 +9,25 @@ use Tipoff\Checkout\Models\CartItem;
 
 class CartItemTransformer extends TransformerAbstract
 {
-    /**
-     * List of resources to automatically include.
-     *
-     * @var array
-     */
     protected $defaultIncludes = [
-        //
     ];
 
-    /**
-     * List of resources possible to include.
-     *
-     * @var array
-     */
     protected $availableIncludes = [
-        //
     ];
 
-    /**
-     * A Fractal transformer.
-     *
-     * @return array
-     */
     public function transform(CartItem $cartItem)
     {
-        return $cartItem->toArray();
+        return [
+            'id' => $cartItem->id,
+            'item_id' => $cartItem->getItemId(),
+            'description' => $cartItem->getDescription(),
+            'quantity' => $cartItem->getQuantity(),
+            'amount' => $cartItem->getAmount()->getOriginalAmount(),
+            'amount_discounts' => $cartItem->getAmount()->getDiscounts(),
+            'tax' => $cartItem->getTax(),
+            'tax_code' => $cartItem->getTaxCode(),
+            'expires_at' => $cartItem->getExpiresAt(),
+            'location_id' => $cartItem->getLocationId(),
+        ];
     }
 }

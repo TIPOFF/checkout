@@ -15,7 +15,6 @@ class CartControllerTest extends TestCase
     /** @test */
     public function index()
     {
-        $this->logToStderr($this->app);
         $user = User::factory()->create();
 
         $this->actingAs($user);

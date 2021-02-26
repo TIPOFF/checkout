@@ -17,7 +17,6 @@ class OrderItemResourceTest extends TestCase
     /** @test */
     public function index()
     {
-        $this->logToStderr($this->app);
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 

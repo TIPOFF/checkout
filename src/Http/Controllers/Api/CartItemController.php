@@ -11,6 +11,7 @@ use Tipoff\Checkout\Http\Requests\CartItem\IndexCartItems;
 use Tipoff\Checkout\Http\Requests\CartItem\ShowCartItem;
 use Tipoff\Checkout\Http\Requests\CartItem\StoreCartItem;
 use Tipoff\Checkout\Http\Requests\CartItem\UpdateCartItem;
+use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Transformers\CartItemTransformer;
 use Tipoff\Support\Http\Controllers\Api\BaseApiController;
@@ -22,6 +23,8 @@ class CartItemController extends BaseApiController
     public function __construct(CartItemTransformer $transformer)
     {
         $this->transformer = $transformer;
+
+        $this->authorizeResource(CartItem::class, 'cartItem');
     }
 
     public function index(IndexCartItems $request): JsonResponse

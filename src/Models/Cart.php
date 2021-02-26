@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Models;
 
 use Assert\Assert;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,7 +30,6 @@ use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasPackageFactory;
 
 /**
- * @property int credits
  * // Relations
  * @property Order|null order
  * @property Collection cartItems
@@ -158,6 +158,11 @@ class Cart extends BaseModel implements CartInterface
     }
 
     //endregion
+
+    public function getExpiresAt(): ?Carbon
+    {
+        return $this->cartItems->min->expires_at;
+    }
 
     //region INTERFACE IMPLEMENTATION
 

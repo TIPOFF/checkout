@@ -16,7 +16,6 @@ class OrderResourceTest extends TestCase
     /** @test */
     public function index()
     {
-        $this->logToStderr($this->app);
         Order::factory()->count(4)->create();
 
         $this->actingAs(User::factory()->create());
