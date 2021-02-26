@@ -22,7 +22,7 @@
         "tipoff/fees": "^2.0",
         "tipoff/locations": "^2.2.1",
         "tipoff/payments": "^2.0",
-        "tipoff/scheduling": "^1.1",
+        "tipoff/scheduler": "^1.1",
         "tipoff/support": "^1.4.8",
         "tipoff/taxes": "^2.0.1"
     },
