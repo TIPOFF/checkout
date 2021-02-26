@@ -2,29 +2,14 @@
 
 declare(strict_types=1);
 
-
 namespace Tipoff\Checkout\Tests\Support\Models;
 
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
-use Tipoff\Support\Contracts\Sellable\Sellable;
-use Tipoff\Support\Models\BaseModel;
-use Tipoff\Support\Models\TestModelStub;
+use Tipoff\TestSupport\Models\TestSellable as BaseSellable;
 
-class TestSellable extends BaseModel implements Sellable
+class TestSellable extends BaseSellable
 {
-    use TestModelStub;
-
-    public function getMorphClass(): string
-    {
-        return get_class($this);
-    }
-
-    public function getDescription(): string
-    {
-        return 'Test Sellable';
-    }
-
     /**
      * Simulated API handler for converting form submission parameters into a cart item
      */
@@ -105,12 +90,5 @@ class TestSellable extends BaseModel implements Sellable
         }
 
         throw new \Exception('Checkout is not enabled');
-    }
-
-    private function getItemId(): string
-    {
-        // $itemId is a Sellable defined unique item identifier that is treated like a SKU
-        // in this example, we use the DB id for the Sellable - we wouldn't do this for a real Sellable
-        return (string) $this->getId();
     }
 }
