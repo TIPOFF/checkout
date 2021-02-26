@@ -10,21 +10,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
-use Tipoff\Checkout\Exceptions\InvalidDeductionCodeException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Checkout\Objects\CartPricingDetail;
+use Tipoff\Checkout\Services\Cart\ApplyCode;
+use Tipoff\Checkout\Services\Cart\ApplyCredits;
+use Tipoff\Checkout\Services\Cart\ApplyDiscounts;
+use Tipoff\Checkout\Services\Cart\ApplyTaxes;
 use Tipoff\Checkout\Services\Cart\CompletePurchase;
 use Tipoff\Checkout\Services\Cart\VerifyPurchasable;
+use Tipoff\Checkout\Services\CartItem\AddToCart;
+use Tipoff\Checkout\Services\CartItem\UpdateInCart;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
-use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
-use Tipoff\Support\Contracts\Checkout\Discounts\DiscountInterface;
-use Tipoff\Support\Contracts\Checkout\Vouchers\VoucherInterface;
 use Tipoff\Support\Contracts\Sellable\Sellable;
-use Tipoff\Support\Contracts\Taxes\TaxRequest;
-use Tipoff\Support\Events\Checkout\CartItemCreated;
-use Tipoff\Support\Events\Checkout\CartItemUpdated;
 use Tipoff\Support\Events\Checkout\CartUpdated;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Objects\DiscountableValue;
@@ -53,11 +52,6 @@ class Cart extends BaseModel implements CartInterface
         'location_id' => 'integer',
         'creator_id' => 'integer',
         'updater_id' => 'integer',
-    ];
-
-    private static array $deductionTypes = [
-        VoucherInterface::class,
-        DiscountInterface::class,
     ];
 
     public static function boot()
@@ -136,11 +130,6 @@ class Cart extends BaseModel implements CartInterface
 
     public function updatePricing(): self
     {
-        // Reset All
-        $this->resetDiscounts()
-            ->resetTaxes()
-            ->resetCredits();
-
         // Calculate ALl - order is important!
         $this->calculateDiscounts()
             ->calculateTaxes()
@@ -149,81 +138,23 @@ class Cart extends BaseModel implements CartInterface
         return $this->saveAll();
     }
 
-    protected function resetDiscounts(): self
-    {
-        if (findService(DiscountInterface::class)) {
-            $this->cartItems->each(function (CartItem $cartItem) {
-                $cartItem->setAmount($cartItem->getAmount()->reset());
-            });
-            $this->setShipping($this->getShipping()->reset());
-            $this->discounts = 0;
-        }
-
-        return $this->updateItemAmount();
-    }
-
-    protected function resetTaxes(): self
-    {
-        if (findService(TaxRequest::class)) {
-            $this->cartItems->each(function (CartItem $cartItem) {
-                $cartItem->tax = 0;
-            });
-        }
-
-        return $this->updateTax();
-    }
-
-    protected function resetCredits(): self
-    {
-        if (findService(VoucherInterface::class)) {
-            $this->credits = 0;
-        }
-
-        return $this;
-    }
-
     protected function calculateDiscounts(): self
     {
-        if ($service = findService(DiscountInterface::class)) {
-            /** @var DiscountInterface $service */
-            $service::calculateAdjustments($this);
-        }
+        app(ApplyDiscounts::class)($this);
 
         return $this->updateItemAmount();
     }
 
     protected function calculateTaxes(): self
     {
-        if ($service = findService(TaxRequest::class)) {
-            /** @var TaxRequest $service */
-            $taxRequest = $service::createTaxRequest();
-
-            $this->cartItems->each(function (CartItem $cartItem) use ($taxRequest) {
-                $taxRequest->createTaxRequestItem(
-                    $cartItem->getId(),
-                    $cartItem->getLocationId(),
-                    $cartItem->getTaxCode(),
-                    $cartItem->getAmount()->getDiscountedAmount()
-                );
-            });
-
-            $taxRequest->calculateTax();
-
-            $this->cartItems->each(function (CartItem $cartItem) use ($taxRequest) {
-                $taxRequest = $taxRequest->getTaxRequestItem($cartItem->getId());
-                $cartItem->setTax($taxRequest ? $taxRequest->getTax() : 0);
-            });
-        }
+        app(ApplyTaxes::class)($this);
 
         return $this->updateTax();
     }
 
     protected function calculateCredits(): self
     {
-        if ($service = findService(VoucherInterface::class)) {
-            /** @var VoucherInterface $service */
-            $service::calculateAdjustments($this);
-        }
+        app(ApplyCredits::class)($this);
 
         return $this;
     }
@@ -267,10 +198,10 @@ class Cart extends BaseModel implements CartInterface
     {
         if ($cartItem instanceof CartItem) {
             if ($cartItem->getCart()) {
-                return $this->updateItem($cartItem);
+                return app(UpdateInCart::class)($cartItem, $this);
             }
 
-            return $this->insertItem($cartItem);
+            return app(AddToCart::class)($cartItem, $this);
         }
 
         throw new CartNotValidException();
@@ -355,13 +286,7 @@ class Cart extends BaseModel implements CartInterface
 
     public function applyCode(string $code): CartInterface
     {
-        $deduction = $this->findDeductionByCode($code);
-
-        if (empty($deduction)) {
-            throw new InvalidDeductionCodeException($code);
-        }
-
-        $deduction->applyToCart($this);
+        app(ApplyCode::class)($this, $code);
 
         return $this->updatePricing();
     }
@@ -369,69 +294,6 @@ class Cart extends BaseModel implements CartInterface
     //endregion
 
     //region PROTECTED HELPERS
-
-    protected static function activeDeductions(): Collection
-    {
-        return collect(static::$deductionTypes)
-            ->filter(function (string $type) {
-                return app()->has($type);
-            })
-            ->map(function (string $type) {
-                return app($type);
-            });
-    }
-
-    protected function findDeductionByCode(string $code): ?CodedCartAdjustment
-    {
-        return static::activeDeductions()
-            ->first(function (CodedCartAdjustment $deduction) use ($code) {
-                return $deduction::findByCode($code);
-            });
-    }
-
-    protected function insertItem(CartItem $cartItem): CartItem
-    {
-        // Ensure item is unique
-        if ($this->findItem($cartItem->getSellable(), $cartItem->getItemId())) {
-            throw new CartNotValidException();
-        }
-
-        // Validate location is allowed
-        $this->setLocationId($cartItem->getLocationId());
-
-        $this->cartItems()->save($cartItem);
-
-        CartItemCreated::dispatch($cartItem);
-        $cartItem->save();
-
-        $this->load('cartItems');
-        $this->updatePricing();
-
-        CartUpdated::dispatch($this);
-
-        return $cartItem->load('cart');
-    }
-
-    protected function updateItem(CartItem $cartItem): CartItem
-    {
-        // Validate item already exists in is in this cart
-        if (! $cartItem->getCart() || ($cartItem->getCart()->getId() !== $this->id)) {
-            throw new CartNotValidException();
-        }
-
-        // Validate location is allowed
-        $this->setLocationId($cartItem->getLocationId());
-
-        CartItemUpdated::dispatch($cartItem);
-        $cartItem->save();
-
-        $this->load('cartItems');
-        $this->updatePricing();
-
-        CartUpdated::dispatch($this);
-
-        return $cartItem->load('cart');
-    }
 
     protected function saveAll(): self
     {
