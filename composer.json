@@ -18,16 +18,16 @@
         "php": "^7.4|^8.0",
         "tipoff/authorization": "^1.0.1",
         "tipoff/bookings": "^1.1",
-        "tipoff/escape-room": "^2.0",
+        "tipoff/escape-room": "^2.1",
         "tipoff/fees": "^2.0",
-        "tipoff/locations": "^2.1.1",
+        "tipoff/locations": "^2.2.1",
         "tipoff/payments": "^2.0",
         "tipoff/scheduling": "^1.1",
-        "tipoff/support": "dev-pdbreen/feature/api-support as 1.4.7",
+        "tipoff/support": "^1.4.8",
         "tipoff/taxes": "^2.0.1"
     },
     "require-dev": {
-        "tipoff/test-support": "^1.0.5"
+        "tipoff/test-support": "^1.0.6"
     },
     "autoload": {
         "psr-4": {
