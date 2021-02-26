@@ -27,7 +27,7 @@
         "tipoff/taxes": "^2.0.1"
     },
     "require-dev": {
-        "tipoff/test-support": "^1.0"
+        "tipoff/test-support": "^1.0.5"
     },
     "autoload": {
         "psr-4": {
