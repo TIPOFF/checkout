@@ -24,6 +24,7 @@ class CartTransformer extends TransformerAbstract
             'item_amount' => $cart->getItemAmount()->getDiscountedAmount(),
             'discounts' => $cart->getDiscounts(),
             'credits' => $cart->getCredits(),
+            'codes' => $cart->getCodes(),
             'tax' => $cart->getTax(),
             'user_id' => $cart->user_id,
             'expires_at' => $cart->getExpiresAt(),

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Tipoff\Checkout\Models\Traits\IsItem;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
+use Tipoff\Support\Contracts\Models\UserInterface;
 use Tipoff\Support\Events\Checkout\CartItemCreated;
 use Tipoff\Support\Events\Checkout\CartItemRemoved;
 use Tipoff\Support\Events\Checkout\CartItemUpdated;
@@ -18,9 +19,9 @@ use Tipoff\Support\Traits\HasPackageFactory;
 
 /**
  * @property Carbon expires_at
+ * @property Cart cart
  * // Raw Relation ID
  * @property int|null cart_id
- * @property int|null order_item_id
  */
 class CartItem extends BaseModel implements CartItemInterface
 {
@@ -87,6 +88,28 @@ class CartItem extends BaseModel implements CartItemInterface
     public function scopeExpired(Builder $query): Builder
     {
         return $this->scopeActive($query, false);
+    }
+
+    //endregion
+
+    //region PERMISSIONS
+
+    public function scopeVisibleBy(Builder $query, UserInterface $user): Builder
+    {
+        return $query->whereHas('cart', function (Builder $q) use ($user) {
+            $q->visibleBy($user);
+        });
+    }
+
+    public function isOwner(UserInterface $user): bool
+    {
+        if ($userId = $user->getId()) {
+            $cart = Cart::activeCart($userId);
+
+            return $this->cart_id === $cart->getId();
+        }
+
+        return false;
     }
 
     //endregion

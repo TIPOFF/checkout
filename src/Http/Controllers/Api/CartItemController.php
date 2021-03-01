@@ -23,12 +23,12 @@ class CartItemController extends BaseApiController
     {
         $this->transformer = $transformer;
 
-        $this->authorizeResource(CartItem::class, 'cartItem');
+        $this->authorizeResource(CartItem::class);
     }
 
     public function index(IndexCartItems $request): JsonResponse
     {
-        $cartItems = CartItem::paginate(
+        $cartItems = CartItem::query()->visibleBy($request->user())->paginate(
             $request->getPageSize()
         );
 
@@ -38,6 +38,7 @@ class CartItemController extends BaseApiController
 
     public function store(StoreCartItem $request): JsonResponse
     {
+        // TODO - update for new checkout
         $cartItem = CartItem::make($request->all());
         $cartItem->save();
 
@@ -53,6 +54,7 @@ class CartItemController extends BaseApiController
 
     public function update(UpdateCartItem $request, CartItem $cartItem): JsonResponse
     {
+        // TODO - update for new checkout
         $cartItem->fill($request->all())
             ->save();
 
@@ -61,7 +63,7 @@ class CartItemController extends BaseApiController
                 ->respond();
     }
 
-    public function destroy(DestroyCartItem $request, CartItem $cartItem): Response
+    public function destroy(DestroyCartItem $request, CartItem $cartItem): JsonResponse
     {
         if ($cartItem->delete()) {
             return $this->respondSuccess();

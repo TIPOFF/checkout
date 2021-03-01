@@ -19,7 +19,7 @@ class OrderPolicy
 
     public function view(UserInterface $user, Order $order): bool
     {
-        return $user->hasPermissionTo('view orders') ? true : false;
+        return $order->isOwner($user) || ($user->hasPermissionTo('view orders') ? true : false);
     }
 
     public function create(UserInterface $user): bool

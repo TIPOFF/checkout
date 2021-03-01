@@ -6,13 +6,16 @@ namespace Tipoff\Checkout\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
+use Tipoff\Checkout\Http\Requests\Cart\ApplyCodeRequest;
 use Tipoff\Checkout\Http\Requests\Cart\DestroyRequest;
-use Tipoff\Checkout\Http\Requests\Cart\ShowRequest;
+use Tipoff\Checkout\Http\Requests\Cart\PurchaseRequest;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Transformers\CartTransformer;
+use Tipoff\Checkout\Transformers\OrderTransformer;
 use Tipoff\Support\Http\Controllers\Api\BaseApiController;
 
-class CartController extends BaseApiController
+class CartApplyCodeController extends BaseApiController
 {
     protected CartTransformer $transformer;
 
@@ -21,22 +24,13 @@ class CartController extends BaseApiController
         $this->transformer = $transformer;
     }
 
-    public function show(ShowRequest $request): JsonResponse
+    public function __invoke(ApplyCodeRequest $request): JsonResponse
     {
-        $cart = $request->user() ? Cart::activeCart($request->user()->id) : null;
+        $cart = Cart::activeCart($request->user()->id);
+
+        $cart->applyCode($request->code);
 
         return fractal($cart, $this->transformer)
             ->respond();
-    }
-
-    public function destroy(DestroyRequest $request): JsonResponse
-    {
-        if ($request->user()) {
-            /** @var Cart $cart */
-            $cart = Cart::activeCart($request->user()->id);
-            $cart->delete();
-        }
-
-        return $this->respondSuccess();
     }
 }
