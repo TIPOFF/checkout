@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use Tipoff\Checkout\Http\Requests\Cart\DestroyCart;
 use Tipoff\Checkout\Http\Requests\Cart\ShowCart;
 use Tipoff\Checkout\Models\Cart;
@@ -29,7 +28,7 @@ class CartController extends BaseApiController
             ->respond();
     }
 
-    public function destroy(DestroyCart $request): Response
+    public function destroy(DestroyCart $request): JsonResponse
     {
         if ($request->user()) {
             /** @var Cart $cart */

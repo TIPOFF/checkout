@@ -21,8 +21,8 @@ class TestSellable extends BaseSellable
             $user = auth()->user();
             $cart = $service::activeCart($user->id);
 
-            // $amount is the total amount for the item - TODO / TBD - need to confirm if it should be price each
-            $amount = ($quantity * 1000);
+            // Amount Each
+            $amount = 1000;
 
             // Create a DETACHED item, chaining additional settings that may exist, but aren't required
             $item = $service::createItem($this, $this->getItemId(), $amount, $quantity)
@@ -47,12 +47,12 @@ class TestSellable extends BaseSellable
             $user = auth()->user();
             $cart = $service::activeCart($user->id);
 
-            // $amount is the total amount for the item - TODO / TBD - need to confirm if it should be price each
-            $amount = ($quantity * 1000);
+            // Amount Each
+            $amount = 1000;
 
             if ($item = $cart->findItem($this, $this->getItemId())) {
                 // Update core fields of existing item
-                $item->setAmount($amount)->setQuantity($quantity);
+                $item->setAmountEach($amount)->setQuantity($quantity);
             } else {
                 // Create new item with core values
                 $item = $service::createItem($this, $this->getItemId(), $amount, $quantity);

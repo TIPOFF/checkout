@@ -117,12 +117,12 @@ class VertifyPurchasableTest extends TestCase
             ->withSellable(TestSellable::factory()->create())
             ->active()
             ->create([
-                'amount' => 1000,
+                'amount_each' => 1000,
                 'cart_id' => $cart,
             ]);
 
         $cart->refresh()->updatePricing();
-        $cart->getItems()->first->setAmount(1234);
+        $cart->getItems()->first->setAmountEach(1234);
 
         $this->expectException(CartNotValidException::class);
 

@@ -33,12 +33,15 @@ class Order extends BaseModel implements OrderInterface
     protected $guarded = [
         'id',
         'order_number',
+        'item_amount_total',
+        'item_amount_total_discounts',
+        'tax',
     ];
 
     protected $casts = [
         'id' => 'integer',
         'shipping' => \Tipoff\Support\Casts\DiscountableValue::class,
-        'item_amount' => \Tipoff\Support\Casts\DiscountableValue::class,
+        'item_amount_total' => \Tipoff\Support\Casts\DiscountableValue::class,
         'discounts' => 'integer',
         'tax' => 'integer',
         'user_id' => 'integer',
@@ -54,7 +57,7 @@ class Order extends BaseModel implements OrderInterface
 
         $order->user()->associate($cart->user);
         $order->shipping = $cart->getShipping();
-        $order->item_amount = $cart->getItemAmount();
+        $order->item_amount_total = $cart->getItemAmountTotal();
         $order->discounts = $cart->getDiscounts();
         $order->credits = $cart->getCredits();
         $order->tax = $cart->getTax();

@@ -25,7 +25,7 @@ class OrderItemFactory extends Factory
             'item_id' => $this->faker->unique()->asciify('********'),
             'description' => $this->faker->words(3, true),
             'quantity' => $this->faker->optional(0.5, 1)->numberBetween(1, 5),
-            'amount' => (new DiscountableValue($this->faker->numberBetween(1000, 5000)))
+            'amount_each' => (new DiscountableValue($this->faker->numberBetween(1000, 5000)))
                 ->addDiscounts($this->faker->optional(0.5, 0)->numberBetween(500, 1000)),
             'tax' => $this->faker->optional(0.5, 0)->numberBetween(500, 1000),
             'location_id' => $this->faker->optional()->passthrough(randomOrCreate(app('location'))),

@@ -26,9 +26,11 @@ class CreateCartItemsTable extends Migration
             $table->unsignedInteger('quantity');
 
             // Field pair is handled together via cast to `DiscountableValue`
-            // TODO - TBD - is this price each?
-            $table->unsignedInteger('amount')->default(0);
-            $table->unsignedInteger('amount_discounts')->default(0);
+            $table->unsignedInteger('amount_each')->default(0);
+            $table->unsignedInteger('amount_each_discounts')->default(0);
+
+            $table->unsignedInteger('amount_total')->default(0);
+            $table->unsignedInteger('amount_total_discounts')->default(0);
 
             $table->unsignedInteger('tax')->default(0);
 
