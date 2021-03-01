@@ -44,7 +44,6 @@ class CartControllerTest extends TestCase
         $this->assertNotNull($cart->deleted_at);
     }
 
-
     /** @test */
     public function index_not_logged_in()
     {
