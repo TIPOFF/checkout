@@ -64,8 +64,8 @@ trait IsItemContainer
 
     protected function updateItemAmountTotal(): self
     {
-        $this->item_amount_total = $this->getItems()->reduce(function (DiscountableValue $itemAmount, BaseItemInterface $item) {
-            return $itemAmount->add($item->getAmountTotal());
+        $this->item_amount_total = $this->getItems()->reduce(function (DiscountableValue $itemAmountTotal, BaseItemInterface $item) {
+            return $itemAmountTotal->add($item->getAmountTotal());
         }, new DiscountableValue(0));
 
         return $this;
