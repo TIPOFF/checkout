@@ -15,7 +15,7 @@ class OrderModelTest extends TestCase
     /** @test */
     public function create()
     {
-        $cart = Order::factory()->create();
-        $this->assertNotNull($cart);
+        $model = Order::factory()->create();
+        $this->assertNotNull($model);
     }
 }

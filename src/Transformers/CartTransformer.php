@@ -9,45 +9,28 @@ use Tipoff\Checkout\Models\Cart;
 
 class CartTransformer extends TransformerAbstract
 {
-    /**
-     * List of resources to automatically include.
-     *
-     * @var array
-     */
     protected $defaultIncludes = [
-        //
     ];
 
-    /**
-     * List of resources possible to include.
-     *
-     * @var array
-     */
     protected $availableIncludes = [
         'cartItems',
     ];
 
-    /**
-     * A Fractal transformer.
-     *
-     * @return array
-     */
     public function transform(Cart $cart)
     {
         return [
-            'amount' => $cart->amount,
-            'total_taxes' => $cart->total_taxes,
-            'total_fees' => $cart->total_fees,
-            'total_deductions' => $cart->total_deductions,
-            'total_amount' => $cart->total_amount,
+            'id' => $cart->id,
+            'shipping' => $cart->getShipping()->getDiscountedAmount(),
+            'item_amount' => $cart->getItemAmount()->getDiscountedAmount(),
+            'discounts' => $cart->getDiscounts(),
+            'credits' => $cart->getCredits(),
+            'tax' => $cart->getTax(),
             'user_id' => $cart->user_id,
-            'expires_at' => $cart->expires_at,
+            'expires_at' => $cart->getExpiresAt(),
+            'location_id' => $cart->getLocationId(),
         ];
     }
 
-    /**
-     * Include cart items.
-     */
     public function includeCartItems(Cart $cart)
     {
         return $this->collection($cart->cartItems, new CartItemTransformer);

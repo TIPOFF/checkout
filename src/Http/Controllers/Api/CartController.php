@@ -23,7 +23,7 @@ class CartController extends BaseApiController
 
     public function show(ShowCart $request): JsonResponse
     {
-        $cart = Cart::activeCart($request->user()->id);
+        $cart = $request->user() ? Cart::activeCart($request->user()->id) : null;
 
         return fractal($cart, $this->transformer)
             ->respond();
@@ -31,7 +31,11 @@ class CartController extends BaseApiController
 
     public function destroy(DestroyCart $request): Response
     {
-        $request->user()->cart()->delete();
+        if ($request->user()) {
+            /** @var Cart $cart */
+            $cart = Cart::activeCart($request->user()->id);
+            $cart->delete();
+        }
 
         return $this->respondSuccess();
     }

@@ -12,10 +12,8 @@ Route::middleware(config('tipoff.api.middleware_group'))
     Route::get('cart', [CartController::class, 'show']);
     Route::delete('cart', [CartController::class, 'destroy']);
 
-    Route::resource('cart-items', CartItemController::class);
-
     // PROTECTED ROUTES
     Route::middleware(config('tipoff.api.auth_middleware'))->group(function () {
-
+        Route::resource('cart-items', CartItemController::class);
     });
 });

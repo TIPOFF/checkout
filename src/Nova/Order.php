@@ -54,9 +54,9 @@ class Order extends BaseResource
         return array_filter([
             ID::make()->sortable(),
             Text::make('Order Number')->sortable(),
-            nova('customer') ? BelongsTo::make('Customer', 'customer', nova('customer'))->sortable() : null,
+            nova('user') ? BelongsTo::make('Customer', 'user', nova('user'))->sortable() : null,
             nova('location') ? BelongsTo::make('Location', 'location', nova('location'))->sortable() : null,
-            Currency::make('Amount')->asMinorUnits()->sortable(),
+            Currency::make('Item Total', 'item_amount')->asMinorUnits()->sortable(),
             Date::make('Created', 'created_at')->sortable()->exceptOnForms(),
         ]);
     }
@@ -65,13 +65,12 @@ class Order extends BaseResource
     {
         return array_filter([
             Text::make('Order Number')->exceptOnForms(),
-            nova('customer') ? BelongsTo::make('Customer', 'customer', nova('customer'))->searchable()->withSubtitles() : null,
+            nova('user') ? BelongsTo::make('Customer', 'user', nova('user'))->searchable()->withSubtitles() : null,
             nova('location') ? BelongsTo::make('Location', 'location', nova('location')) : null,
-            Currency::make('Amount')->asMinorUnits()->exceptOnForms(),
-            Currency::make('Taxes', 'total_taxes')->asMinorUnits()->exceptOnForms(),
-            Currency::make('Fees', 'total_fees')->asMinorUnits()->exceptOnForms(),
-            nova('booking') ? HasMany::make('Bookings', 'bookings', nova('booking')) : null,
-            nova('voucher') ? HasMany::make('Purchased Vouchers', 'purchasedVouchers', nova('voucher')) : null,
+            Currency::make('Item Total', 'item_amount')->asMinorUnits()->exceptOnForms(),
+            Currency::make('Item Discounts', 'item_amount_discounts')->asMinorUnits()->exceptOnForms(),
+            Currency::make('Taxes', 'tax')->asMinorUnits()->exceptOnForms(),
+            HasMany::make('Items', 'orderItems', OrderItem::class),
             nova('payment') ? HasMany::make('Payments', 'payments', nova('payment')) : null,
             nova('invoice') ? HasMany::make('Invoices', 'invoices', nova('invoice')) : null,
             nova('discount') ? HasMany::make('Discounts', 'discounts', nova('discount')) : null,

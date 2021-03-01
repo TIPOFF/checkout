@@ -14,11 +14,6 @@ abstract class CartItemRequest extends BaseApiRequest
         return CartItem::class;
     }
 
-    public function authorize()
-    {
-        return false;
-    }
-
     public function rules()
     {
         return [];

@@ -22,6 +22,8 @@ class CartItemController extends BaseApiController
     public function __construct(CartItemTransformer $transformer)
     {
         $this->transformer = $transformer;
+
+        $this->authorizeResource(CartItem::class, 'cartItem');
     }
 
     public function index(IndexCartItems $request): JsonResponse
