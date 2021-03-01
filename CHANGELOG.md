@@ -31,3 +31,7 @@ All notable changes to `checkout` will be documented in this file.
 - add creator & updater to models
 - update location in order & cart migrations
 - update model policies
+
+## 2.2.0 - 2021-03-01
+
+- update migrations
