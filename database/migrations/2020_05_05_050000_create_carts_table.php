@@ -13,12 +13,9 @@ class CreateCartsTable extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            // TODO - TBD - status of customer vs user
             $table->foreignIdFor(app('user'));
 
             $table->foreignIdFor(Order::class)->nullable();
-
-            // TODO - TBD - how linkage for shipping address
 
             // Pair is handled as cast to `DiscountableValue`
             $table->unsignedInteger('shipping')->default(0);
@@ -30,9 +27,9 @@ class CreateCartsTable extends Migration
             // Accumulated cart-level credits from vouchers pending redemption
             $table->unsignedInteger('credits')->default(0);
 
-            // Direct calculation from sum(amount)/sum(amount_discounts) in cart_items
-            $table->unsignedInteger('item_amount')->default(0);
-            $table->unsignedInteger('item_amount_discounts')->default(0);
+            // Direct calculation from sum(amount_total) sum(amount_total_discounts) in cart_items
+            $table->unsignedInteger('item_amount_total')->default(0);
+            $table->unsignedInteger('item_amount_total_discounts')->default(0);
 
             // Direct calculation from sum(tax) in cart_items
             $table->unsignedInteger('tax')->default(0);

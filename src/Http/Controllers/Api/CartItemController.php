@@ -61,7 +61,7 @@ class CartItemController extends BaseApiController
                 ->respond();
     }
 
-    public function destroy(DestroyCartItem $request, CartItem $cartItem): Response
+    public function destroy(DestroyCartItem $request, CartItem $cartItem): JsonResponse
     {
         if ($cartItem->delete()) {
             return $this->respondSuccess();

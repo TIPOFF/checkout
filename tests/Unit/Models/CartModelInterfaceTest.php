@@ -39,8 +39,9 @@ class CartModelInterfaceTest extends TestCase
         $cartItem = Cart::createItem($sellable, 'item-id', 1234, 2);
 
         $this->assertEquals(2, $cartItem->getQuantity());
-        $this->assertEquals(1234, $cartItem->getAmount()->getOriginalAmount());
-        $this->assertEquals(0, $cartItem->getAmount()->getDiscounts());
+        $this->assertEquals(1234, $cartItem->getAmountEach()->getOriginalAmount());
+        $this->assertEquals(2468, $cartItem->getAmountTotal()->getOriginalAmount());
+        $this->assertEquals(0, $cartItem->getAmountTotal()->getDiscounts());
         $this->assertEquals('item-id', $cartItem->getItemId());
         $this->assertFalse($cartItem->isExpired());
         $this->assertEquals($sellable->getMorphClass(), $cartItem->getSellable()->getMorphClass());

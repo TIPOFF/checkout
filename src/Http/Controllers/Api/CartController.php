@@ -29,7 +29,7 @@ class CartController extends BaseApiController
             ->respond();
     }
 
-    public function destroy(DestroyCart $request): Response
+    public function destroy(DestroyCart $request): JsonResponse
     {
         if ($request->user()) {
             /** @var Cart $cart */

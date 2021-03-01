@@ -40,10 +40,17 @@ class Cart extends BaseModel implements CartInterface
     use SoftDeletes;
     use IsItemContainer;
 
+    protected $guarded = [
+        'id',
+        'item_amount_total',
+        'item_amount_total_discounts',
+        'tax',
+    ];
+
     protected $casts = [
         'id' => 'integer',
         'shipping' => \Tipoff\Support\Casts\DiscountableValue::class,
-        'item_amount' => \Tipoff\Support\Casts\DiscountableValue::class,
+        'item_amount_total' => \Tipoff\Support\Casts\DiscountableValue::class,
         'discounts' => 'integer',
         'credits' => 'integer',
         'tax' => 'integer',
@@ -122,7 +129,7 @@ class Cart extends BaseModel implements CartInterface
     {
         // Cart total includes cart discounts, but not cart credits
         // Shipping and taxes are also not included
-        return $this->getItemAmount()
+        return $this->getItemAmountTotal()
             ->addDiscounts($this->getDiscounts());
     }
 
@@ -140,7 +147,7 @@ class Cart extends BaseModel implements CartInterface
     {
         app(ApplyDiscounts::class)($this);
 
-        return $this->updateItemAmount();
+        return $this->updateItemAmountTotal();
     }
 
     protected function calculateTaxes(): self
@@ -188,8 +195,9 @@ class Cart extends BaseModel implements CartInterface
             $item->item_id = $itemId;
             $item->setDescription($sellable->getDescription())
                 ->setQuantity($quantity)
-                ->setAmount($amount)
+                ->setAmountEach($amount)
                 ->setSellable($sellable);
+            $item->updateCalculatedValues();
 
             return $item;
         }

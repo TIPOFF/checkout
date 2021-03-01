@@ -23,7 +23,7 @@ class ApplyDiscounts
     private function resetDiscounts(Cart $cart): self
     {
         $cart->cartItems->each(function (CartItem $cartItem) {
-            $cartItem->setAmount($cartItem->getAmount()->reset());
+            $cartItem->setAmountEach($cartItem->getAmountTotal()->reset());
         });
         $cart->setShipping($cart->getShipping()->reset());
         $cart->discounts = 0;
