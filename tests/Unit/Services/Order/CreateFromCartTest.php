@@ -12,7 +12,7 @@ use Tipoff\Checkout\Services\Order\CreateFromCart;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Objects\DiscountableValue;
-use Tipoff\TestSupport\Models\User;
+use Tipoff\Authorization\Models\User;
 
 class CreateFromCartTest extends TestCase
 {

@@ -13,7 +13,7 @@ use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Events\Checkout\OrderCreated;
 use Tipoff\Support\Events\Checkout\OrderItemCreated;
-use Tipoff\TestSupport\Models\User;
+use Tipoff\Authorization\Models\User;
 
 class CompletePurchaseTest extends TestCase
 {

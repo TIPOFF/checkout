@@ -16,12 +16,12 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "tipoff/authorization": "^2.0.1",
-        "tipoff/locations": "^2.3.0",
+        "tipoff/authorization": "dev-pdbreen/bugfix/fix-user-model as 2.0.1",
+        "tipoff/locations": "dev-pdbreen/bugfix/nullable-gmb-account",
         "tipoff/support": "^1.5.2"
     },
     "require-dev": {
-        "tipoff/test-support": "^1.0.9"
+        "tipoff/test-support": "dev-pdbreen/bugfix/allow-authorization-user"
     },
     "autoload": {
         "psr-4": {

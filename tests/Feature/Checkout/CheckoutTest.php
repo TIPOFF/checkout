@@ -14,7 +14,7 @@ use Tipoff\Support\Events\Checkout\CartItemCreated;
 use Tipoff\Support\Events\Checkout\CartItemPurchaseVerification;
 use Tipoff\Support\Events\Checkout\OrderCreated;
 use Tipoff\Support\Events\Checkout\OrderItemCreated;
-use Tipoff\TestSupport\Models\User;
+use Tipoff\Authorization\Models\User;
 
 class CheckoutTest extends TestCase
 {
