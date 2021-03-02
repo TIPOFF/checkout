@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Services\Order;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Models\OrderItem;
@@ -12,7 +13,6 @@ use Tipoff\Checkout\Services\Order\CreateFromCart;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Objects\DiscountableValue;
-use Tipoff\TestSupport\Models\User;
 
 class CreateFromCartTest extends TestCase
 {
@@ -86,7 +86,8 @@ class CreateFromCartTest extends TestCase
         /** @var OrderItem $orderItem */
         $orderItem = $order->getItems()->first();
         $this->assertEquals('item-id', $orderItem->getItemId());
-        $this->assertEquals(1234, $orderItem->getAmount()->getOriginalAmount());
+        $this->assertEquals(1234, $orderItem->getAmountEach()->getOriginalAmount());
+        $this->assertEquals(2468, $orderItem->getAmountTotal()->getOriginalAmount());
         $this->assertEquals(2, $orderItem->getQuantity());
         $this->assertEquals('ABC', $orderItem->getTaxCode());
         $this->assertEquals(456, $orderItem->getLocationId());
@@ -123,15 +124,15 @@ class CreateFromCartTest extends TestCase
 
         // Validate container
         $this->assertCount(3, $order->getItems());
-        $this->assertEquals(1200, $order->getItemAmount()->getOriginalAmount());
+        $this->assertEquals(1200, $order->getItemAmountTotal()->getOriginalAmount());
 
         // Validate items
         $orderItem = $order->findItem($sellable, 'parent');
         $this->assertEquals('parent', $orderItem->getItemId());
-        $this->assertEquals(1000, $orderItem->getAmount()->getOriginalAmount());
+        $this->assertEquals(1000, $orderItem->getAmountTotal()->getOriginalAmount());
 
         $orderItem = $order->findItem($sellable, 'child');
         $this->assertEquals('child', $orderItem->getItemId());
-        $this->assertEquals(200, $orderItem->getAmount()->getOriginalAmount());
+        $this->assertEquals(200, $orderItem->getAmountTotal()->getOriginalAmount());
     }
 }

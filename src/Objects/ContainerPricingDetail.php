@@ -21,7 +21,7 @@ class ContainerPricingDetail
      */
     public function __construct($container)
     {
-        $this->itemAmount = $container->getItemAmount();
+        $this->itemAmount = $container->getItemAmountTotal();
         $this->shipping = $container->getShipping();
         $this->discounts = $container->getDiscounts();
         $this->credits = $container->getCredits();

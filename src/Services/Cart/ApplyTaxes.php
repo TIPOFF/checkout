@@ -21,7 +21,7 @@ class ApplyTaxes
                     $cartItem->getId(),
                     $cartItem->getLocationId(),
                     $cartItem->getTaxCode(),
-                    $cartItem->getAmount()->getDiscountedAmount()
+                    $cartItem->getAmountTotal()->getDiscountedAmount()
                 );
             });
 

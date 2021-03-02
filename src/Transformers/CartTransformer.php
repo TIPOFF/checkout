@@ -21,7 +21,7 @@ class CartTransformer extends TransformerAbstract
         return [
             'id' => $cart->id,
             'shipping' => $cart->getShipping()->getDiscountedAmount(),
-            'item_amount' => $cart->getItemAmount()->getDiscountedAmount(),
+            'item_amount' => $cart->getItemAmountTotal()->getDiscountedAmount(),
             'discounts' => $cart->getDiscounts(),
             'credits' => $cart->getCredits(),
             'codes' => $cart->getCodes(),

@@ -6,6 +6,7 @@ namespace Tipoff\Checkout\Tests\Unit\Services\Cart;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Services\Cart\CompletePurchase;
@@ -13,7 +14,6 @@ use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Events\Checkout\OrderCreated;
 use Tipoff\Support\Events\Checkout\OrderItemCreated;
-use Tipoff\TestSupport\Models\User;
 
 class CompletePurchaseTest extends TestCase
 {

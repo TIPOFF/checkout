@@ -32,9 +32,16 @@ class CartItem extends BaseModel implements CartItemInterface
         'cart',
     ];
 
+    protected $guarded = [
+        'id',
+        'amount_total',
+        'amount_total_discounts',
+    ];
+
     protected $casts = [
         'id' => 'integer',
-        'amount' => \Tipoff\Support\Casts\DiscountableValue::class,
+        'amount_each' => \Tipoff\Support\Casts\DiscountableValue::class,
+        'amount_total' => \Tipoff\Support\Casts\DiscountableValue::class,
         'quantity' => 'integer',
         'tax' => 'integer',
         'meta_data' => 'json',
@@ -140,9 +147,9 @@ class CartItem extends BaseModel implements CartItemInterface
         return $this;
     }
 
-    public function setAmount($amount): self
+    public function setAmountEach($amount): self
     {
-        $this->amount = $amount;
+        $this->amount_each = $amount;
 
         return $this;
     }

@@ -26,9 +26,16 @@ class OrderItem extends BaseModel implements OrderItemInterface
         'order',
     ];
 
+    protected $guarded = [
+        'id',
+        'amount_total',
+        'amount_total_discounts',
+    ];
+
     protected $casts = [
         'id' => 'integer',
-        'amount' => \Tipoff\Support\Casts\DiscountableValue::class,
+        'amount_each' => \Tipoff\Support\Casts\DiscountableValue::class,
+        'amount_total' => \Tipoff\Support\Casts\DiscountableValue::class,
         'quantity' => 'integer',
         'tax' => 'integer',
         'meta_data' => 'json',
@@ -54,7 +61,7 @@ class OrderItem extends BaseModel implements OrderItemInterface
         // Fields
         $orderItem->item_id = $cartItem->getItemId();
         $orderItem->description = $cartItem->getDescription();
-        $orderItem->amount = $cartItem->getAmount();
+        $orderItem->amount_each = $cartItem->getAmountEach();
         $orderItem->quantity = $cartItem->getQuantity();
         $orderItem->tax = $cartItem->getTax();
         $orderItem->tax_code = $cartItem->getTaxCode();

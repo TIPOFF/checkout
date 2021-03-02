@@ -13,10 +13,10 @@ use Tipoff\Support\Traits\HasUpdater;
 
 /**
  * @property int|null id
- * @property DiscountableValue $shipping
+ * @property DiscountableValue shipping
  * @property int discounts
  * @property int credits
- * @property DiscountableValue $item_amount
+ * @property DiscountableValue $item_amount_total
  * @property int tax
  * @property Carbon created_at
  * @property Carbon updated_at
@@ -62,10 +62,10 @@ trait IsItemContainer
         return new ContainerPricingDetail($this);
     }
 
-    protected function updateItemAmount(): self
+    protected function updateItemAmountTotal(): self
     {
-        $this->item_amount = $this->getItems()->reduce(function (DiscountableValue $itemAmount, BaseItemInterface $item) {
-            return $itemAmount->add($item->getAmount());
+        $this->item_amount_total = $this->getItems()->reduce(function (DiscountableValue $itemAmountTotal, BaseItemInterface $item) {
+            return $itemAmountTotal->add($item->getAmountTotal());
         }, new DiscountableValue(0));
 
         return $this;
@@ -80,16 +80,16 @@ trait IsItemContainer
 
     protected function updateCalculatedValues(): self
     {
-        return $this->updateItemAmount()->updateTax();
+        return $this->updateItemAmountTotal()->updateTax();
     }
 
     //endregion
 
     //region INTERFACE IMPLEMENTATION
 
-    public function getItemAmount(): DiscountableValue
+    public function getItemAmountTotal(): DiscountableValue
     {
-        return $this->item_amount ?? new DiscountableValue(0);
+        return $this->item_amount_total ?? new DiscountableValue(0);
     }
 
     public function getTax(): int

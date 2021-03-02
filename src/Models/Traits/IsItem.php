@@ -19,7 +19,8 @@ use Tipoff\Support\Traits\HasUpdater;
  * @property Sellable sellable
  * @property string description
  * @property int quantity
- * @property DiscountableValue amount
+ * @property DiscountableValue amount_total
+ * @property DiscountableValue amount_each
  * @property int tax
  * @property string|null tax_code
  * @property array|null meta_data
@@ -41,6 +42,13 @@ trait IsItem
 {
     use HasCreator;
     use HasUpdater;
+
+    protected static function bootIsItem()
+    {
+        static::saving(function ($model) {
+            $model->updateCalculatedValues();
+        });
+    }
 
     //region RELATIONSHIPS
 
@@ -96,6 +104,18 @@ trait IsItem
         return parent::delete();
     }
 
+    protected function updateAmountTotal(): self
+    {
+        $this->amount_total = $this->getAmountEach()->multiply($this->getQuantity());
+
+        return $this;
+    }
+
+    public function updateCalculatedValues(): self
+    {
+        return $this->updateAmountTotal();
+    }
+
     //region INTERFACE IMPLEMENTATION
 
     public function getSellable(): Sellable
@@ -141,9 +161,14 @@ trait IsItem
         return $this->description;
     }
 
-    public function getAmount(): DiscountableValue
+    public function getAmountEach(): DiscountableValue
     {
-        return $this->amount ?? new DiscountableValue(0);
+        return $this->amount_each ?? new DiscountableValue(0);
+    }
+
+    public function getAmountTotal(): DiscountableValue
+    {
+        return $this->amount_total ?? new DiscountableValue(0);
     }
 
     public function getTax(): int

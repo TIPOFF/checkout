@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Feature\Checkout;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
-use Tipoff\TestSupport\Models\User;
 
 class CartTest extends TestCase
 {
