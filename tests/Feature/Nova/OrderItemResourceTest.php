@@ -17,14 +17,12 @@ class OrderItemResourceTest extends TestCase
     /** @test */
     public function index()
     {
-        $this->markTestSkipped('NEED TO PERMISSION REAL AUTH USER PROPERLY NOW');
-
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
         OrderItem::factory()->count(4)->withSellable($sellable)->create();
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(self::createPermissionedUser('view order items', true));
 
         $response = $this->getJson('nova-api/order-items')
             ->assertOk();

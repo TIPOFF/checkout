@@ -20,6 +20,7 @@ use Tipoff\Support\Traits\HasPackageFactory;
 /**
  * @property string order_number
  * // Relations
+ * @property Cart cart
  * @property Collection orderItems
  * @property Collection invoices
  * @property Collection payments
@@ -102,7 +103,7 @@ class Order extends BaseModel implements OrderInterface
 
     public function cart()
     {
-        return $this->hasOne(Order::class);
+        return $this->hasOne(Cart::class);
     }
 
     public function purchasedVouchers()

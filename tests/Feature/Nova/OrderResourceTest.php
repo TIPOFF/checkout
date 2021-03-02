@@ -16,11 +16,9 @@ class OrderResourceTest extends TestCase
     /** @test */
     public function index()
     {
-        $this->markTestSkipped('NEED TO PERMISSION REAL AUTH USER PROPERLY NOW');
-
         Order::factory()->count(4)->create();
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(self::createPermissionedUser('view orders', true));
 
         $response = $this->getJson('nova-api/orders')
             ->assertOk();
