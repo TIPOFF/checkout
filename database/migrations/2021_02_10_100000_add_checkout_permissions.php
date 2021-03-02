@@ -2,23 +2,16 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Migrations\Migration;
-use Spatie\Permission\Contracts\Permission;
-use Spatie\Permission\PermissionRegistrar;
+use Tipoff\Authorization\Permissions\BasePermissionsMigration;
 
-class AddCheckoutPermissions extends Migration
+class AddCheckoutPermissions extends BasePermissionsMigration
 {
     public function up()
     {
-        if (app()->has(Permission::class)) {
-            app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-            foreach ([
-                         'view orders',
-                         'view order items',
-                     ] as $name) {
-                app(Permission::class)::findOrCreate($name, null);
-            };
-        }
+        $permissions = [
+            'view orders',
+            'view order items',
+        ];
+        $this->createPermissions($permissions);
     }
 }
