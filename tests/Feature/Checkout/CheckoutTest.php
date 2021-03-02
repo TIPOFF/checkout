@@ -7,6 +7,7 @@ namespace Tipoff\Checkout\Tests\Feature\Checkout;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
@@ -14,7 +15,6 @@ use Tipoff\Support\Events\Checkout\CartItemCreated;
 use Tipoff\Support\Events\Checkout\CartItemPurchaseVerification;
 use Tipoff\Support\Events\Checkout\OrderCreated;
 use Tipoff\Support\Events\Checkout\OrderItemCreated;
-use Tipoff\TestSupport\Models\User;
 
 class CheckoutTest extends TestCase
 {

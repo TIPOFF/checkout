@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Services\Order;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Models\OrderItem;
@@ -12,7 +13,6 @@ use Tipoff\Checkout\Services\Order\CreateFromCart;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Objects\DiscountableValue;
-use Tipoff\TestSupport\Models\User;
 
 class CreateFromCartTest extends TestCase
 {
