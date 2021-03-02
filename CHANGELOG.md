@@ -35,3 +35,7 @@ All notable changes to `checkout` will be documented in this file.
 ## 2.2.0 - 2021-03-01
 
 - update migrations
+
+## 2.2.1 - 2021-03-01
+
+- use tipoff/authorization user
