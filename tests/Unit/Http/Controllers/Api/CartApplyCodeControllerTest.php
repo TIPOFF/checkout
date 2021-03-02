@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Http\Controllers\Api;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
 use Tipoff\Support\Contracts\Checkout\Discounts\DiscountInterface;
-use Tipoff\Authorization\Models\User;
 
 class CartApplyCodeControllerTest extends TestCase
 {
