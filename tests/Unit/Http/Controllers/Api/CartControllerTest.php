@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Http\Controllers\Api;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Tipoff\Checkout\Models\Cart;
 use Tipoff\Authorization\Models\User;
+use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Tests\TestCase;
 
 class CartControllerTest extends TestCase
