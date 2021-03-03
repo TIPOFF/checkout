@@ -14,7 +14,6 @@ use Tipoff\Checkout\Services\Cart\VerifyPurchasable;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Events\Checkout\CartItemPurchaseVerification;
-use Tipoff\Support\Objects\DiscountableValue;
 
 class VertifyPurchasableTest extends TestCase
 {

@@ -6,10 +6,10 @@ namespace Tipoff\Checkout\Tests\Unit\Http\Controllers\Api;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
-use Tipoff\Authorization\Models\User;
 
 class CartPurchaseControllerTest extends TestCase
 {

@@ -36,7 +36,7 @@ class CartDeductionsTest extends TestCase
         $view = $this->blade(
             '<x-tipoff-cart-deductions :deductions="$deductions" />',
             ['deductions' => [
-                $this->mockAdjustment('ABCD', 1234)
+                $this->mockAdjustment('ABCD', 1234),
             ]]
         );
 
