@@ -6,7 +6,7 @@ namespace Tipoff\Checkout\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Tipoff\Checkout\Http\Requests\Cart\PurchaseRequest;
+use Tipoff\Checkout\Http\Requests\Api\Cart\PurchaseRequest;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Transformers\OrderTransformer;
 use Tipoff\Support\Http\Controllers\Api\BaseApiController;

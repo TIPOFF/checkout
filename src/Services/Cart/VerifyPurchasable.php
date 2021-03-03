@@ -21,6 +21,8 @@ class VerifyPurchasable
     public function __invoke(Cart $cart): Cart
     {
         DB::transaction(function () use ($cart) {
+            $cart->load('cartItems');
+
             $this->verifyNotEmpty($cart)
                 ->verifyNoExpiredItems($cart)
                 ->verifyItems($cart)
@@ -34,7 +36,7 @@ class VerifyPurchasable
     {
         // Must have at least one item
         if ($cart->cartItems->isEmpty()) {
-            throw new CartNotValidException();
+            throw CartNotValidException::cartIsEmpty();
         }
 
         return $this;
@@ -44,7 +46,7 @@ class VerifyPurchasable
     {
         // All items must be active
         if ($cart->cartItems->first->isExpired()) {
-            throw new CartNotValidException();
+            throw CartNotValidException::cartHasExpiredItems();
         }
 
         return $this;
@@ -54,7 +56,11 @@ class VerifyPurchasable
     {
         // Dispatch events to ensure all items remain purchasable
         $cart->cartItems->each(function (CartItem $cartItem) {
-            CartItemPurchaseVerification::dispatch($cartItem);
+            try {
+                CartItemPurchaseVerification::dispatch($cartItem);
+            } catch (\Throwable $ex) {
+                throw CartNotValidException::itemException($ex);
+            }
         });
 
         return $this;
@@ -66,7 +72,7 @@ class VerifyPurchasable
         $originalTotal = $cart->getPricingDetail();
         $cart->updatePricing();
         if (! $originalTotal->isEqual($cart->getPricingDetail())) {
-            throw new CartNotValidException();
+            throw CartNotValidException::pricingHasChanged();
         }
 
         return $this;

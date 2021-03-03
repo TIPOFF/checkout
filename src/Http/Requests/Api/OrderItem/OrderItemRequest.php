@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\Http\Requests\OrderItem;
+namespace Tipoff\Checkout\Http\Requests\Api\OrderItem;
 
 use Tipoff\Checkout\Models\OrderItem;
 use Tipoff\Support\Http\Requests\BaseApiRequest;

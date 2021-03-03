@@ -4,34 +4,24 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Transformers;
 
-use League\Fractal\TransformerAbstract;
 use Tipoff\Checkout\Models\Order;
+use Tipoff\Support\Transformers\BaseTransformer;
 
-class OrderTransformer extends TransformerAbstract
+class OrderTransformer extends BaseItemContainerTransformer
 {
-    protected $defaultIncludes = [
-    ];
-
-    protected $availableIncludes = [
-        'orderItems',
-    ];
-
-    public function transform(Order $order)
+    public function getItemTransformer(): BaseTransformer
     {
-        return [
-            'id' => $order->id,
-            'shipping' => $order->getShipping()->getDiscountedAmount(),
-            'item_amount' => $order->getItemAmount()->getDiscountedAmount(),
-            'discounts' => $order->getDiscounts(),
-            'credits' => $order->getCredits(),
-            'tax' => $order->getTax(),
-            'user_id' => $order->user_id,
-            'location_id' => $order->getLocationId(),
-        ];
+        return new OrderItemTransformer();
     }
 
-    public function includeOrderItems(Order $order)
+    /**
+     * @inheritDoc
+     */
+    public function transform($order)
     {
-        return $this->collection($order->orderItems, new OrderItemTransformer);
+        /** @var Order $order */
+        return array_merge(parent::transform($order), [
+            'order_number' => $order->getOrderNumber(),
+        ]);
     }
 }

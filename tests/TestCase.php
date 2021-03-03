@@ -27,4 +27,5 @@ class TestCase extends BaseTestCase
             CheckoutServiceProvider::class,
         ];
     }
+
 }

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
-use Tipoff\Checkout\Http\Requests\OrderItem\IndexRequest;
-use Tipoff\Checkout\Http\Requests\OrderItem\ShowRequest;
+use Tipoff\Checkout\Http\Requests\Api\OrderItem\IndexRequest;
+use Tipoff\Checkout\Http\Requests\Api\OrderItem\ShowRequest;
 use Tipoff\Checkout\Models\OrderItem;
 use Tipoff\Checkout\Transformers\OrderItemTransformer;
 use Tipoff\Support\Http\Controllers\Api\BaseApiController;
