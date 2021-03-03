@@ -7,6 +7,7 @@ namespace Tipoff\Checkout\Models\Traits;
 use Carbon\Carbon;
 use Tipoff\Checkout\Objects\ContainerPricingDetail;
 use Tipoff\Support\Contracts\Checkout\BaseItemInterface;
+use Tipoff\Support\Contracts\Models\UserInterface;
 use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasUpdater;
@@ -86,6 +87,11 @@ trait IsItemContainer
     //endregion
 
     //region INTERFACE IMPLEMENTATION
+
+    public function getUser(): UserInterface
+    {
+        return $this->user;
+    }
 
     public function getItemAmountTotal(): DiscountableValue
     {
