@@ -20,7 +20,7 @@ class OrderPolicyTest extends TestCase
         $this->assertTrue($user->can('viewAny', Order::class));
 
         $user = self::createPermissionedUser('view orders', false);
-        $this->assertFalse($user->can('viewAny', Order::class));
+        $this->assertTrue($user->can('viewAny', Order::class));
     }
 
     /**

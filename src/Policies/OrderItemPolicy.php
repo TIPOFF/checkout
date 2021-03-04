@@ -14,12 +14,12 @@ class OrderItemPolicy
 
     public function viewAny(UserInterface $user): bool
     {
-        return $user->hasPermissionTo('view order items') ? true : false;
+        return true;
     }
 
     public function view(UserInterface $user, OrderItem $orderItem): bool
     {
-        return $user->hasPermissionTo('view order items') ? true : false;
+        return $orderItem->isOwner($user) || ($user->hasPermissionTo('view order items') ? true : false);
     }
 
     public function create(UserInterface $user): bool

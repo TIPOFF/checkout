@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Http\Requests\Api\CartItem;
 
-class ShowCartItem extends CartItemRequest
+class ShowRequest extends CartItemRequest
 {
 }

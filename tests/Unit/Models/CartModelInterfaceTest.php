@@ -6,6 +6,7 @@ namespace Tipoff\Checkout\Tests\Unit\Models;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
+use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -169,6 +170,94 @@ class CartModelInterfaceTest extends TestCase
         $cart->delete();
 
         Event::assertDispatched(CartItemRemoved::class, 2);
+    }
+
+    /** @test */
+    public function can_locate_root_and_parent()
+    {
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create();
+
+        $sellable = TestSellable::factory()->create();
+
+        /** @var CartItem $itemA */
+        $itemA = Cart::createItem($sellable, 'A', 100);
+        $itemA = $cart->upsertItem($itemA);
+
+        /** @var CartItem $itemB */
+        $itemB = Cart::createItem($sellable, 'B', 200)
+            ->setParentItem($itemA);
+        $itemB = $cart->upsertItem($itemB);
+
+        /** @var CartItem $itemC */
+        $itemC = Cart::createItem($sellable, 'C', 200)
+            ->setParentItem($itemB);
+        $itemC = $cart->upsertItem($itemC);
+
+        /** @var CartItem $itemD */
+        $itemD = Cart::createItem($sellable, 'D', 200)
+            ->setParentItem($itemB);
+        $itemD = $cart->upsertItem($itemD);
+
+        $itemA->refresh();
+        $itemB->refresh();
+        $itemC->refresh();
+        $itemD->refresh();
+
+        $this->assertEquals($itemB->getId(), $itemD->getParentItem()->getId());
+        $this->assertEquals($itemB->getId(), $itemC->getParentItem()->getId());
+        $this->assertEquals($itemA->getId(), $itemB->getParentItem()->getId());
+        $this->assertNull($itemA->getParentItem());
+
+        $this->assertEquals($itemA->getId(), $itemD->getRootItem()->getId());
+        $this->assertEquals($itemA->getId(), $itemC->getRootItem()->getId());
+        $this->assertEquals($itemA->getId(), $itemB->getRootItem()->getId());
+        $this->assertNull($itemA->getRootItem());
+    }
+
+    /** @test */
+    public function location_propogates_to_cart()
+    {
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create();
+
+        $sellable = TestSellable::factory()->create();
+
+        /** @var CartItem $item */
+        $item = Cart::createItem($sellable, 'A', 100);
+        $cart->upsertItem($item);
+
+        $this->assertNull($cart->getLocationId());
+
+        $item = Cart::createItem($sellable, 'B', 100)
+            ->setLocationId(1);
+        $cart->upsertItem($item);
+
+        $this->assertEquals(1, $cart->getLocationId());
+    }
+
+    /** @test */
+    public function items_must_be_from_same_location()
+    {
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create();
+
+        $sellable = TestSellable::factory()->create();
+
+        /** @var CartItem $item */
+        $item = Cart::createItem($sellable, 'B', 100)
+            ->setLocationId(1);
+        $cart->upsertItem($item);
+
+        $item = Cart::createItem($sellable, 'A', 100);
+        $cart->upsertItem($item);
+
+        $this->expectException(MultipleLocationException::class);
+        $this->expectExceptionMessage('Cart must contain items from single location.');
+
+        $item = Cart::createItem($sellable, 'C', 100)
+            ->setLocationId(2);
+        $cart->upsertItem($item);
     }
 
     /** @test */

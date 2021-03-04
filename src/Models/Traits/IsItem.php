@@ -137,10 +137,9 @@ trait IsItem
 
     public function getRootItem()
     {
-        $rootItem = $parentItem = $this->getParentItem();
-        while ($parentItem && $parentItem->getParentItem()) {
-            $rootItem = $parentItem;
-            $parentItem = $parentItem->getParentItem();
+        $rootItem = $this->getParentItem();
+        while ($rootItem && $rootItem->getParentItem()) {
+            $rootItem = $rootItem->getParentItem();
         }
 
         return $rootItem;

@@ -6,6 +6,7 @@ namespace Tipoff\Checkout\Tests\Unit\Http\Controllers\Api;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Symfony\Component\HttpFoundation\Response;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -16,6 +17,28 @@ class CartPurchaseControllerTest extends TestCase
     use DatabaseTransactions;
 
     /** @test */
+    public function simple_purchase()
+    {
+        TestSellable::createTable();
+        $sellable = TestSellable::factory()->create();
+
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $this->postJson('tipoff/cart-items', [
+            'sellable_type' => get_class($sellable),
+            'sellable_id' => $sellable->id,
+            'item_id' => 'abc',
+            'amount' => 1234,
+        ])->assertOk();
+
+        $response = $this->postJson('tipoff/cart/purchase')
+            ->assertOk();
+
+        $this->assertNotNull($response->json('data.order_number'));
+    }
+
+    /** @test */
     public function cannot_purchase_empty_cart()
     {
         $user = User::factory()->create();
@@ -24,7 +47,7 @@ class CartPurchaseControllerTest extends TestCase
 
         $response = $this
             ->postJson('tipoff/cart/purchase')
-            ->assertStatus(422);
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $this->assertEquals('Cart is empty.', $response->json('errors.cart.0'));
     }
@@ -51,7 +74,7 @@ class CartPurchaseControllerTest extends TestCase
 
         $response = $this
             ->postJson('tipoff/cart/purchase')
-            ->assertStatus(422);
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $this->assertEquals('Cart is empty.', $response->json('errors.cart.0'));
     }

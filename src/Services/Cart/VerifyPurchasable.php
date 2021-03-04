@@ -57,6 +57,7 @@ class VerifyPurchasable
         // Dispatch events to ensure all items remain purchasable
         $cart->cartItems->each(function (CartItem $cartItem) {
             try {
+                /** @psalm-suppress TooManyArguments */
                 CartItemPurchaseVerification::dispatch($cartItem);
             } catch (\Throwable $ex) {
                 throw CartNotValidException::itemException($ex);
