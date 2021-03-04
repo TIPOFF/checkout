@@ -18,7 +18,7 @@ class ApplyTaxes
 
             $cart->cartItems
                 ->filter(function (CartItem $cartItem) {
-                    return $cartItem->getLocationId() && $cartItem->getTaxCode();
+                    return $cartItem->getLocationId();
                 })
                 ->each(function (CartItem $cartItem) use ($taxRequest) {
                     $taxRequest->createTaxRequestItem(
