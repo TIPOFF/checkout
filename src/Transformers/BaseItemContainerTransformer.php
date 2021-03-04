@@ -28,14 +28,17 @@ abstract class BaseItemContainerTransformer extends BaseTransformer
     {
         return [
             'id' => $container->getId(),
+            'shipping_original' => $container->getShipping()->getOriginalAmount(),
+            'shipping_discounts' => $container->getShipping()->getDiscounts(),
             'shipping' => $container->getShipping()->getDiscountedAmount(),
-            'item_amount' => $container->getItemAmountTotal()->getDiscountedAmount(),
+            'item_amount_total_original' => $container->getItemAmountTotal()->getOriginalAmount(),
+            'item_amount_total_discounts' => $container->getItemAmountTotal()->getDiscounts(),
+            'item_amount_total' => $container->getItemAmountTotal()->getDiscountedAmount(),
             'discounts' => $container->getDiscounts(),
             'credits' => $container->getCredits(),
             'codes' => $container->getCodes(),
             'tax' => $container->getTax(),
             'user_id' => $container->getUser()->getId(),
-            'expires_at' => $container->getExpiresAt(),
             'location_id' => $container->getLocationId(),
         ];
     }

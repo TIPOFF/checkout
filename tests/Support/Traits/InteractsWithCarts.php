@@ -29,7 +29,7 @@ trait InteractsWithCarts
             [$amount, $quantity] = $item;
 
             $this->cart->upsertItem(
-                Cart::createItem($this->sellable, "item-{$idx}", $amount, $quantity)
+                Cart::createItem($this->sellable, "item-{$idx}", $amount, $quantity ?? 1)
             );
         }
 

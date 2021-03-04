@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests;
 
 use Laravel\Nova\NovaCoreServiceProvider;
+use Spatie\Fractal\FractalServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Tipoff\Authorization\AuthorizationServiceProvider;
 use Tipoff\Checkout\CheckoutServiceProvider;
@@ -25,6 +26,7 @@ class TestCase extends BaseTestCase
             AuthorizationServiceProvider::class,
             PermissionServiceProvider::class,
             CheckoutServiceProvider::class,
+            FractalServiceProvider::class,
         ];
     }
 }

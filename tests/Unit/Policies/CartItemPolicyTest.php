@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Policies;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\User;
+use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\TestCase;
-use Tipoff\Support\Contracts\Models\UserInterface;
 
 class CartItemPolicyTest extends TestCase
 {
@@ -25,45 +26,49 @@ class CartItemPolicyTest extends TestCase
 
     /**
      * @test
-     * @dataProvider data_provider_for_all_permissions_as_creator
+     * @dataProvider data_provider_for_all_permissions_as_owner
      */
-    public function all_permissions_as_creator(string $permission, UserInterface $user, bool $expected)
+    public function all_permissions_as_owner(string $permission, bool $expected)
     {
-        $discount = CartItem::factory()->make([
-            'creator_id' => $user,
+        $user = User::factory()->create();
+        $cartItem = CartItem::factory()->make([
+            'cart_id' => Cart::factory()->create([
+                'user_id' => $user,
+            ]),
         ]);
 
-        $this->assertEquals($expected, $user->can($permission, $discount));
+        $this->assertEquals($expected, $user->can($permission, $cartItem));
     }
 
-    public function data_provider_for_all_permissions_as_creator()
+    public function data_provider_for_all_permissions_as_owner()
     {
         return [
-            'view-true' => [ 'view', self::createPermissionedUser('view cart items', true), true ],
-            'view-false' => [ 'view', self::createPermissionedUser('view cart items', false), false ],
-            'create-true' => [ 'create', self::createPermissionedUser('create cart items', true), true ],
-            'create-false' => [ 'create', self::createPermissionedUser('create cart items', false), true ],
-            'update-true' => [ 'update', self::createPermissionedUser('update cart items', true), true ],
-            'update-false' => [ 'update', self::createPermissionedUser('update cart items', false), false ],
-            'delete-true' => [ 'delete', self::createPermissionedUser('delete cart items', true), true ],
-            'delete-false' => [ 'delete', self::createPermissionedUser('delete cart items', false), false ],
+            'view' => [ 'view', true ],
+            'create' => [ 'create', true ],
+            'update' => [ 'update', true ],
+            'delete' => [ 'delete', true ],
         ];
     }
 
     /**
      * @test
-     * @dataProvider data_provider_for_all_permissions_not_creator
+     * @dataProvider data_provider_for_all_permissions_not_owner
      */
-    public function all_permissions_not_creator(string $permission, UserInterface $user, bool $expected)
+    public function all_permissions_not_owner(string $permission, bool $expected)
     {
-        $discount = CartItem::factory()->make();
+        $cartItem = CartItem::factory()->make();
+        $user = User::factory()->create();
 
-        $this->assertEquals($expected, $user->can($permission, $discount));
+        $this->assertEquals($expected, $user->can($permission, $cartItem));
     }
 
-    public function data_provider_for_all_permissions_not_creator()
+    public function data_provider_for_all_permissions_not_owner()
     {
-        // Permissions are identical for creator or others
-        return $this->data_provider_for_all_permissions_as_creator();
+        return [
+            'view' => [ 'view', false ],
+            'create' => [ 'create', true ],
+            'update' => [ 'update', false ],
+            'delete' => [ 'delete', false ],
+        ];
     }
 }

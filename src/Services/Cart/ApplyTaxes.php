@@ -16,19 +16,24 @@ class ApplyTaxes
             /** @var TaxRequest $service */
             $taxRequest = $service::createTaxRequest();
 
-            $cart->cartItems->each(function (CartItem $cartItem) use ($taxRequest) {
-                $taxRequest->createTaxRequestItem(
-                    $cartItem->getId(),
-                    $cartItem->getLocationId(),
-                    $cartItem->getTaxCode(),
-                    $cartItem->getAmountTotal()->getDiscountedAmount()
-                );
-            });
+            $cart->cartItems
+                ->filter(function (CartItem $cartItem) {
+                    return $cartItem->getLocationId() && $cartItem->getTaxCode();
+                })
+                ->each(function (CartItem $cartItem) use ($taxRequest) {
+                    $taxRequest->createTaxRequestItem(
+                        (string) $cartItem->getId(),
+                        $cartItem->getLocationId(),
+                        $cartItem->getTaxCode(),
+                        $cartItem->getAmountTotal()->getDiscountedAmount()
+                    );
+                });
 
             $taxRequest->calculateTax();
 
+            $cart->tax = 0;
             $cart->cartItems->each(function (CartItem $cartItem) use ($taxRequest) {
-                $taxRequest = $taxRequest->getTaxRequestItem($cartItem->getId());
+                $taxRequest = $taxRequest->getTaxRequestItem((string) $cartItem->getId());
                 $cartItem->setTax($taxRequest ? $taxRequest->getTax() : 0);
             });
         }

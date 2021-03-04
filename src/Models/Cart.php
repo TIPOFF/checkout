@@ -25,6 +25,7 @@ use Tipoff\Checkout\Services\CartItem\UpdateInCart;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
 use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
+use Tipoff\Support\Contracts\Models\UserInterface;
 use Tipoff\Support\Contracts\Sellable\Fee;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Events\Checkout\CartUpdated;
@@ -104,6 +105,20 @@ class Cart extends BaseModel implements CartInterface
         return $query->whereDoesntHave('cartItems', function (Builder $query) {
             $query->expired();
         });
+    }
+
+    //endregion
+
+    //region PERMISSIONS
+
+    public function scopeVisibleBy(Builder $query, UserInterface $user): Builder
+    {
+        return $query->where('user_id', '=', $user->getId());
+    }
+
+    public function isOwner(UserInterface $user): bool
+    {
+        return $this->user_id === $user->getId();
     }
 
     //endregion

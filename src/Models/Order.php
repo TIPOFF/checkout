@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
+use Tipoff\Checkout\Services\Cart\ActiveAdjustments;
+use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
 use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Checkout\OrderItemInterface;
 use Tipoff\Support\Contracts\Models\UserInterface;
@@ -46,6 +48,7 @@ class Order extends BaseModel implements OrderInterface
         'shipping' => \Tipoff\Support\Casts\DiscountableValue::class,
         'item_amount_total' => \Tipoff\Support\Casts\DiscountableValue::class,
         'discounts' => 'integer',
+        'credits' => 'integer',
         'tax' => 'integer',
         'user_id' => 'integer',
         'location_id' => 'integer',
@@ -174,6 +177,16 @@ class Order extends BaseModel implements OrderInterface
     public function getItems(): Collection
     {
         return $this->orderItems;
+    }
+
+    public function getCodes(): array
+    {
+        return (new ActiveAdjustments())()
+            ->reduce(function (array $codes /*, CodedCartAdjustment $deduction */) {
+                return $codes;
+                // TODO - enable after interface change is available
+                // return array_merge($codes, $deduction::getCodesForOrder($this));
+            }, []);
     }
 
     //endregion
