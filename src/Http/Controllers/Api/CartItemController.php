@@ -48,7 +48,7 @@ class CartItemController extends BaseApiController
             $sellable,
             $request->item_id,
             (int) $request->amount,
-            (int) $request->quantity ?? 1
+            (int) ($request->quantity ?? 1)
         );
 
         $cartItem
