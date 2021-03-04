@@ -23,7 +23,7 @@ class CartItemComponent extends Component
     public function render()
     {
         /** @var View $view */
-        $view = view('components.cart-item');
+        $view = view('checkout::components.cart-item');
 
         return $view;
     }

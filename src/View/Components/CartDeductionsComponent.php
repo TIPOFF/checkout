@@ -24,7 +24,7 @@ class CartDeductionsComponent extends Component
     {
         if ($this->deductions) {
             /** @var View $view */
-            $view = view('components.cart-deductions');
+            $view = view('checkout::components.cart-deductions');
 
             return $view;
         }

@@ -21,7 +21,7 @@ class CartComponent extends Component
     {
         if ($this->cart) {
             /** @var View $view */
-            $view = view($this->cart->isEmpty() ? 'components.cart-empty' : 'components.cart');
+            $view = view($this->cart->isEmpty() ? 'checkout::components.cart-empty' : 'checkout::components.cart');
 
             return $view;
         }

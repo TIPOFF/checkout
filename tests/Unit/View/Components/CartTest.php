@@ -63,9 +63,9 @@ class CartTest extends TestCase
         );
 
         $view->assertSee('Test Sellable');
-        $view->assertSee('Quantity: 2');
-        $view->assertSee('Each: $10.00');
-        $view->assertSee('Discount: $0.00');
-        $view->assertSee('Subtotal: $20.00');
+        $view->assertSee('2');
+        $view->assertSee('$10.00');
+        $view->assertSee('$0.00');
+        $view->assertSee('$20.00');
     }
 }

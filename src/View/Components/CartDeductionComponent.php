@@ -11,7 +11,7 @@ class CartDeductionComponent extends BaseDeductionComponent
     public function render()
     {
         /** @var View $view */
-        $view = view('components.cart-deduction');
+        $view = view('checkout::components.cart-deduction');
 
         return $view;
     }
