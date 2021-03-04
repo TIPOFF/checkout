@@ -212,7 +212,7 @@ class CartItemControllerTest extends TestCase
 
         $response = $this
             ->putJson("tipoff/cart-items/{$cartItem->id}", [
-                'quantity' => 2
+                'quantity' => 2,
             ])
             ->assertOk();
 
@@ -237,7 +237,7 @@ class CartItemControllerTest extends TestCase
 
         $this
             ->putJson("tipoff/cart-items/{$cartItem->id}", [
-                'quantity' => 2
+                'quantity' => 2,
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }

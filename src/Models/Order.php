@@ -184,7 +184,7 @@ class Order extends BaseModel implements OrderInterface
         return (new ActiveAdjustments())()
             ->reduce(function (array $codes /*, CodedCartAdjustment $deduction */) {
                 return $codes;
-                // TODO - enable after interface change is available
+            // TODO - enable after interface change is available
                 // return array_merge($codes, $deduction::getCodesForOrder($this));
             }, []);
     }

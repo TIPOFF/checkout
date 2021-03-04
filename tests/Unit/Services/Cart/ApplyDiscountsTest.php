@@ -7,12 +7,10 @@ namespace Tipoff\Checkout\Tests\Unit\Services\Cart;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
-use Tipoff\Checkout\Services\Cart\ApplyCredits;
 use Tipoff\Checkout\Services\Cart\ApplyDiscounts;
 use Tipoff\Checkout\Tests\Support\Traits\InteractsWithCarts;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Contracts\Checkout\Discounts\DiscountInterface;
-use Tipoff\Support\Contracts\Checkout\Vouchers\VoucherInterface;
 
 class ApplyDiscountsTest extends TestCase
 {
