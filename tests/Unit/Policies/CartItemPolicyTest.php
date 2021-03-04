@@ -40,13 +40,13 @@ class CartItemPolicyTest extends TestCase
     {
         return [
             'view-true' => [ 'view', self::createPermissionedUser('view cart items', true), true ],
-            'view-false' => [ 'view', self::createPermissionedUser('view cart items', false), true ],
+            'view-false' => [ 'view', self::createPermissionedUser('view cart items', false), false ],
             'create-true' => [ 'create', self::createPermissionedUser('create cart items', true), true ],
             'create-false' => [ 'create', self::createPermissionedUser('create cart items', false), true ],
             'update-true' => [ 'update', self::createPermissionedUser('update cart items', true), true ],
-            'update-false' => [ 'update', self::createPermissionedUser('update cart items', false), true ],
+            'update-false' => [ 'update', self::createPermissionedUser('update cart items', false), false ],
             'delete-true' => [ 'delete', self::createPermissionedUser('delete cart items', true), true ],
-            'delete-false' => [ 'delete', self::createPermissionedUser('delete cart items', false), true ],
+            'delete-false' => [ 'delete', self::createPermissionedUser('delete cart items', false), false ],
         ];
     }
 

@@ -13,6 +13,7 @@ use Illuminate\Support\Collection;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
+use Tipoff\Checkout\Services\Cart\ActiveAdjustments;
 use Tipoff\Checkout\Services\Cart\ApplyCode;
 use Tipoff\Checkout\Services\Cart\ApplyCredits;
 use Tipoff\Checkout\Services\Cart\ApplyDiscounts;
@@ -23,6 +24,8 @@ use Tipoff\Checkout\Services\CartItem\AddToCart;
 use Tipoff\Checkout\Services\CartItem\UpdateInCart;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
+use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
+use Tipoff\Support\Contracts\Sellable\Fee;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Events\Checkout\CartUpdated;
 use Tipoff\Support\Models\BaseModel;
@@ -30,6 +33,7 @@ use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasPackageFactory;
 
 /**
+ * @property Carbon|null deleted_at
  * // Relations
  * @property Order|null order
  * @property Collection cartItems
@@ -125,6 +129,17 @@ class Cart extends BaseModel implements CartInterface
         return $this->getPricingDetail()->getBalanceDue();
     }
 
+    public function getFeeTotal(): DiscountableValue
+    {
+        return $this->cartItems
+            ->filter(function (CartItem $cartItem) {
+                return $cartItem->sellable instanceof Fee;
+            })
+            ->reduce(function (DiscountableValue $feeTotal, CartItem $item) {
+                return $feeTotal->add($item->getAmountTotal());
+            }, new DiscountableValue(0));
+    }
+
     protected function getCartTotal(): DiscountableValue
     {
         // Cart total includes cart discounts, but not cart credits
@@ -169,6 +184,11 @@ class Cart extends BaseModel implements CartInterface
     public function getExpiresAt(): ?Carbon
     {
         return $this->cartItems->min->expires_at;
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this->cartItems->isEmpty();
     }
 
     //region INTERFACE IMPLEMENTATION
@@ -298,6 +318,14 @@ class Cart extends BaseModel implements CartInterface
     //endregion
 
     //region PROTECTED HELPERS
+
+    public function getCodes(): array
+    {
+        return (new ActiveAdjustments())()
+            ->reduce(function (array $codes, CodedCartAdjustment $deduction) {
+                return array_merge($codes, $deduction::getCodesForCart($this));
+            }, []);
+    }
 
     protected function saveAll(): self
     {

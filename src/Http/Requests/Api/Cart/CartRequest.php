@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\Http\Requests\Cart;
+namespace Tipoff\Checkout\Http\Requests\Api\Cart;
 
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Support\Http\Requests\BaseApiRequest;

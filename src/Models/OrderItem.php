@@ -4,12 +4,19 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Tipoff\Checkout\Models\Traits\IsItem;
 use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Checkout\OrderItemInterface;
+use Tipoff\Support\Contracts\Models\UserInterface;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
 
+/**
+ * @property Order order
+ * // Raw Relation ID
+ * @property int|null order_id
+ */
 class OrderItem extends BaseModel implements OrderItemInterface
 {
     use HasPackageFactory;
@@ -73,6 +80,22 @@ class OrderItem extends BaseModel implements OrderItemInterface
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+
+    //endregion
+
+    //region PERMISSIONS
+
+    public function scopeVisibleBy(Builder $query, UserInterface $user): Builder
+    {
+        return $query->whereHas('order', function (Builder $q) use ($user) {
+            $q->visibleBy($user);
+        });
+    }
+
+    public function isOwner(UserInterface $user): bool
+    {
+        return $this->order->user_id === $user->getId();
     }
 
     //endregion

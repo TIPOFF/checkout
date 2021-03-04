@@ -44,7 +44,7 @@ class ContainerPricingDetail
         return $this->itemAmount->isEqual($other->itemAmount) &&
             $this->shipping->isEqual($other->shipping) &&
             ($this->discounts === $other->discounts) &&
-            ($this->credits === $other->discounts) &&
+            ($this->credits === $other->credits) &&
             ($this->tax === $other->tax);
     }
 }
