@@ -25,8 +25,8 @@ class CartControllerTest extends TestCase
         $response = $this->getJson('tipoff/cart')
             ->assertOk();
 
-        $this->assertNotNull( $response->json('data.item_amount_total' ));
-        $this->assertEquals(0, $response->json('data.item_amount_total' ));
+        $this->assertNotNull($response->json('data.item_amount_total'));
+        $this->assertEquals(0, $response->json('data.item_amount_total'));
     }
 
     /** @test */
@@ -47,7 +47,7 @@ class CartControllerTest extends TestCase
         $response = $this->getJson('tipoff/cart')
             ->assertOk();
 
-        $this->assertNotNull( $response->json('data.item_amount_total' ));
+        $this->assertNotNull($response->json('data.item_amount_total'));
         $this->assertGreaterThan(0, $response->json('data.item_amount_total'));
         $this->assertNull($response->json('data.items'));
     }
@@ -70,7 +70,7 @@ class CartControllerTest extends TestCase
         $response = $this->getJson('tipoff/cart?include=items')
             ->assertOk();
 
-        $this->assertNotNull( $response->json('data.item_amount_total' ));
+        $this->assertNotNull($response->json('data.item_amount_total'));
         $this->assertGreaterThan(0, $response->json('data.item_amount_total'));
         $this->assertNotNull($response->json('data.items'));
         $this->assertCount(4, $response->json('data.items.data'));

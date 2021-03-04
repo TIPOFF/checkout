@@ -18,7 +18,7 @@ class StoreRequest extends CartItemRequest
             'quantity' => [ 'nullable', 'integer', 'min:1' ],
             'location_d' => [ 'nullable', 'integer'],
             'tax_code' => [ 'nullable', 'string'],
-            'expires_at' => [ 'nullable', 'date', 'after:now']
+            'expires_at' => [ 'nullable', 'date', 'after:now'],
         ];
     }
 
@@ -26,18 +26,21 @@ class StoreRequest extends CartItemRequest
     {
         $validator->after(function ($validator) {
             $sellable = $this->sellable_type;
-            if (!class_exists($sellable)) {
+            if (! class_exists($sellable)) {
                 $validator->errors()->add('sellable_type', 'Sellable type is not defined.');
+
                 return;
             }
 
-            if (!(new \ReflectionClass($sellable))->implementsInterface(Sellable::class)) {
+            if (! (new \ReflectionClass($sellable))->implementsInterface(Sellable::class)) {
                 $validator->errors()->add('sellable_type', 'Type is not sellable.');
+
                 return;
             }
 
-            if (!$sellable::query()->find($this->sellable_id)) {
+            if (! $sellable::query()->find($this->sellable_id)) {
                 $validator->errors()->add('sellable_id', 'Sellable item not found.');
+
                 return;
             }
         });
