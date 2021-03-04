@@ -76,6 +76,7 @@ class Cart extends BaseModel implements CartInterface
         });
 
         static::saved(function (Cart $cart) {
+            /** @psalm-suppress TooManyArguments */
             CartUpdated::dispatch($cart);
         });
 

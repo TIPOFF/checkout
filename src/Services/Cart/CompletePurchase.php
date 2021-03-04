@@ -33,6 +33,7 @@ class CompletePurchase
             $cart->order()->associate($order);
             $cart->save();
 
+            /** @psalm-suppress TooManyArguments */
             OrderCreated::dispatch($order);
 
             $cart->delete();
@@ -47,6 +48,7 @@ class CompletePurchase
     {
         // Dispatch item creation events
         $order->orderItems->each(function (OrderItem $orderItem) {
+            /** @psalm-suppress TooManyArguments */
             OrderItemCreated::dispatch($orderItem);
             $orderItem->save();
         });

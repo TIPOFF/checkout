@@ -64,14 +64,17 @@ class CartItem extends BaseModel implements CartItemInterface
         });
 
         static::creating(function (CartItem $item) {
+            /** @psalm-suppress TooManyArguments */
             CartItemCreated::dispatch($item);
         });
 
         static::updating(function (CartItem $item) {
+            /** @psalm-suppress TooManyArguments */
             CartItemUpdated::dispatch($item);
         });
 
         static::deleting(function (CartItem $item) {
+            /** @psalm-suppress TooManyArguments */
             CartItemRemoved::dispatch($item);
         });
     }
