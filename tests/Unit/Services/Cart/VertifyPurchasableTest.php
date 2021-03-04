@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Event;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
+use Tipoff\Checkout\Services\Cart\ApplyCredits;
 use Tipoff\Checkout\Services\Cart\VerifyPurchasable;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
@@ -122,7 +123,14 @@ class VertifyPurchasableTest extends TestCase
             ]);
 
         $cart->refresh()->updatePricing();
-        $cart->getItems()->first->setAmountEach(1234);
+
+        $applyCredits = \Mockery::mock(ApplyCredits::class);
+        $applyCredits->shouldReceive('__invoke')
+            ->once()
+            ->andReturnUsing(function (Cart $cart) {
+                return $cart->addCredits(1234);
+            });
+        $this->app->instance(ApplyCredits::class, $applyCredits);
 
         $this->expectException(CartNotValidException::class);
 

@@ -1,8 +1,10 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Tipoff\Checkout\Http\Controllers\Api\CartApplyCodeController;
 use Tipoff\Checkout\Http\Controllers\Api\CartController;
 use Tipoff\Checkout\Http\Controllers\Api\CartItemController;
+use Tipoff\Checkout\Http\Controllers\Api\CartPurchaseController;
 
 Route::middleware(config('tipoff.api.middleware_group'))
     ->prefix(config('tipoff.api.uri_prefix'))
@@ -15,5 +17,7 @@ Route::middleware(config('tipoff.api.middleware_group'))
     // PROTECTED ROUTES
     Route::middleware(config('tipoff.api.auth_middleware'))->group(function () {
         Route::resource('cart-items', CartItemController::class);
+        Route::post('cart/apply-code', CartApplyCodeController::class);
+        Route::post('cart/purchase', CartPurchaseController::class);
     });
 });

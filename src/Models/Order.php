@@ -6,11 +6,13 @@ namespace Tipoff\Checkout\Models;
 
 use Assert\Assert;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Checkout\OrderItemInterface;
+use Tipoff\Support\Contracts\Models\UserInterface;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Models\BaseModel;
 use Tipoff\Support\Traits\HasPackageFactory;
@@ -18,6 +20,7 @@ use Tipoff\Support\Traits\HasPackageFactory;
 /**
  * @property string order_number
  * // Relations
+ * @property Cart cart
  * @property Collection orderItems
  * @property Collection invoices
  * @property Collection payments
@@ -136,6 +139,20 @@ class Order extends BaseModel implements OrderInterface
     //endregion
 
     //region SCOPES
+
+    //endregion
+
+    //region PERMISSIONS
+
+    public function scopeVisibleBy(Builder $query, UserInterface $user): Builder
+    {
+        return $query->where('user_id', '=', $user->getId());
+    }
+
+    public function isOwner(UserInterface $user): bool
+    {
+        return $this->user_id === $user->getId();
+    }
 
     //endregion
 

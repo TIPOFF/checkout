@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
-use Tipoff\Checkout\Http\Requests\CartItem\DestroyCartItem;
-use Tipoff\Checkout\Http\Requests\CartItem\IndexCartItems;
-use Tipoff\Checkout\Http\Requests\CartItem\ShowCartItem;
-use Tipoff\Checkout\Http\Requests\CartItem\StoreCartItem;
-use Tipoff\Checkout\Http\Requests\CartItem\UpdateCartItem;
+use Tipoff\Checkout\Http\Requests\Api\CartItem\DestroyCartItem;
+use Tipoff\Checkout\Http\Requests\Api\CartItem\IndexCartItems;
+use Tipoff\Checkout\Http\Requests\Api\CartItem\ShowCartItem;
+use Tipoff\Checkout\Http\Requests\Api\CartItem\StoreCartItem;
+use Tipoff\Checkout\Http\Requests\Api\CartItem\UpdateCartItem;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Transformers\CartItemTransformer;
 use Tipoff\Support\Http\Controllers\Api\BaseApiController;
@@ -22,12 +22,12 @@ class CartItemController extends BaseApiController
     {
         $this->transformer = $transformer;
 
-        $this->authorizeResource(CartItem::class, 'cartItem');
+        $this->authorizeResource(CartItem::class);
     }
 
     public function index(IndexCartItems $request): JsonResponse
     {
-        $cartItems = CartItem::paginate(
+        $cartItems = CartItem::query()->visibleBy($request->user())->paginate(
             $request->getPageSize()
         );
 
@@ -37,6 +37,7 @@ class CartItemController extends BaseApiController
 
     public function store(StoreCartItem $request): JsonResponse
     {
+        // TODO - update for new checkout
         $cartItem = CartItem::make($request->all());
         $cartItem->save();
 
@@ -52,6 +53,7 @@ class CartItemController extends BaseApiController
 
     public function update(UpdateCartItem $request, CartItem $cartItem): JsonResponse
     {
+        // TODO - update for new checkout
         $cartItem->fill($request->all())
             ->save();
 

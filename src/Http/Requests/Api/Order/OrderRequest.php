@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\Http\Requests\CartItem;
+namespace Tipoff\Checkout\Http\Requests\Api\Order;
 
-use Tipoff\Checkout\Models\CartItem;
+use Tipoff\Checkout\Models\Order;
 use Tipoff\Support\Http\Requests\BaseApiRequest;
 
-abstract class CartItemRequest extends BaseApiRequest
+abstract class OrderRequest extends BaseApiRequest
 {
     public function getModelClass(): string
     {
-        return CartItem::class;
+        return Order::class;
     }
 
     public function rules()

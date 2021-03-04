@@ -19,7 +19,7 @@ class CartItemPolicy
 
     public function view(UserInterface $user, CartItem $cartItem): bool
     {
-        return true;
+        return $cartItem->isOwner($user) || ($user->hasPermissionTo('view cart items') ? true : false);
     }
 
     public function create(UserInterface $user): bool
@@ -29,21 +29,21 @@ class CartItemPolicy
 
     public function update(UserInterface $user, CartItem $cartItem): bool
     {
-        return true;
+        return $cartItem->isOwner($user) || ($user->hasPermissionTo('update cart items') ? true : false);
     }
 
     public function delete(UserInterface $user, CartItem $cartItem): bool
     {
-        return true;
+        return $cartItem->isOwner($user) || ($user->hasPermissionTo('delete cart items') ? true : false);
     }
 
     public function restore(UserInterface $user, CartItem $cartItem): bool
     {
-        return true;
+        return false;
     }
 
     public function forceDelete(UserInterface $user, CartItem $cartItem): bool
     {
-        return true;
+        return false;
     }
 }
