@@ -14,6 +14,7 @@ class FindAdjustmentCode
         (new ActiveAdjustments())()
             ->first(function (CodedCartAdjustment $deduction) use ($code, &$result) {
                 $result = $deduction::findByCode($code);
+
                 return $result;
             });
 
