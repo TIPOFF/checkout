@@ -140,22 +140,6 @@ class Cart extends BaseModel implements CartInterface
 
     //region PRICING
 
-    public function getBalanceDue(): int
-    {
-        return $this->getPricingDetail()->getBalanceDue();
-    }
-
-    public function getFeeTotal(): DiscountableValue
-    {
-        return $this->cartItems
-            ->filter(function (CartItem $cartItem) {
-                return $cartItem->sellable instanceof Fee;
-            })
-            ->reduce(function (DiscountableValue $feeTotal, CartItem $item) {
-                return $feeTotal->add($item->getAmountTotal());
-            }, new DiscountableValue(0));
-    }
-
     protected function getCartTotal(): DiscountableValue
     {
         // Cart total includes cart discounts, but not cart credits

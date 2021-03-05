@@ -11,7 +11,5 @@ use Tipoff\TestSupport\Providers\BaseNovaPackageServiceProvider;
 class NovaPackageServiceProvider extends BaseNovaPackageServiceProvider
 {
     public static array $packageResources = [
-        Order::class,
-        OrderItem::class,
     ];
 }

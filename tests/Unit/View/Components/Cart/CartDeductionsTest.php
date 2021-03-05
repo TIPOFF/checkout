@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\Tests\Unit\View\Components;
+namespace Tipoff\Checkout\Tests\Unit\View\Components\Cart;
 
 use Illuminate\Support\Facades\Blade;
 use Tipoff\Checkout\Tests\TestCase;
@@ -14,6 +14,8 @@ class CartDeductionsTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        $this->artisan('view:clear')->run();
 
         // Dynamic Component has static data, so need to ensure this gets included
         Blade::component('custom-deduction', CustomDeduction::class);

@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Tipoff\Checkout\Objects\ContainerPricingDetail;
 use Tipoff\Support\Contracts\Checkout\BaseItemInterface;
 use Tipoff\Support\Contracts\Models\UserInterface;
+use Tipoff\Support\Contracts\Sellable\Fee;
 use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasCreator;
 use Tipoff\Support\Traits\HasUpdater;
@@ -57,6 +58,22 @@ trait IsItemContainer
     //endregion
 
     //region HELPERS
+
+    public function getFeeTotal(): DiscountableValue
+    {
+        return $this->getItems()
+            ->filter(function (BaseItemInterface $item) {
+                return $item->getSellable() instanceof Fee;
+            })
+            ->reduce(function (DiscountableValue $feeTotal, BaseItemInterface $item) {
+                return $feeTotal->add($item->getAmountTotal());
+            }, new DiscountableValue(0));
+    }
+
+    public function getBalanceDue(): int
+    {
+        return $this->getPricingDetail()->getBalanceDue();
+    }
 
     public function getPricingDetail(): ContainerPricingDetail
     {

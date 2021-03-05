@@ -16,6 +16,8 @@ use Tipoff\TestSupport\BaseTestCase;
 
 class TestCase extends BaseTestCase
 {
+    protected bool $stubNovaResources = false;
+
     protected function getPackageProviders($app)
     {
         return [

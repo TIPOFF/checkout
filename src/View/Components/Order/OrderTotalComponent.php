@@ -1,0 +1,27 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tipoff\Checkout\View\Components\Order;
+
+use Illuminate\View\Component;
+use Illuminate\View\View;
+use Tipoff\Checkout\Models\Order;
+
+class OrderTotalComponent extends Component
+{
+    public Order $order;
+
+    public function __construct(Order $order)
+    {
+        $this->order = $order;
+    }
+
+    public function render()
+    {
+        /** @var View $view */
+        $view = view('components.order.order-total');
+
+        return $view;
+    }
+}

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\Tests\Unit\View\Components;
+namespace Tipoff\Checkout\Tests\Unit\View\Components\Cart;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Authorization\Models\User;
