@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Tests;
 
+use Illuminate\View\DynamicComponent;
 use Laravel\Nova\NovaCoreServiceProvider;
 use Spatie\Fractal\FractalServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
@@ -30,5 +31,17 @@ class TestCase extends BaseTestCase
             CheckoutServiceProvider::class,
             FractalServiceProvider::class,
         ];
+    }
+
+    protected function resetDynamicComponent()
+    {
+        $reflectionClass = new \ReflectionClass(DynamicComponent::class);
+
+        $prop = $reflectionClass->getProperty('componentClasses');
+        $prop->setAccessible(true);
+        $prop->setValue([]);
+        $prop = $reflectionClass->getProperty('compiler');
+        $prop->setAccessible(true);
+        $prop->setValue(null);
     }
 }

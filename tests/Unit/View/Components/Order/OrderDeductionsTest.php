@@ -18,6 +18,7 @@ class OrderDeductionsTest extends TestCase
         $this->artisan('view:clear')->run();
 
         // Dynamic Component has static data, so need to ensure this gets included
+        $this->resetDynamicComponent();
         Blade::component('custom-deduction', CustomDeduction::class);
     }
 

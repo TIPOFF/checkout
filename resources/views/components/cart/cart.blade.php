@@ -11,7 +11,7 @@
         </thead>
         <tbody>
         @foreach ($cart->getItems() as $item)
-            <x-dynamic-component :component="$item->getSellable()->getViewComponent('cart-item') ?? 'tipoff-cart-item'" :cart-item="$item" :sellable="$item->getSellable()"/>
+            <x-dynamic-component :component="$getItemComponent($item)" :cart-item="$item" :sellable="$item->getSellable()"/>
         @endforeach
         </tbody>
     </table>
