@@ -6,7 +6,6 @@ namespace Tipoff\Checkout\View\Components\Order;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
-use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\Order;
 
 class OrderComponent extends Component

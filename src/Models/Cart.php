@@ -26,7 +26,6 @@ use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
 use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
 use Tipoff\Support\Contracts\Models\UserInterface;
-use Tipoff\Support\Contracts\Sellable\Fee;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Events\Checkout\CartUpdated;
 use Tipoff\Support\Models\BaseModel;
