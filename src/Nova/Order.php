@@ -56,7 +56,7 @@ class Order extends BaseResource
             Text::make('Order Number')->sortable(),
             nova('user') ? BelongsTo::make('Customer', 'user', nova('user'))->sortable() : null,
             nova('location') ? BelongsTo::make('Location', 'location', nova('location'))->sortable() : null,
-            Currency::make('Item Total', 'item_amount')->asMinorUnits()->sortable(),
+            Currency::make('Item Total', 'item_amount_total')->asMinorUnits()->sortable(),
             Date::make('Created', 'created_at')->sortable()->exceptOnForms(),
         ]);
     }
