@@ -21,7 +21,7 @@ class CartTotalComponent extends Component
     {
         if ($this->cart) {
             /** @var View $view */
-            $view = view('components.cart.cart-total');
+            $view = view('checkout::components.cart.cart-total');
 
             return $view;
         }

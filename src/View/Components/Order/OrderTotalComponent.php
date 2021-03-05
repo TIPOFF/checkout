@@ -20,7 +20,7 @@ class OrderTotalComponent extends Component
     public function render()
     {
         /** @var View $view */
-        $view = view('components.order.order-total');
+        $view = view('checkout::components.order.order-total');
 
         return $view;
     }
