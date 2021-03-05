@@ -276,17 +276,24 @@ class CartModelInterfaceTest extends TestCase
         $sellable = TestSellable::factory()->create();
 
         /** @var CartItem $item */
+        $item = Cart::createItem($sellable, 'A', 100);
+        $cart->upsertItem($item);
+
         $item = Cart::createItem($sellable, 'B', 100)
             ->setLocationId(1);
         $cart->upsertItem($item);
 
-        $item = Cart::createItem($sellable, 'A', 100);
+        $item = Cart::createItem($sellable, 'C', 100);
+        $cart->upsertItem($item);
+
+        $item = Cart::createItem($sellable, 'D', 100)
+            ->setLocationId(1);
         $cart->upsertItem($item);
 
         $this->expectException(MultipleLocationException::class);
         $this->expectExceptionMessage('Cart must contain items from single location.');
 
-        $item = Cart::createItem($sellable, 'C', 100)
+        $item = Cart::createItem($sellable, 'E', 100)
             ->setLocationId(2);
         $cart->upsertItem($item);
     }
