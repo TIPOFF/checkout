@@ -154,7 +154,7 @@ class CartItem extends BaseModel implements CartItemInterface
     {
         $this->amount_each = $amount;
 
-        return $this;
+        return $this->updateAmountTotal();
     }
 
     public function setTax(int $tax): CartItemInterface

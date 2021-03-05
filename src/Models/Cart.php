@@ -297,7 +297,7 @@ class Cart extends BaseModel implements CartInterface
     public function setLocationId(?int $locationId): self
     {
         if ($locationId) {
-            if ($this->location_id && ! $this->location_id != $locationId) {
+            if ($this->location_id && $this->location_id != $locationId) {
                 throw new MultipleLocationException();
             }
 
