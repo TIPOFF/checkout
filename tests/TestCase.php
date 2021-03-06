@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Tests;
 
-use Illuminate\View\DynamicComponent;
 use Laravel\Nova\NovaCoreServiceProvider;
 use Spatie\Fractal\FractalServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
