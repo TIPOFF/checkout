@@ -47,3 +47,9 @@ All notable changes to `checkout` will be documented in this file.
 ## 2.3.1 - 2021-03-04
 
 - more methods on cart api
+
+## 2.3.2 - 2021-03-06
+
+- views for cart & order
+- cart components
+- order components
