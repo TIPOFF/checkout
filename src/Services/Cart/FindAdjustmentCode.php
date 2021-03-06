@@ -10,9 +10,14 @@ class FindAdjustmentCode
 {
     public function __invoke(string $code): ?CodedCartAdjustment
     {
-        return (new ActiveAdjustments())()
-            ->first(function (CodedCartAdjustment $deduction) use ($code) {
-                return $deduction::findByCode($code);
+        $result = null;
+        (new ActiveAdjustments())()
+            ->first(function (CodedCartAdjustment $deduction) use ($code, &$result) {
+                $result = $deduction::findByCode($code);
+
+                return $result;
             });
+
+        return $result;
     }
 }

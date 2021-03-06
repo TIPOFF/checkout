@@ -11,6 +11,7 @@ use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
+use Tipoff\Support\Contracts\Sellable\Fee;
 use Tipoff\Support\Events\Checkout\CartItemCreated;
 use Tipoff\Support\Events\Checkout\CartItemRemoved;
 use Tipoff\Support\Events\Checkout\CartItemUpdated;
@@ -84,6 +85,36 @@ class CartModelInterfaceTest extends TestCase
 
         Event::assertDispatched(CartItemCreated::class, 1);
         Event::assertNotDispatched(CartItemUpdated::class);
+    }
+
+    /** @test */
+    public function can_total_fees()
+    {
+        TestFee::createTable();
+
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create();
+
+        $cart->upsertItem(
+            Cart::createItem(TestSellable::factory()->create(), 'item-1', 1010)
+        );
+
+        $cart->upsertItem(
+            Cart::createItem(TestFee::factory()->create(), 'fee-1', 110)
+        );
+
+        $cart->upsertItem(
+            Cart::createItem(TestSellable::factory()->create(), 'item-2', 1010)
+        );
+
+        $cart->upsertItem(
+            Cart::createItem(TestFee::factory()->create(), 'fee-2', 110)
+        );
+
+        $fees = $cart->getFeeTotal();
+
+        $this->assertEquals(220, $fees->getOriginalAmount());
+        $this->assertEquals(0, $fees->getDiscounts());
     }
 
     /** @test */
@@ -245,17 +276,24 @@ class CartModelInterfaceTest extends TestCase
         $sellable = TestSellable::factory()->create();
 
         /** @var CartItem $item */
+        $item = Cart::createItem($sellable, 'A', 100);
+        $cart->upsertItem($item);
+
         $item = Cart::createItem($sellable, 'B', 100)
             ->setLocationId(1);
         $cart->upsertItem($item);
 
-        $item = Cart::createItem($sellable, 'A', 100);
+        $item = Cart::createItem($sellable, 'C', 100);
+        $cart->upsertItem($item);
+
+        $item = Cart::createItem($sellable, 'D', 100)
+            ->setLocationId(1);
         $cart->upsertItem($item);
 
         $this->expectException(MultipleLocationException::class);
         $this->expectExceptionMessage('Cart must contain items from single location.');
 
-        $item = Cart::createItem($sellable, 'C', 100)
+        $item = Cart::createItem($sellable, 'E', 100)
             ->setLocationId(2);
         $cart->upsertItem($item);
     }
@@ -363,4 +401,8 @@ class CartModelInterfaceTest extends TestCase
         $item = $cart1->findItem($sellable, 'item');
         $this->assertEquals($item1->getId(), $item->getId());
     }
+}
+
+class TestFee extends TestSellable implements Fee
+{
 }

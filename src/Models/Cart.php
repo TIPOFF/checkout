@@ -26,7 +26,6 @@ use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
 use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
 use Tipoff\Support\Contracts\Models\UserInterface;
-use Tipoff\Support\Contracts\Sellable\Fee;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Events\Checkout\CartUpdated;
 use Tipoff\Support\Models\BaseModel;
@@ -139,22 +138,6 @@ class Cart extends BaseModel implements CartInterface
     //endregion
 
     //region PRICING
-
-    public function getBalanceDue(): int
-    {
-        return $this->getPricingDetail()->getBalanceDue();
-    }
-
-    public function getFeeTotal(): DiscountableValue
-    {
-        return $this->cartItems
-            ->filter(function (CartItem $cartItem) {
-                return $cartItem->sellable instanceof Fee;
-            })
-            ->reduce(function (DiscountableValue $feeTotal, CartItem $item) {
-                return $feeTotal->add($item->getAmountTotal());
-            }, new DiscountableValue(0));
-    }
 
     protected function getCartTotal(): DiscountableValue
     {
@@ -314,7 +297,7 @@ class Cart extends BaseModel implements CartInterface
     public function setLocationId(?int $locationId): self
     {
         if ($locationId) {
-            if ($this->location_id && ! $this->location_id != $locationId) {
+            if ($this->location_id && $this->location_id != $locationId) {
                 throw new MultipleLocationException();
             }
 

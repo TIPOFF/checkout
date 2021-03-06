@@ -22,4 +22,27 @@ class CartItemModelTest extends TestCase
         $model = CartItem::factory()->withSellable($sellable)->create();
         $this->assertNotNull($model);
     }
+
+    /** @test */
+    public function set_amount_each_updates_total()
+    {
+        TestSellable::createTable();
+        $sellable = TestSellable::factory()->create();
+
+        /** @var CartItem $cartItem */
+        $cartItem = CartItem::factory()->withSellable($sellable)->create([
+            'quantity' => 2,
+            'amount_each' => 1000,
+        ]);
+
+        $this->assertEquals(2000, $cartItem->getAmountTotal()->getOriginalAmount());
+        $this->assertEquals(0, $cartItem->getAmountTotal()->getDiscounts());
+        $this->assertEquals(2000, $cartItem->getAmountTotal()->getDiscountedAmount());
+
+        $cartItem->setAmountEach($cartItem->getAmountEach()->addDiscounts(250));
+
+        $this->assertEquals(2000, $cartItem->getAmountTotal()->getOriginalAmount());
+        $this->assertEquals(500, $cartItem->getAmountTotal()->getDiscounts());
+        $this->assertEquals(1500, $cartItem->getAmountTotal()->getDiscountedAmount());
+    }
 }

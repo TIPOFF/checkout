@@ -33,12 +33,14 @@ class CartApplyCodeControllerTest extends TestCase
     /** @test */
     public function apply_good_code()
     {
-        $discounts = \Mockery::mock(DiscountInterface::class);
-        $discounts->shouldReceive('findByCode')->twice()->andReturn(\Mockery::mock(CodedCartAdjustment::class));
-        $discounts->shouldReceive('applyToCart')->once();
-        $discounts->shouldReceive('calculateAdjustments')->once();
-        $discounts->shouldReceive('getCodesForCart')->once()->andReturn(['abcd']);
-        $this->app->instance(DiscountInterface::class, $discounts);
+        $discount = \Mockery::mock(CodedCartAdjustment::class);
+        $discount->shouldReceive('applyToCart')->once();
+
+        $service = \Mockery::mock(DiscountInterface::class);
+        $service->shouldReceive('findByCode')->twice()->andReturn($discount);
+        $service->shouldReceive('calculateAdjustments')->once();
+        $service->shouldReceive('getCodesForCart')->once()->andReturn(['abcd']);
+        $this->app->instance(DiscountInterface::class, $service);
 
         $user = User::factory()->create();
 

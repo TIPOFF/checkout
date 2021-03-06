@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\View\Components;
+namespace Tipoff\Checkout\View\Components\Cart;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
@@ -24,7 +24,7 @@ class CartDeductionsComponent extends Component
     {
         if ($this->deductions) {
             /** @var View $view */
-            $view = view('components.cart-deductions');
+            $view = view('checkout::components.cart.cart-deductions');
 
             return $view;
         }

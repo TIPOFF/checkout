@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\View\Components;
+namespace Tipoff\Checkout\View\Components\Cart;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
@@ -23,7 +23,7 @@ class CartItemComponent extends Component
     public function render()
     {
         /** @var View $view */
-        $view = view('components.cart-item');
+        $view = view('checkout::components.cart.cart-item');
 
         return $view;
     }

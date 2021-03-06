@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tipoff\Checkout\View\Components;
+namespace Tipoff\Checkout\View\Components\Cart;
 
 use Illuminate\View\Component;
 use Illuminate\View\View;
@@ -21,7 +21,7 @@ class CartTotalComponent extends Component
     {
         if ($this->cart) {
             /** @var View $view */
-            $view = view('components.cart-total');
+            $view = view('checkout::components.cart.cart-total');
 
             return $view;
         }
