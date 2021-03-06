@@ -32,16 +32,4 @@ class TestCase extends BaseTestCase
             FractalServiceProvider::class,
         ];
     }
-
-    protected function resetDynamicComponent()
-    {
-        $reflectionClass = new \ReflectionClass(DynamicComponent::class);
-
-        $prop = $reflectionClass->getProperty('componentClasses');
-        $prop->setAccessible(true);
-        $prop->setValue([]);
-        $prop = $reflectionClass->getProperty('compiler');
-        $prop->setAccessible(true);
-        $prop->setValue(null);
-    }
 }
