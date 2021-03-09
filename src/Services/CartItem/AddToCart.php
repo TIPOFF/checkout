@@ -13,8 +13,11 @@ class AddToCart
     public function __invoke(CartItem $cartItem, Cart $cart): CartItem
     {
         // Ensure item is unique
-        if ($cart->findItem($cartItem->getSellable(), $cartItem->getItemId())) {
-            throw new CartNotValidException();
+        /** @var CartItem $findItem */
+        $findItem = $cart->findItem($cartItem->getSellable(), $cartItem->getItemId());
+        if ($findItem) {
+            $findItem->delete();
+            $cart->load('cartItems');
         }
 
         // Validate location is allowed

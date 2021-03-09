@@ -45,18 +45,4 @@ class UpdateInCartTest extends TestCase
         Event::assertDispatched(CartItemCreated::class, 1);
         Event::assertDispatched(CartItemUpdated::class, 1);
     }
-
-    /** @test */
-    public function cannot_upsert_existing_item_as_new()
-    {
-        /** @var CartItem $cartItem */
-        $cartItem = Cart::createItem($this->sellable, 'item-id', 1234, 2);
-        $this->cart->upsertItem($cartItem);
-        $this->assertCount(1, $this->cart->getItems());
-
-        $this->expectException(CartNotValidException::class);
-
-        $cartItem = Cart::createItem($this->sellable, 'item-id', 5678, 2);
-        $this->cart->upsertItem($cartItem);
-    }
 }
