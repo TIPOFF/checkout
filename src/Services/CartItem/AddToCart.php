@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Services\CartItem;
 
-use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 

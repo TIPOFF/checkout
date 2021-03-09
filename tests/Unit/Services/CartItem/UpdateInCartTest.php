@@ -6,7 +6,6 @@ namespace Tipoff\Checkout\Tests\Unit\Services\CartItem;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
-use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
