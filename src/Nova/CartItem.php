@@ -26,7 +26,6 @@ class CartItem extends BaseResource
 
     public static function indexQuery(NovaRequest $request, $query)
     {
-
     }
 
     public static $group;
