@@ -19,7 +19,7 @@ class CartItemPolicy
 
     public function view(UserInterface $user, CartItem $cartItem): bool
     {
-        return $cartItem->isOwner($user);
+        return $cartItem->isOwner($user) || ($user->hasPermissionTo('view cart items') ? true : false);
     }
 
     public function create(UserInterface $user): bool
