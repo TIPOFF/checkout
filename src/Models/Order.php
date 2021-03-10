@@ -9,8 +9,11 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Tipoff\Checkout\Enums\OrderStatus;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Checkout\Services\Cart\ActiveAdjustments;
+use Tipoff\Statuses\Models\Status;
+use Tipoff\Statuses\Traits\HasStatuses;
 use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
 use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Checkout\OrderItemInterface;
@@ -34,6 +37,7 @@ class Order extends BaseModel implements OrderInterface
 {
     use HasPackageFactory;
     use IsItemContainer;
+    use HasStatuses;
 
     protected $guarded = [
         'id',
@@ -69,6 +73,8 @@ class Order extends BaseModel implements OrderInterface
         $order->tax = $cart->getTax();
         $order->location_id = $cart->getLocationId();
         $order->save();
+
+        $order->setOrderStatus(OrderStatus::PROCESSING());
 
         return $order;
     }
@@ -143,6 +149,11 @@ class Order extends BaseModel implements OrderInterface
 
     //region SCOPES
 
+    public function scopeByOrderStatus(Builder $query, OrderStatus $orderStatus): Builder
+    {
+        return $this->scopeByStatus($query, $orderStatus->toStatus());
+    }
+
     //endregion
 
     //region PERMISSIONS
@@ -172,6 +183,25 @@ class Order extends BaseModel implements OrderInterface
     public function getOrderNumber(): string
     {
         return $this->order_number;
+    }
+
+    public function setOrderStatus(OrderStatus $orderStatus): self
+    {
+        $this->setStatus((string) $orderStatus->getValue(), OrderStatus::statusType());
+
+        return $this;
+    }
+
+    public function getOrderStatus(): ?OrderStatus
+    {
+        $status = $this->getStatus(OrderStatus::statusType());
+
+        return $status ? OrderStatus::byValue((string) $status) : null;
+    }
+
+    public function getOrderStatusHistory(): Collection
+    {
+        return $this->getStatusHistory(OrderStatus::statusType());
     }
 
     public function getItems(): Collection

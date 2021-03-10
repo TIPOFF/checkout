@@ -14,7 +14,10 @@ use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
+use Tipoff\Checkout\Enums\OrderStatus;
 use Tipoff\Support\Nova\BaseResource;
+use Tipoff\Support\Nova\Fields\Enum;
+use Tipoff\Support\Nova\Filters\EnumFilter;
 
 class Order extends BaseResource
 {
@@ -53,6 +56,9 @@ class Order extends BaseResource
     {
         return array_filter([
             ID::make()->sortable(),
+            Enum::make('OrderStatus', function(\Tipoff\Checkout\Models\Order $order) {
+                return $order->getOrderStatus();
+            })->attach(OrderStatus::class)->sortable(),
             Text::make('Order Number')->sortable(),
             nova('user') ? BelongsTo::make('Customer', 'user', nova('user'))->sortable() : null,
             nova('location') ? BelongsTo::make('Location', 'location', nova('location'))->sortable() : null,
@@ -65,6 +71,9 @@ class Order extends BaseResource
     {
         return array_filter([
             Text::make('Order Number')->exceptOnForms(),
+            Enum::make('OrderStatus', function(\Tipoff\Checkout\Models\Order $order) {
+                return $order->getOrderStatus();
+            })->attach(OrderStatus::class),
             nova('user') ? BelongsTo::make('Customer', 'user', nova('user'))->searchable()->withSubtitles() : null,
             nova('location') ? BelongsTo::make('Location', 'location', nova('location')) : null,
             Currency::make('Item Total', 'item_amount_total')->asMinorUnits()->exceptOnForms(),

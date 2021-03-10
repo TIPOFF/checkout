@@ -12,6 +12,7 @@ use Tipoff\Authorization\AuthorizationServiceProvider;
 use Tipoff\Checkout\CheckoutServiceProvider;
 use Tipoff\Checkout\Tests\Support\Providers\NovaPackageServiceProvider;
 use Tipoff\Locations\LocationsServiceProvider;
+use Tipoff\Statuses\StatusesServiceProvider;
 use Tipoff\Support\SupportServiceProvider;
 use Tipoff\TestSupport\BaseTestCase;
 
@@ -27,6 +28,7 @@ class TestCase extends BaseTestCase
             SupportServiceProvider::class,
             LocationsServiceProvider::class,
             AddressesServiceProvider::class,
+            StatusesServiceProvider::class,
             AuthorizationServiceProvider::class,
             PermissionServiceProvider::class,
             CheckoutServiceProvider::class,
