@@ -100,6 +100,14 @@ class Cart extends BaseModel implements CartInterface
 
     //region SCOPES
 
+    public function scopeIsAbandoned(Builder $query): Builder
+    {
+        return $query->whereNull('order_id')
+            ->whereHas('cartItems', function (Builder $query) {
+                $query->expired();
+            });
+    }
+
     public function scopeActive(Builder $query): Builder
     {
         return $query->whereDoesntHave('cartItems', function (Builder $query) {
@@ -194,7 +202,7 @@ class Cart extends BaseModel implements CartInterface
 
     public static function activeCart(int $userId): CartInterface
     {
-        $cart = Cart::query()
+        $cart = static::query()
             ->where('user_id', $userId)
             ->active()
             ->orderByDesc('id')
@@ -203,6 +211,21 @@ class Cart extends BaseModel implements CartInterface
         return $cart ?: static::create([
             'user_id' => $userId,
         ]);
+    }
+
+    public static function abandonedCarts(?string $createdAfter = null, ?string $createdBefore = null): Collection
+    {
+        return static::query()
+            ->isAbandoned()
+            ->where(function (Builder $query) use ($createdBefore, $createdAfter) {
+                if ($createdAfter) {
+                    $query->where('created_at', '>=', Carbon::parse($createdAfter));
+                }
+                if ($createdBefore) {
+                    $query->where('created_at', '<=', Carbon::parse($createdBefore));
+                }
+            })
+            ->get();
     }
 
     public static function createItem(Sellable $sellable, string $itemId, $amount, int $quantity = 1): CartItemInterface
