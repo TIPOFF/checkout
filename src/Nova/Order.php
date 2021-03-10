@@ -16,7 +16,7 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Tipoff\Support\Nova\BaseResource;
 
-class Order extends BaseResource
+class Order extends BaseCheckoutResource
 {
     public static $model = \Tipoff\Checkout\Models\Order::class;
 
@@ -25,22 +25,6 @@ class Order extends BaseResource
     public static $search = [
         'order_number',
     ];
-
-    public static function indexQuery(NovaRequest $request, $query)
-    {
-        if ($request->user()->hasRole([
-            'Admin',
-            'Owner',
-            'Accountant',
-            'Executive',
-            'Reservation Manager',
-            'Reservationist',
-        ])) {
-            return $query;
-        }
-
-        return $query->whereIn('location_id', $request->user()->locations->pluck('id'));
-    }
 
     public static $group = 'Operations';
 
@@ -80,12 +64,4 @@ class Order extends BaseResource
         ]);
     }
 
-    protected function dataFields(): array
-    {
-        return array_merge(
-            parent::dataFields(),
-            $this->creatorDataFields(),
-            $this->updaterDataFields()
-        );
-    }
 }

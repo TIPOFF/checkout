@@ -6,15 +6,18 @@ namespace Tipoff\Checkout\Nova;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
+use Laravel\Nova\Fields\MorphTo;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Tipoff\Support\Nova\BaseResource;
 
-class CartItem extends BaseResource
+class CartItem extends BaseCheckoutResource
 {
     public static $model = \Tipoff\Checkout\Models\CartItem::class;
 
@@ -23,10 +26,6 @@ class CartItem extends BaseResource
     public static $search = [
 
     ];
-
-    public static function indexQuery(NovaRequest $request, $query)
-    {
-    }
 
     public static $group;
 
@@ -39,43 +38,39 @@ class CartItem extends BaseResource
     {
         return array_filter([
             ID::make()->sortable(),
+            BelongsTo::make('Cart', 'Cart', Cart::class)->sortable(),
+            Text::make('Item ID', 'item_id')->sortable(),
+            Number::make('Quantity')->sortable(),
+            Currency::make('Amount Each', 'amount_each')->asMinorUnits()->sortable(),
+            Currency::make('Discount Each', 'amount_each_discounts')->asMinorUnits()->sortable(),
+            Currency::make('Amount Total', 'amount_total')->asMinorUnits()->sortable(),
+            Currency::make('Discount Total', 'amount_total_discounts')->asMinorUnits()->sortable(),
+            Currency::make('Taxes', 'tax')->asMinorUnits()->sortable(),
         ]);
     }
 
     public function fields(Request $request)
     {
         return array_filter([
-            // Missing columns for $table->morphs('sellable')
+            BelongsTo::make('Cart', 'cart', Cart::class),
+            MorphTo::make('sellable'),
+            nova('location') ? BelongsTo::make('Location', 'location', nova('location')) : null,
             Text::make('Item id')->required(),
             Text::make('Description')->required(),
             Number::make('Quantity')->required()->min(1),
-            Number::make('Amount each')->required()->min(0)->default(0),
-            Number::make('Amount each discounts')->required()->min(0)->default(0),
-            Number::make('Amount total')->required()->min(0)->default(0),
-            Number::make('Amount total discounts')->required()->min(0)->default(0),
-            Number::make('Tax')->required()->min(0)->default(0),
+            Currency::make('Amount each')->asMinorUnits()->required()->min(0)->default(0),
+            Currency::make('Amount each discounts')->asMinorUnits()->required()->min(0)->default(0),
+            Currency::make('Amount total')->asMinorUnits()->exceptOnForms(),
+            Currency::make('Amount total discounts')->asMinorUnits()->exceptOnForms(),
+            Currency::make('Taxes')->asMinorUnits()->required()->min(0)->default(0),
             DateTime::make('Expires at')->required(),
-            Number::make('Location id')->min(0)->nullable(),
             Text::make('Tax code')->nullable(),
             // $table->json('meta_data')->nullable();
             Text::make('Meta data')->nullable(),
 
-            nova('cart') ? BelongsTo::make('Cart', 'cart', nova('cart'))->searchable() : null,
-            // In migration, parent_id
-            nova('cart-item') ? BelongsTo::make('Cart item', 'cart item', nova('cart-item'))->nullable() : null,
+            HasOne::make('Parent Item', 'parent_id', CartItem::class)->nullable(),
 
             new Panel('Data Fields', $this->dataFields()),
         ]);
-    }
-
-    protected function dataFields(): array
-    {
-        return array_merge(
-            parent::dataFields(),
-            [
-                $this->creatorDataFields(),
-                $this->updaterDataFields(),
-            ]
-        );
     }
 }

@@ -14,7 +14,7 @@ class CartPolicy
 
     public function viewAny(UserInterface $user): bool
     {
-        return false;
+        return $user->hasPermissionTo('view carts') ? true : false;
     }
 
     public function view(UserInterface $user, Cart $cart): bool

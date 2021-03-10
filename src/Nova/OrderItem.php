@@ -15,7 +15,7 @@ use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Tipoff\Support\Nova\BaseResource;
 
-class OrderItem extends BaseResource
+class OrderItem extends BaseCheckoutResource
 {
     public static $model = \Tipoff\Checkout\Models\OrderItem::class;
 
@@ -26,23 +26,7 @@ class OrderItem extends BaseResource
         'description',
     ];
 
-    public static function indexQuery(NovaRequest $request, $query)
-    {
-        if ($request->user()->hasRole([
-            'Admin',
-            'Owner',
-            'Accountant',
-            'Executive',
-            'Reservation Manager',
-            'Reservationist',
-        ])) {
-            return $query;
-        }
-
-        return $query->whereIn('location_id', $request->user()->locations->pluck('id'));
-    }
-
-    public static $group = 'Operations';
+    public static $group;
 
     public function fieldsForIndex(NovaRequest $request)
     {
@@ -75,14 +59,5 @@ class OrderItem extends BaseResource
             Text::make('Tax Code', 'tax_code')->exceptOnForms(),
             new Panel('Data Fields', $this->dataFields()),
         ]);
-    }
-
-    protected function dataFields(): array
-    {
-        return array_merge(
-            parent::dataFields(),
-            $this->creatorDataFields(),
-            $this->updaterDataFields()
-        );
     }
 }

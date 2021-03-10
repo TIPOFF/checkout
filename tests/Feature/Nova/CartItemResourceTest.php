@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Models\OrderItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 
-class OrderItemResourceTest extends TestCase
+class CartItemResourceTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -19,11 +20,11 @@ class OrderItemResourceTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        OrderItem::factory()->count(4)->withSellable($sellable)->create();
+        CartItem::factory()->count(4)->withSellable($sellable)->create();
 
-        $this->actingAs(self::createPermissionedUser('view order items', true));
+        $this->actingAs(self::createPermissionedUser('view cart items', true));
 
-        $response = $this->getJson('nova-api/order-items')
+        $response = $this->getJson('nova-api/cart-items')
             ->assertOk();
 
         $this->assertCount(4, $response->json('resources'));
@@ -35,15 +36,14 @@ class OrderItemResourceTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        $orderItem = OrderItem::factory()->withSellable($sellable)->create();
+        $cartItem = CartItem::factory()->withSellable($sellable)->create();
 
-        $this->actingAs(self::createPermissionedUser('view order items', true));
+        $this->actingAs(self::createPermissionedUser('view cart items', true));
 
-        $response = $this->getJson("nova-api/order-items/{$orderItem->id}")
+        $response = $this->getJson("nova-api/cart-items/{$cartItem->id}")
             ->assertOk();
 
-        $this->assertEquals($orderItem->id, $response->json('resource.id.value'));
+        $this->assertEquals($cartItem->id, $response->json('resource.id.value'));
     }
-
 
 }

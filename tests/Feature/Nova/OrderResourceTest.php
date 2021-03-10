@@ -24,4 +24,18 @@ class OrderResourceTest extends TestCase
 
         $this->assertCount(4, $response->json('resources'));
     }
+
+    /** @test */
+    public function show()
+    {
+        $order = Order::factory()->create();
+
+        $this->actingAs(self::createPermissionedUser('view orders', true));
+
+        $response = $this->getJson("nova-api/orders/{$order->id}")
+            ->assertOk();
+
+        $this->assertEquals($order->id, $response->json('resource.id.value'));
+    }
+
 }
