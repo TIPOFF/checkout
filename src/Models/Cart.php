@@ -110,9 +110,11 @@ class Cart extends BaseModel implements CartInterface
 
     public function scopeActive(Builder $query): Builder
     {
-        return $query->whereDoesntHave('cartItems', function (Builder $query) {
-            $query->expired();
-        });
+        return $query
+            ->whereNull('order_id')
+            ->whereDoesntHave('cartItems', function (Builder $query) {
+                $query->expired();
+            });
     }
 
     //endregion
