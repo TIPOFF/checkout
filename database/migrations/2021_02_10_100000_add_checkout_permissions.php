@@ -13,5 +13,19 @@ class AddCheckoutPermissions extends BasePermissionsMigration
             'view order items' => ['Owner', 'Staff'],
         ];
         $this->createPermissions($permissions);
+
+        $permissionsByRole = [
+            'Owner' => [
+                'view orders',
+                'view order items',
+            ],
+            'Staff' => [
+                'view orders',
+                'view order items',
+            ],
+        ];
+        foreach ($permissionsByRole as $role => $permissions) {
+            $this->addPermissionsToRole($permissions, $role);
+        }
     }
 }
