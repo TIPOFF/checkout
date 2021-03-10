@@ -38,6 +38,7 @@ class CheckoutServiceProvider extends TipoffServiceProvider
                 OrderItem::class => OrderItemPolicy::class,
             ])
             ->hasNovaResources([
+                Nova\Cart::class,
                 Nova\Order::class,
                 Nova\OrderItem::class,
             ])
