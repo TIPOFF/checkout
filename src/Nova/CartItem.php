@@ -15,7 +15,6 @@ use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
-use Tipoff\Support\Nova\BaseResource;
 
 class CartItem extends BaseCheckoutResource
 {

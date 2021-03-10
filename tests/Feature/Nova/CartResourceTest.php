@@ -6,7 +6,6 @@ namespace Tipoff\Checkout\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Checkout\Models\Cart;
-use Tipoff\Checkout\Models\Order;
 use Tipoff\Checkout\Tests\TestCase;
 
 class CartResourceTest extends TestCase

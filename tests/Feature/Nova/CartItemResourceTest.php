@@ -6,7 +6,6 @@ namespace Tipoff\Checkout\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Checkout\Models\CartItem;
-use Tipoff\Checkout\Models\OrderItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 
@@ -45,5 +44,4 @@ class CartItemResourceTest extends TestCase
 
         $this->assertEquals($cartItem->id, $response->json('resource.id.value'));
     }
-
 }

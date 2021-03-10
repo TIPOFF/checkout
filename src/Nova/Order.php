@@ -14,7 +14,6 @@ use Laravel\Nova\Fields\MorphMany;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
-use Tipoff\Support\Nova\BaseResource;
 
 class Order extends BaseCheckoutResource
 {
@@ -63,5 +62,4 @@ class Order extends BaseCheckoutResource
             new Panel('Data Fields', $this->dataFields()),
         ]);
     }
-
 }

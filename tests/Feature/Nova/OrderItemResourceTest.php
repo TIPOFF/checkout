@@ -44,6 +44,4 @@ class OrderItemResourceTest extends TestCase
 
         $this->assertEquals($orderItem->id, $response->json('resource.id.value'));
     }
-
-
 }
