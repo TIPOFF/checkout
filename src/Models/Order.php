@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Tipoff\Checkout\Enums\OrderStatus;
+use Tipoff\Addresses\Models\Address;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Checkout\Services\Cart\ActiveAdjustments;
 use Tipoff\Statuses\Traits\HasStatuses;
@@ -74,6 +75,12 @@ class Order extends BaseModel implements OrderInterface
         $order->save();
 
         $order->setOrderStatus(OrderStatus::PROCESSING());
+
+        $cart->addresses->each(function (Address $cartAddress) use ($order) {
+            // Create a copy, replacing the cart with the order before saving
+            $orderAddress = $cartAddress->replicate();
+            $orderAddress->addressable()->associate($order)->save();
+        });
 
         return $order;
     }
