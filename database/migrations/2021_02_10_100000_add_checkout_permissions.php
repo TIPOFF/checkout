@@ -10,6 +10,7 @@ class AddCheckoutPermissions extends BasePermissionsMigration
     {
         $permissions = [
             'view carts',
+            'view cart items',
             'view orders',
             'view order items',
         ];
