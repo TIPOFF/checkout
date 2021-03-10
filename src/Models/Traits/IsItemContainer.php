@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Models\Traits;
 
 use Carbon\Carbon;
+use Tipoff\Addresses\Models\Address;
+use Tipoff\Addresses\Models\DomesticAddress;
+use Tipoff\Addresses\Traits\HasAddresses;
+use Tipoff\Checkout\Enums\AddressTypes;
 use Tipoff\Checkout\Objects\ContainerPricingDetail;
 use Tipoff\Support\Contracts\Checkout\BaseItemInterface;
 use Tipoff\Support\Contracts\Models\UserInterface;
@@ -35,6 +39,7 @@ trait IsItemContainer
 {
     use HasCreator;
     use HasUpdater;
+    use HasAddresses;
 
     protected static function bootIsItemContainer()
     {
@@ -58,6 +63,26 @@ trait IsItemContainer
     //endregion
 
     //region HELPERS
+
+    public function getShippingAddress(): ?Address
+    {
+        return $this->getAddressByType(AddressTypes::SHIPPING);
+    }
+
+    public function setShippingAddress(DomesticAddress $domesticAddress): Address
+    {
+        return $this->setAddressByType(AddressTypes::SHIPPING, $domesticAddress);
+    }
+
+    public function getBillingAddress(): ?Address
+    {
+        return $this->getAddressByType(AddressTypes::BILLING);
+    }
+
+    public function setBillingAddress(DomesticAddress $domesticAddress): Address
+    {
+        return $this->setAddressByType(AddressTypes::BILLING, $domesticAddress);
+    }
 
     public function getFeeTotal(): DiscountableValue
     {
