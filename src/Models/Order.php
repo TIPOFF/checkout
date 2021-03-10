@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Tipoff\Addresses\Models\Address;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Checkout\Services\Cart\ActiveAdjustments;
 use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
@@ -69,6 +70,12 @@ class Order extends BaseModel implements OrderInterface
         $order->tax = $cart->getTax();
         $order->location_id = $cart->getLocationId();
         $order->save();
+
+        $cart->addresses->each(function (Address $cartAddress) use ($order) {
+            // Create a copy, replacing the cart with the order before saving
+            $orderAddress = $cartAddress->replicate();
+            $orderAddress->addressable()->associate($order)->save();
+        });
 
         return $order;
     }

@@ -9,6 +9,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
+use Tipoff\Checkout\Models\Order;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 
@@ -94,6 +95,23 @@ class CartModelActiveCartTest extends TestCase
                 'cart_id' => $cart,
                 'expires_at' => Carbon::now()->subMinutes(3),
             ]);
+
+        $cart = Cart::activeCart($user->id);
+
+        $this->assertEquals($activeCart->id, $cart->id);
+    }
+
+    /** @test */
+    public function cart_with_order_conversion_not_active()
+    {
+        $user = User::factory()->create();
+        $activeCart = Cart::factory()->create([
+            'user_id' => $user,
+        ]);
+        Cart::factory()->create([
+            'user_id' => $user,
+            'order_id' => Order::factory()->create(),
+        ]);
 
         $cart = Cart::activeCart($user->id);
 
