@@ -40,6 +40,10 @@ abstract class BaseItemTransformer extends BaseTransformer
             'tax_code' => $item->getTaxCode(),
             'location_id' => $item->getLocationId(),
             'meta_data' => $item->getMetaData(null),
+            'creator_id' => $item->creator_id,
+            'updater_id' => $item->updater_id,
+            'created_at' => (string) $item->created_at,
+            'updated_at' => (string) $item->updated_at,
         ];
     }
 
