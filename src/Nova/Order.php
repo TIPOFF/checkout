@@ -17,7 +17,6 @@ use Laravel\Nova\Panel;
 use Tipoff\Checkout\Enums\OrderStatus;
 use Tipoff\Support\Nova\BaseResource;
 use Tipoff\Support\Nova\Fields\Enum;
-use Tipoff\Support\Nova\Filters\EnumFilter;
 
 class Order extends BaseResource
 {
@@ -56,7 +55,7 @@ class Order extends BaseResource
     {
         return array_filter([
             ID::make()->sortable(),
-            Enum::make('OrderStatus', function(\Tipoff\Checkout\Models\Order $order) {
+            Enum::make('OrderStatus', function (\Tipoff\Checkout\Models\Order $order) {
                 return $order->getOrderStatus();
             })->attach(OrderStatus::class)->sortable(),
             Text::make('Order Number')->sortable(),
@@ -71,7 +70,7 @@ class Order extends BaseResource
     {
         return array_filter([
             Text::make('Order Number')->exceptOnForms(),
-            Enum::make('OrderStatus', function(\Tipoff\Checkout\Models\Order $order) {
+            Enum::make('OrderStatus', function (\Tipoff\Checkout\Models\Order $order) {
                 return $order->getOrderStatus();
             })->attach(OrderStatus::class),
             nova('user') ? BelongsTo::make('Customer', 'user', nova('user'))->searchable()->withSubtitles() : null,

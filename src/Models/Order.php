@@ -12,7 +12,6 @@ use Illuminate\Support\Str;
 use Tipoff\Checkout\Enums\OrderStatus;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Checkout\Services\Cart\ActiveAdjustments;
-use Tipoff\Statuses\Models\Status;
 use Tipoff\Statuses\Traits\HasStatuses;
 use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
 use Tipoff\Support\Contracts\Checkout\OrderInterface;

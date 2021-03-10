@@ -49,5 +49,4 @@ class OrderModelTest extends TestCase
 
         $this->assertEquals([OrderStatus::DELIVERING, OrderStatus::SHIPPING, OrderStatus::PROCESSING], $history);
     }
-
 }
