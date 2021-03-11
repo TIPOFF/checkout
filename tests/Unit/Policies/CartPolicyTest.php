@@ -17,7 +17,7 @@ class CartPolicyTest extends TestCase
     public function view_any()
     {
         $user = self::createPermissionedUser('view carts', true);
-        $this->assertFalse($user->can('viewAny', Cart::class));
+        $this->assertTrue($user->can('viewAny', Cart::class));
 
         $user = self::createPermissionedUser('view carts', false);
         $this->assertFalse($user->can('viewAny', Cart::class));
@@ -40,7 +40,7 @@ class CartPolicyTest extends TestCase
     {
         return [
             'view-true' => [ 'view', self::createPermissionedUser('view carts', true), true ],
-            'view-false' => [ 'view', self::createPermissionedUser('view carts', false), true ],
+            'view-false' => [ 'view', self::createPermissionedUser('view carts', false), false ],
             'create-true' => [ 'create', self::createPermissionedUser('create carts', true), true ],
             'create-false' => [ 'create', self::createPermissionedUser('create carts', false), true ],
             'update-true' => [ 'update', self::createPermissionedUser('update carts', true), false ],

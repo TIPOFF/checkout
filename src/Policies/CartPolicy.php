@@ -14,12 +14,12 @@ class CartPolicy
 
     public function viewAny(UserInterface $user): bool
     {
-        return false;
+        return $user->hasPermissionTo('view carts') ? true : false;
     }
 
     public function view(UserInterface $user, Cart $cart): bool
     {
-        return true;
+        return $cart->isOwner($user) || ($user->hasPermissionTo('view carts') ? true : false);
     }
 
     public function create(UserInterface $user): bool
