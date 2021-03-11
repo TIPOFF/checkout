@@ -53,3 +53,11 @@ All notable changes to `checkout` will be documented in this file.
 - views for cart & order
 - cart components
 - order components
+
+## 2.4.0 - 2021-03-10
+
+- implement addresses
+- migrate permissions
+- grant permissions to roles
+- register nova resources
+- allow cart item replacement
