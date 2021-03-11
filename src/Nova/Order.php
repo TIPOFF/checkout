@@ -15,7 +15,6 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Laravel\Nova\Panel;
 use Tipoff\Checkout\Enums\OrderStatus;
-use Tipoff\Support\Nova\BaseResource;
 use Tipoff\Support\Nova\Fields\Enum;
 
 class Order extends BaseCheckoutResource
