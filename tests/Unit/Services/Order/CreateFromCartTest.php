@@ -7,6 +7,7 @@ namespace Tipoff\Checkout\Tests\Unit\Services\Order;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Addresses\Models\Zip;
 use Tipoff\Authorization\Models\User;
+use Tipoff\Checkout\Enums\OrderStatus;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Models\OrderItem;
@@ -48,6 +49,7 @@ class CreateFromCartTest extends TestCase
         $this->assertEquals(321, $order->location_id);
         $this->assertEquals($user->id, $order->creator_id);
         $this->assertEquals($user->id, $order->updater_id);
+        $this->assertEquals(OrderStatus::PROCESSING, $order->getOrderStatus()->getValue());
     }
 
     /** @test */
