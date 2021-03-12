@@ -25,7 +25,7 @@ class OrderItem extends BaseCheckoutResource
         'description',
     ];
 
-    public static $group;
+    public static $group = 'Ecommerce';
 
     public function fieldsForIndex(NovaRequest $request)
     {

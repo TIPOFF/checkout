@@ -26,7 +26,7 @@ class CartItem extends BaseCheckoutResource
 
     ];
 
-    public static $group;
+    public static $group = 'Ecommerce';
 
     /** @psalm-suppress UndefinedClass */
     protected array $filterClassList = [

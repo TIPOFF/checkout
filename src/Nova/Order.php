@@ -27,7 +27,7 @@ class Order extends BaseCheckoutResource
         'order_number',
     ];
 
-    public static $group = 'Operations';
+    public static $group = 'Ecommerce';
 
     /** @psalm-suppress UndefinedClass */
     protected array $filterClassList = [
