@@ -10,7 +10,7 @@ use Tipoff\Support\Contracts\Checkout\Filters\ItemFilter as ItemFilterContract;
 class ItemFilter extends Filter implements ItemFilterContract
 {
     /**
-     * @param Location|int $location
+     * @param mixed|int $location
      * @return $this
      */
     public function byLocation($location): self
