@@ -6,7 +6,7 @@ namespace Tipoff\Checkout\Filters;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection;
 use Tipoff\Support\Contracts\Checkout\Filters\CreatedAtFilter;
 
 abstract class Filter implements CreatedAtFilter
