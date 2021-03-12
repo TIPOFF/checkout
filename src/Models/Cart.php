@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
-use Tipoff\Checkout\Filters\Cart\CartItemFilter;
 use Tipoff\Checkout\Filters\ItemFilter;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Checkout\Services\Cart\ActiveAdjustments;

@@ -7,7 +7,7 @@ namespace Tipoff\Checkout\Filters;
 use Tipoff\Locations\Models\Location;
 use Tipoff\Support\Contracts\Checkout\Filters\ItemFilter as ItemFilterContract;
 
-class ItemFilter extends Filter implements  ItemFilterContract
+class ItemFilter extends Filter implements ItemFilterContract
 {
     /**
      * @param Location|int $location

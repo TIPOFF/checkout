@@ -11,7 +11,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Tipoff\Checkout\Enums\OrderStatus;
 use Tipoff\Checkout\Filters\ItemFilter;
-use Tipoff\Checkout\Filters\Order\OrderItemFilter;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Checkout\Services\Cart\ActiveAdjustments;
 use Tipoff\Statuses\Traits\HasStatuses;

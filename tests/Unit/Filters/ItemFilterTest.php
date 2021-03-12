@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Tests\Unit\Filters;
 
-
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
-use Tipoff\Checkout\Models\CartItem;
-use Tipoff\Checkout\Models\OrderItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Locations\Models\Location;
@@ -223,7 +220,6 @@ class ItemFilterTest extends TestCase
                 ->apply();
 
             $this->assertCount(2, $items);
-
         } finally {
             Carbon::setTestNow(null);
         }
