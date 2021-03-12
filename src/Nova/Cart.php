@@ -23,7 +23,7 @@ class Cart extends BaseCheckoutResource
 
     ];
 
-    public static $group = 'operations';
+    public static $group = 'Ecommerce';
 
     /** @psalm-suppress UndefinedClass */
     protected array $filterClassList = [
