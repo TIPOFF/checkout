@@ -20,7 +20,10 @@ abstract class Filter implements CreatedAtFilter
 
     public function apply(): Collection
     {
-        return $this->query->get();
+        /** @var Collection $result */
+        $result = $this->query->get();
+
+        return $result;
     }
 
     /**
