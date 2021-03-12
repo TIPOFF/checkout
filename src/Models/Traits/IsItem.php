@@ -79,8 +79,8 @@ trait IsItem
     public function scopeBySellableId(Builder $query, Sellable $sellable, string $itemId): Builder
     {
         return $query->where(function ($query) use ($sellable, $itemId) {
-            $query->where('sellable_type', '=', $sellable->getMorphClass());
-            $query->where('item_id', '=', $itemId);
+            $query->bySellableType($sellable->getMorphClass(), false);
+            $query->byItemId($itemId);
         });
     }
 
@@ -92,6 +92,38 @@ trait IsItem
     public function scopeIsChildItem(Builder $query): Builder
     {
         return $query->whereNotNull('parent_id');
+    }
+
+    public function scopeBySellableType(Builder $query, string $type, bool $includeChildren = true): Builder
+    {
+        return $query->where(function (Builder $query) use ($type, $includeChildren) {
+            $query->where('sellable_type', '=', $type);
+            if ($includeChildren) {
+                $query->orWhereHas('parent', function (Builder $q) use ($type) {
+                    $q->where('sellable_type', '=', $type);
+                });
+            }
+        });
+    }
+
+    public function scopeByItemId(Builder $query, string $itemId): Builder
+    {
+        return $query->where('item_id', '=', $itemId);
+    }
+
+    public function scopeByLocationId(Builder $query, int $locationId): Builder
+    {
+        return $query->where('location_id', '=', $locationId);
+    }
+
+    public function scopeByStartDate(Builder $query, Carbon $startDate): Builder
+    {
+        return $query->where('created_at', '>=', $startDate);
+    }
+
+    public function scopeByEndDate(Builder $query, Carbon $endDate): Builder
+    {
+        return $query->where('created_at', '<=', $endDate);
     }
 
     //endregion
