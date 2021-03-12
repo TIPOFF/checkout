@@ -16,9 +16,9 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "tipoff/authorization": "^2.5.0",
-        "tipoff/locations": "^2.5.1",
-        "tipoff/statuses": "^2.0.2",
+        "tipoff/authorization": "^2.5.4",
+        "tipoff/locations": "^2.5.3",
+        "tipoff/statuses": "^2.0.4",
         "tipoff/support": "dev-pdbreen/feature/checkout-item as 1.6.1"
     },
     "require-dev": {

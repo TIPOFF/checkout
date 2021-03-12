@@ -61,3 +61,7 @@ All notable changes to `checkout` will be documented in this file.
 - grant permissions to roles
 - register nova resources
 - allow cart item replacement
+
+## 2.4.1 - 2021-03-12
+
+- nova resource group
