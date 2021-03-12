@@ -10,6 +10,8 @@ use Tipoff\Addresses\Models\DomesticAddress;
 use Tipoff\Addresses\Traits\HasAddresses;
 use Tipoff\Checkout\Enums\AddressTypes;
 use Tipoff\Checkout\Objects\ContainerPricingDetail;
+use Tipoff\Checkout\Objects\ItemFilter;
+use Tipoff\Checkout\Objects\FilterResult;
 use Tipoff\Support\Contracts\Checkout\BaseItemInterface;
 use Tipoff\Support\Contracts\Models\UserInterface;
 use Tipoff\Support\Contracts\Sellable\Fee;

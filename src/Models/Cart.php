@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
+use Tipoff\Checkout\Filters\Cart\CartItemFilter;
+use Tipoff\Checkout\Filters\ItemFilter;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
 use Tipoff\Checkout\Services\Cart\ActiveAdjustments;
 use Tipoff\Checkout\Services\Cart\ApplyCode;
@@ -228,6 +230,11 @@ class Cart extends BaseModel implements CartInterface
                 }
             })
             ->get();
+    }
+
+    public static function itemFilter(): ItemFilter
+    {
+        return new ItemFilter(CartItem::query());
     }
 
     public static function createItem(Sellable $sellable, string $itemId, $amount, int $quantity = 1): CartItemInterface

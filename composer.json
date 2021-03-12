@@ -19,7 +19,7 @@
         "tipoff/authorization": "^2.5.0",
         "tipoff/locations": "^2.5.1",
         "tipoff/statuses": "^2.0.2",
-        "tipoff/support": "^1.5.12"
+        "tipoff/support": "dev-pdbreen/feature/checkout-item as 1.6.1"
     },
     "require-dev": {
         "tipoff/test-support": "^1.2.0"
