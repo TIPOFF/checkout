@@ -14,26 +14,26 @@ class Purchase
 {
     public function __invoke(Cart $cart, $paymentMethod): Order
     {
+
         /** @var PaymentInterface $service */
         $service = findService(PaymentInterface::class);
-        if ($service) {
-            return DB::transaction(function () use ($service, $cart, $paymentMethod) {
-                $cart->verifyPurchasable();
+        throw_unless($service, PaymentNotAvailableException::class);
 
-                $payment = $service::createPayment(
-                    $cart->getLocationId(),
-                    $cart->getUser(),
-                    $cart->getBalanceDue(),
-                    $paymentMethod
-                );
+        return DB::transaction(function () use ($service, $cart, $paymentMethod) {
+            $cart->verifyPurchasable();
 
-                $order = $cart->completePurchase();
-                $payment->attachOrder($order);
+            $payment = $service::createPayment(
+                $cart->getLocationId(),
+                $cart->getUser(),
+                $cart->getBalanceDue(),
+                $paymentMethod,
+                'online'
+            );
 
-                return $order;
-            });
-        }
+            $order = $cart->completePurchase();
+            $payment->attachOrder($order);
 
-        throw new PaymentNotAvailableException();
+            return $order;
+        });
     }
 }
