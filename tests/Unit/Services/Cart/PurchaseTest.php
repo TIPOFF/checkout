@@ -8,8 +8,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
-use Tipoff\Checkout\Models\CartItem;
-use Tipoff\Checkout\Services\Cart\CompletePurchase;
 use Tipoff\Checkout\Services\Cart\Purchase;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
