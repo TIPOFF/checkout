@@ -10,12 +10,14 @@ use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Services\Cart\CompletePurchase;
+use Tipoff\Checkout\Services\Cart\Purchase;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
+use Tipoff\Support\Contracts\Payment\PaymentInterface;
 use Tipoff\Support\Events\Checkout\OrderCreated;
 use Tipoff\Support\Events\Checkout\OrderItemCreated;
 
-class CompletePurchaseTest extends TestCase
+class PurchaseTest extends TestCase
 {
     use DatabaseTransactions;
 
@@ -24,6 +26,11 @@ class CompletePurchaseTest extends TestCase
         parent::setUp();
 
         TestSellable::createTable();
+
+        $service = \Mockery::mock(PaymentInterface::class);
+        $service->shouldReceive('createPayment', 'attachOrder')
+            ->andReturnSelf();
+        $this->app->instance(PaymentInterface::class, $service);
     }
 
     /** @test */
@@ -43,53 +50,19 @@ class CompletePurchaseTest extends TestCase
 
         $cart->upsertItem(
             Cart::createItem($sellable, 'item-id', 1234, 2)
+                ->setLocationId(123)
         );
 
         $this->actingAs($user);
 
-        $handler = $this->app->make(CompletePurchase::class);
-        $order = ($handler)($cart);
+        $handler = $this->app->make(Purchase::class);
+        $order = ($handler)($cart, 'paymethod');
 
         $cart->refresh();
         $this->assertNotNull($cart->deleted_at);
         $this->assertEquals($cart->order_id, $order->id);
 
         Event::assertDispatched(OrderItemCreated::class, 1);
-        Event::assertDispatched(OrderCreated::class, 1);
-    }
-
-    /** @test */
-    public function purchase_linked_items_cart()
-    {
-        Event::fake([
-            OrderItemCreated::class,
-            OrderCreated::class,
-        ]);
-
-        $user = User::factory()->create();
-
-        /** @var Cart $cart */
-        $cart = Cart::factory()->create();
-
-        $sellable = TestSellable::factory()->create();
-
-        /** @var CartItem $parent */
-        $parent = $cart->upsertItem(
-            Cart::createItem($sellable, 'parent', 1000, 1)
-        );
-
-        $child = Cart::createItem($sellable, 'child', 200, 1)
-            ->setParentItem($parent);
-        $cart->upsertItem($child);
-
-        $cart->upsertItem(Cart::createItem($sellable, 'root', 0, 1));
-
-        $this->actingAs($user);
-
-        $handler = $this->app->make(CompletePurchase::class);
-        ($handler)($cart);
-
-        Event::assertDispatched(OrderItemCreated::class, 3);
         Event::assertDispatched(OrderCreated::class, 1);
     }
 }

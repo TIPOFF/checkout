@@ -19,7 +19,7 @@
         "tipoff/authorization": "^2.5.5",
         "tipoff/locations": "^2.5.4",
         "tipoff/statuses": "^2.0.4",
-        "tipoff/support": "^1.6.3"
+        "tipoff/support": "dev-pdbreen/feature/payment-interface as 1.6.3"
     },
     "require-dev": {
         "tipoff/test-support": "^1.2.0"
