@@ -9,10 +9,10 @@ class AddCheckoutPermissions extends BasePermissionsMigration
     public function up()
     {
         $permissions = [
-            'view carts' => ['Owner', 'Staff'],
-            'view cart items' => ['Owner', 'Staff'],
-            'view orders' => ['Owner', 'Staff'],
-            'view order items' => ['Owner', 'Staff'],
+            'view carts' => ['Owner', 'Executive', 'Staff'],
+            'view cart items' => ['Owner', 'Executive', 'Staff'],
+            'view orders' => ['Owner', 'Executive', 'Staff'],
+            'view order items' => ['Owner', 'Executive', 'Staff'],
         ];
         
         $this->createPermissions($permissions);
