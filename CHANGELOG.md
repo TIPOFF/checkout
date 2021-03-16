@@ -69,3 +69,7 @@ All notable changes to `checkout` will be documented in this file.
 ## 2.4.2 - 2021-03-12
 
 - implement item filtering
+
+## 2.5.0 - 2021-03-16
+
+- add purchase with paymethod service
