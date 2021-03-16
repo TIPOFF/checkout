@@ -20,12 +20,14 @@ use Tipoff\Checkout\Services\Cart\ApplyCredits;
 use Tipoff\Checkout\Services\Cart\ApplyDiscounts;
 use Tipoff\Checkout\Services\Cart\ApplyTaxes;
 use Tipoff\Checkout\Services\Cart\CompletePurchase;
+use Tipoff\Checkout\Services\Cart\Purchase;
 use Tipoff\Checkout\Services\Cart\VerifyPurchasable;
 use Tipoff\Checkout\Services\CartItem\AddToCart;
 use Tipoff\Checkout\Services\CartItem\UpdateInCart;
 use Tipoff\Support\Contracts\Checkout\CartInterface;
 use Tipoff\Support\Contracts\Checkout\CartItemInterface;
 use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
+use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Models\UserInterface;
 use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Events\Checkout\CartUpdated;
@@ -38,6 +40,7 @@ use Tipoff\Support\Traits\HasPackageFactory;
  * // Relations
  * @property Order|null order
  * @property Collection cartItems
+ * @property int|null order_id
  */
 class Cart extends BaseModel implements CartInterface
 {
@@ -60,6 +63,7 @@ class Cart extends BaseModel implements CartInterface
         'credits' => 'integer',
         'tax' => 'integer',
         'user_id' => 'integer',
+        'order_id' => 'integer',
         'location_id' => 'integer',
         'creator_id' => 'integer',
         'updater_id' => 'integer',
@@ -343,6 +347,11 @@ class Cart extends BaseModel implements CartInterface
         app(ApplyCode::class)($this, $code);
 
         return $this->updatePricing();
+    }
+
+    public function purchase($paymentMethod): OrderInterface
+    {
+        return app(Purchase::class)($this, $paymentMethod);
     }
 
     //endregion

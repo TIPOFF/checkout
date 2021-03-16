@@ -35,7 +35,7 @@ class CreateCartItemsTable extends Migration
             $table->unsignedInteger('tax')->default(0);
 
             $table->dateTime('expires_at');
-            $table->unsignedInteger('location_id')->nullable();
+            $table->unsignedBigInteger('location_id')->nullable();
             $table->string('tax_code')->nullable();
             $table->json('meta_data')->nullable();
 
