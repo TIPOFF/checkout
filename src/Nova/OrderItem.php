@@ -6,7 +6,9 @@ namespace Tipoff\Checkout\Nova;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\Currency;
+use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\MorphTo;
 use Laravel\Nova\Fields\Number;
@@ -46,7 +48,12 @@ class OrderItem extends BaseCheckoutResource
     {
         return array_filter([
             BelongsTo::make('Order', 'order', Order::class),
-            MorphTo::make('sellable'),
+            MorphTo::make('sellable')->types(array_filter([
+                nova('booking'),
+                nova('product'),
+                nova('fee'),
+                nova('voucher_type'),
+            ])),
             nova('location') ? BelongsTo::make('Location', 'location', nova('location')) : null,
             Text::make('Item ID', 'item_id')->exceptOnForms(),
             Number::make('Quantity')->exceptOnForms(),
@@ -56,6 +63,10 @@ class OrderItem extends BaseCheckoutResource
             Currency::make('Discount Total', 'amount_total_discounts')->asMinorUnits()->exceptOnForms(),
             Currency::make('Taxes', 'tax')->asMinorUnits()->exceptOnForms(),
             Text::make('Tax Code', 'tax_code')->exceptOnForms(),
+
+            Code::make('Meta data')->json()->nullable(),
+            HasOne::make('Parent Item', 'parent', OrderItem::class)->nullable(),
+
             new Panel('Data Fields', $this->dataFields()),
         ]);
     }

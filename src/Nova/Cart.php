@@ -52,10 +52,13 @@ class Cart extends BaseCheckoutResource
             Currency::make('Item amount total discounts')->asMinorUnits()->exceptOnForms(),
             Currency::make('Tax')->asMinorUnits()->exceptOnForms(),
 
+            nova('address') ? HasMany::make('Addresses', 'addresses', nova('address')) : null,
+            nova('discount') ? HasMany::make('Discounts', 'discounts', nova('discount')) : null,
+            nova('voucher') ? HasMany::make('Vouchers', 'voucher', nova('voucher')) : null,
             nova('location') ? BelongsTo::make('Location', 'location', nova('location')) : null,
             nova('user') ? BelongsTo::make('User', 'user', nova('user'))->searchable() : null,
             nova('order') ? BelongsTo::make('Order', 'order', nova('order'))->nullable() : null,
-            nova('cart-item') ? HasMany::make('Cart items', 'cart items', nova('cart-item'))->nullable() : null,
+            HasMany::make('Cart items', 'cart items', CartItem::class)->nullable(),
 
             new Panel('Data Fields', $this->dataFields()),
         ]);

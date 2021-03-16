@@ -61,9 +61,7 @@ class CartItem extends BaseModel implements CartItemInterface
 
         static::creating(function (CartItem $item) {
             $item->expires_at = $item->expires_at ?? Carbon::now()->addMonths(3);    // TODO - move default to const or config
-        });
 
-        static::creating(function (CartItem $item) {
             /** @psalm-suppress TooManyArguments */
             CartItemCreated::dispatch($item);
         });
@@ -73,9 +71,19 @@ class CartItem extends BaseModel implements CartItemInterface
             CartItemUpdated::dispatch($item);
         });
 
+        static::saved(function (CartItem $item) {
+            $item->load('cart');
+            optional($item->cart)->touch();
+        });
+
         static::deleting(function (CartItem $item) {
             /** @psalm-suppress TooManyArguments */
             CartItemRemoved::dispatch($item);
+        });
+
+        static::deleted(function (CartItem $item) {
+            $item->load('cart');
+            optional($item->cart)->touch();
         });
     }
 
