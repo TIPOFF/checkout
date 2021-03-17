@@ -19,7 +19,7 @@
         "tipoff/authorization": "^2.5.5",
         "tipoff/locations": "^2.6.0",
         "tipoff/statuses": "^2.0.5",
-        "tipoff/support": "^1.7.0"
+        "tipoff/support": "^1.7.2"
     },
     "require-dev": {
         "tipoff/test-support": "^1.3.0"
