@@ -6,6 +6,7 @@ namespace Tipoff\Checkout\Nova;
 
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Fields\Currency;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\HasOne;
@@ -52,7 +53,12 @@ class CartItem extends BaseCheckoutResource
     {
         return array_filter([
             BelongsTo::make('Cart', 'cart', Cart::class),
-            MorphTo::make('sellable'),
+            MorphTo::make('sellable')->types(array_filter([
+                nova('booking'),
+                nova('product'),
+                nova('fee'),
+                nova('voucher_type'),
+            ])),
             nova('location') ? BelongsTo::make('Location', 'location', nova('location')) : null,
             Text::make('Item id')->required(),
             Text::make('Description')->required(),
@@ -61,13 +67,12 @@ class CartItem extends BaseCheckoutResource
             Currency::make('Amount each discounts')->asMinorUnits()->required()->min(0)->default(0),
             Currency::make('Amount total')->asMinorUnits()->exceptOnForms(),
             Currency::make('Amount total discounts')->asMinorUnits()->exceptOnForms(),
-            Currency::make('Taxes')->asMinorUnits()->required()->min(0)->default(0),
+            Currency::make('Taxes', 'tax')->asMinorUnits()->required()->min(0)->default(0),
             DateTime::make('Expires at')->required(),
             Text::make('Tax code')->nullable(),
-            // $table->json('meta_data')->nullable();
-            Text::make('Meta data')->nullable(),
 
-            HasOne::make('Parent Item', 'parent_id', CartItem::class)->nullable(),
+            Code::make('Meta data')->json()->nullable(),
+            HasOne::make('Parent Item', 'parent', CartItem::class)->nullable(),
 
             new Panel('Data Fields', $this->dataFields()),
         ]);

@@ -62,6 +62,7 @@ class Order extends BaseCheckoutResource
             Currency::make('Item Total Discounts', 'item_amount_total_discounts')->asMinorUnits()->exceptOnForms(),
             Currency::make('Taxes', 'tax')->asMinorUnits()->exceptOnForms(),
             HasMany::make('Items', 'orderItems', OrderItem::class),
+            nova('address') ? HasMany::make('Addresses', 'addresses', nova('address')) : null,
             nova('payment') ? HasMany::make('Payments', 'payments', nova('payment')) : null,
             nova('invoice') ? HasMany::make('Invoices', 'invoices', nova('invoice')) : null,
             nova('discount') ? HasMany::make('Discounts', 'discounts', nova('discount')) : null,

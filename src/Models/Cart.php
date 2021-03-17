@@ -101,6 +101,16 @@ class Cart extends BaseModel implements CartInterface
         return $this->belongsTo(Order::class);
     }
 
+    public function discounts()
+    {
+        return $this->belongsToMany(app('discount'));
+    }
+
+    public function vouchers()
+    {
+        return $this->belongsToMany(app('voucher'));
+    }
+
     //endregion
 
     //region SCOPES
