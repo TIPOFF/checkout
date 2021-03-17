@@ -73,3 +73,7 @@ All notable changes to `checkout` will be documented in this file.
 ## 2.5.0 - 2021-03-16
 
 - add purchase with paymethod service
+
+## 2.5.1 - 2021-03-16
+
+- improve nova resources
