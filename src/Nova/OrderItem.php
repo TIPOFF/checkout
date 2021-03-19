@@ -29,6 +29,19 @@ class OrderItem extends BaseCheckoutResource
 
     public static $group = 'Ecommerce';
 
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        if ($request->user()->hasRole([
+            'Admin',
+            'Owner',
+            'Executive',
+        ])) {
+            return $query;
+        }
+
+        return $query->whereIn('location_id', $request->user()->locations->pluck('id'));
+    }
+
     public function fieldsForIndex(NovaRequest $request)
     {
         return [

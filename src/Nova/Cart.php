@@ -30,6 +30,19 @@ class Cart extends BaseCheckoutResource
         \Tipoff\Locations\Nova\Filters\Location::class,
     ];
 
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        if ($request->user()->hasRole([
+            'Admin',
+            'Owner',
+            'Executive',
+        ])) {
+            return $query;
+        }
+
+        return $query->whereIn('location_id', $request->user()->locations->pluck('id'));
+    }
+
     public function fieldsForIndex(NovaRequest $request)
     {
         return array_filter([
