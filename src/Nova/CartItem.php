@@ -34,6 +34,15 @@ class CartItem extends BaseCheckoutResource
 
     ];
 
+    public static function indexQuery(NovaRequest $request, $query)
+    {
+        if ($request->user()->hasPermissionTo('all locations')) {
+            return $query;
+        }
+
+        return $query->whereIn('location_id', $request->user()->locations->pluck('id'));
+    }
+
     public function fieldsForIndex(NovaRequest $request)
     {
         return array_filter([
