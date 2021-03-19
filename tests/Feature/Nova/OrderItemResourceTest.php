@@ -48,7 +48,7 @@ class OrderItemResourceTest extends TestCase
         $response = $this->getJson(self::NOVA_ROUTE)
             ->assertOk();
 
-        $this->assertCount(5, $response->json('resources'));
+        $this->assertCount(2, $response->json('resources'));
     }
 
     /**
