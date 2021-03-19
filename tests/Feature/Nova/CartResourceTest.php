@@ -7,8 +7,6 @@ namespace Tipoff\Checkout\Tests\Feature\Nova;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
-use Tipoff\Checkout\Models\CartItem;
-use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Locations\Models\Location;
 
