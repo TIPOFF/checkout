@@ -6,11 +6,13 @@ namespace Tipoff\Checkout\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Tipoff\Checkout\Models\OrderItem;
+use Tipoff\Locations\Traits\HasLocationPermissions;
 use Tipoff\Support\Contracts\Models\UserInterface;
 
 class OrderItemPolicy
 {
     use HandlesAuthorization;
+    use HasLocationPermissions;
 
     public function viewAny(UserInterface $user): bool
     {
@@ -19,7 +21,7 @@ class OrderItemPolicy
 
     public function view(UserInterface $user, OrderItem $orderItem): bool
     {
-        return $orderItem->isOwner($user) || ($user->hasPermissionTo('view order items') ? true : false);
+        return $orderItem->isOwner($user) || $this->hasLocationPermission($user, 'view order items', $orderItem->location_id);
     }
 
     public function create(UserInterface $user): bool
