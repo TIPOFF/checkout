@@ -6,11 +6,13 @@ namespace Tipoff\Checkout\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Tipoff\Checkout\Models\Order;
+use Tipoff\Locations\Traits\HasLocationPermissions;
 use Tipoff\Support\Contracts\Models\UserInterface;
 
 class OrderPolicy
 {
     use HandlesAuthorization;
+    use HasLocationPermissions;
 
     public function viewAny(UserInterface $user): bool
     {
@@ -19,7 +21,8 @@ class OrderPolicy
 
     public function view(UserInterface $user, Order $order): bool
     {
-        return $order->isOwner($user) || ($user->hasPermissionTo('view orders') ? true : false);
+        /** @psalm-suppress  UndefinedMagicPropertyFetch */
+        return $order->isOwner($user) || $this->hasLocationPermission($user, 'view orders', $order->location_id);
     }
 
     public function create(UserInterface $user): bool
