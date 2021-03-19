@@ -44,29 +44,7 @@ class OrderItemPolicyTest extends TestCase
     {
         return [
             'view' => [ 'view', true ],
-            'create' => [ 'create', true ],
-            'update' => [ 'update', true ],
-            'delete' => [ 'delete', true ],
-        ];
-    }
-
-    /**
-     * @test
-     * @dataProvider data_provider_for_all_permissions_not_owner
-     */
-    public function all_permissions_not_owner(string $permission, bool $expected)
-    {
-        $orderItem = OrderItem::factory()->make();
-        $user = User::factory()->create();
-
-        $this->assertEquals($expected, $user->can($permission, $orderItem));
-    }
-
-    public function data_provider_for_all_permissions_not_owner()
-    {
-        return [
-            'view' => [ 'view', false ],
-            'create' => [ 'create', true ],
+            'create' => [ 'create', false ],
             'update' => [ 'update', false ],
             'delete' => [ 'delete', false ],
         ];
