@@ -45,6 +45,8 @@ class CartItemResourceTest extends TestCase
         $this->assertCount(5, $response->json('resources'));
         
         $user->revokePermissionTo('all locations');
+        $this->actingAs($user->refresh());
+
         $response = $this->getJson(self::NOVA_ROUTE)
             ->assertOk();
 
