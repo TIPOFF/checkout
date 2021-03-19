@@ -6,11 +6,13 @@ namespace Tipoff\Checkout\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Tipoff\Checkout\Models\Cart;
+use Tipoff\Locations\Traits\HasLocationPermissions;
 use Tipoff\Support\Contracts\Models\UserInterface;
 
 class CartPolicy
 {
     use HandlesAuthorization;
+    use HasLocationPermissions;
 
     public function viewAny(UserInterface $user): bool
     {
@@ -19,7 +21,8 @@ class CartPolicy
 
     public function view(UserInterface $user, Cart $cart): bool
     {
-        return $cart->isOwner($user) || ($user->hasPermissionTo('view carts') ? true : false);
+        /** @psalm-suppress  UndefinedMagicPropertyFetch */
+        return $cart->isOwner($user) || $this->hasLocationPermission($user, 'view carts', $cart->location_id);
     }
 
     public function create(UserInterface $user): bool

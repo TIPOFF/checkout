@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
@@ -37,7 +38,7 @@ class CartItemResourceTest extends TestCase
 
         $cartItem = CartItem::factory()->withSellable($sellable)->create();
 
-        $this->actingAs(self::createPermissionedUser('view cart items', true));
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
 
         $response = $this->getJson("nova-api/cart-items/{$cartItem->id}")
             ->assertOk();
