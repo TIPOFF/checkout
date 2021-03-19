@@ -51,16 +51,6 @@ class CartItemResourceTest extends TestCase
         $this->assertCount(2, $response->json('resources'));
     }
 
-    public function dataProviderForIndexRoleLocationFilter()
-    {
-        return [
-            'Admin' => ['Admin', false],
-            'Owner' => ['Owner', false],
-            'Executive' => ['Executive', false],
-            'Staff' => ['Staff', true],
-        ];
-    }
-
     /**
      * @dataProvider dataProviderForIndexByRole
      * @test
