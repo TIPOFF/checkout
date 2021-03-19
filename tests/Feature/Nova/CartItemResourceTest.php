@@ -57,6 +57,7 @@ class CartItemResourceTest extends TestCase
             'Admin' => ['Admin', false],
             'Owner' => ['Owner', false],
             'Executive' => ['Executive', false],
+            'Staff' => ['Staff', true],
         ];
     }
 
@@ -91,6 +92,7 @@ class CartItemResourceTest extends TestCase
             'Admin' => ['Admin', true, true],
             'Owner' => ['Owner', true, true],
             'Executive' => ['Executive', true, true],
+            'Staff' => ['Staff', true, false],
             'Former Staff' => ['Former Staff', true, false],
             'Customer' => ['Customer', true, false],
             'No Role' => [null, true, false],
@@ -128,6 +130,7 @@ class CartItemResourceTest extends TestCase
             'Admin' => ['Admin', true, true],
             'Owner' => ['Owner', true, true],
             'Executive' => ['Executive', true, true],
+            'Staff' => ['Staff', true, false],
             'Former Staff' => ['Former Staff', false, false],
             'Customer' => ['Customer', false, false],
             'No Role' => [null, false, false],
