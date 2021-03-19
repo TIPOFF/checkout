@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\OrderItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
@@ -21,7 +22,7 @@ class OrderItemResourceTest extends TestCase
 
         OrderItem::factory()->count(4)->withSellable($sellable)->create();
 
-        $this->actingAs(self::createPermissionedUser('view order items', true));
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
 
         $response = $this->getJson('nova-api/order-items')
             ->assertOk();
@@ -37,7 +38,7 @@ class OrderItemResourceTest extends TestCase
 
         $orderItem = OrderItem::factory()->withSellable($sellable)->create();
 
-        $this->actingAs(self::createPermissionedUser('view order items', true));
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
 
         $response = $this->getJson("nova-api/order-items/{$orderItem->id}")
             ->assertOk();

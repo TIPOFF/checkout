@@ -22,7 +22,7 @@ class CartItemResourceTest extends TestCase
 
         CartItem::factory()->count(4)->withSellable($sellable)->create();
 
-        $this->actingAs(self::createPermissionedUser('view cart items', true));
+        $this->actingAs(User::factory()->create()->assignRole('Admin'));
 
         $response = $this->getJson('nova-api/cart-items')
             ->assertOk();
