@@ -31,20 +31,20 @@ class OrderResourceTest extends TestCase
         ]);
 
         /** @var User $user */
-        $user = User::factory()->create()->assignRole('Staff');
+        $user = User::factory()->create()->assignRole('Admin');
         $user->locations()->attach($location1);
         $this->actingAs($user);
 
         $response = $this->getJson(self::NOVA_ROUTE)
             ->assertOk();
 
-        $this->assertCount(2, $response->json('resources'));
+        $this->assertCount(5, $response->json('resources'));
         
-        $user->givePermissionTo('all locations');
+        $user->revokePermissionTo('all locations');
         $response = $this->getJson(self::NOVA_ROUTE)
             ->assertOk();
 
-        $this->assertCount(5, $response->json('resources'));
+        $this->assertCount(2, $response->json('resources'));
     }
 
     /**
