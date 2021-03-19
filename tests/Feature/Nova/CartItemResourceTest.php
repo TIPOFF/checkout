@@ -17,11 +17,8 @@ class CartItemResourceTest extends TestCase
 
     private const NOVA_ROUTE = 'nova-api/cart-items';
 
-    /**
-     * @dataProvider dataProviderForIndexRoleLocationFilter
-     * @test
-     */
-    public function index_role_location_filter(string $role, bool $isRoleLocationFiltered)
+    /** @test */
+    public function index_role_location_filter()
     {
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
@@ -38,17 +35,20 @@ class CartItemResourceTest extends TestCase
         ]);
 
         /** @var User $user */
-        $user = User::factory()->create();
-        if ($role) {
-            $user->assignRole($role);
-        }
+        $user = User::factory()->create()->assignRole('Admin');
         $user->locations()->attach($location1);
         $this->actingAs($user);
 
         $response = $this->getJson(self::NOVA_ROUTE)
             ->assertOk();
 
-        $this->assertCount($isRoleLocationFiltered ? 2 : 5, $response->json('resources'));
+        $this->assertCount(5, $response->json('resources'));
+        
+        $user->revokePermissionTo('all locations');
+        $response = $this->getJson(self::NOVA_ROUTE)
+            ->assertOk();
+
+        $this->assertCount(2, $response->json('resources'));
     }
 
     public function dataProviderForIndexRoleLocationFilter()
