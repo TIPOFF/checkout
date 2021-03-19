@@ -130,7 +130,7 @@ class CartItemResourceTest extends TestCase
             'Admin' => ['Admin', true, true],
             'Owner' => ['Owner', true, true],
             'Executive' => ['Executive', true, true],
-            'Staff' => ['Staff', true, false],
+            'Staff' => ['Staff', false, false],
             'Former Staff' => ['Former Staff', false, false],
             'Customer' => ['Customer', false, false],
             'No Role' => [null, false, false],
