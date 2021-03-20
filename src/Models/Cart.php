@@ -93,12 +93,12 @@ class Cart extends BaseModel implements CartInterface
 
     public function cartItems()
     {
-        return $this->hasMany(CartItem::class);
+        return $this->hasMany(app('cart_item'));
     }
 
     public function order()
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(app('order'));
     }
 
     public function discounts()
