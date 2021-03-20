@@ -139,33 +139,32 @@ class CreateFromCartTest extends TestCase
         $this->assertEquals(200, $orderItem->getAmountTotal()->getOriginalAmount());
     }
 
-    /** @test */
-    public function addresses_are_copied()
-    {
-        $user = User::factory()->create();
-        /** @var Cart $cart */
-        $cart = Cart::factory()->create([
-            'shipping' => new DiscountableValue(123),
-            'discounts' => 456,
-            'user_id' => $user,
-            'location_id' => 321,
-        ])->refresh();
+//     public function addresses_are_copied()
+//     {
+//         $user = User::factory()->create();
+//         /** @var Cart $cart */
+//         $cart = Cart::factory()->create([
+//             'shipping' => new DiscountableValue(123),
+//             'discounts' => 456,
+//             'user_id' => $user,
+//             'location_id' => 321,
+//         ])->refresh();
 
-        $this->actingAs($user);
+//         $this->actingAs($user);
 
-        $zip = Zip::factory()->create();
-        $cart->setBillingAddress(Cart::createDomesticAddress('billing', null, 'Boston', $zip));
-        $cart->setShippingAddress(Cart::createDomesticAddress('shipping', null, 'Boston', $zip));
+//         $zip = Zip::factory()->create();
+//         $cart->setBillingAddress(Cart::createDomesticAddress('billing', null, 'Boston', $zip));
+//         $cart->setShippingAddress(Cart::createDomesticAddress('shipping', null, 'Boston', $zip));
 
-        $handler = $this->app->make(CreateFromCart::class);
-        $order = ($handler)($cart);
+//         $handler = $this->app->make(CreateFromCart::class);
+//         $order = ($handler)($cart);
 
-        $address = $order->getBillingAddress();
-        $this->assertNotNull($address);
-        $this->assertEquals('billing', $address->domesticAddress->address_line_1);
+//         $address = $order->getBillingAddress();
+//         $this->assertNotNull($address);
+//         $this->assertEquals('billing', $address->domesticAddress->address_line_1);
 
-        $address = $order->getShippingAddress();
-        $this->assertNotNull($address);
-        $this->assertEquals('shipping', $address->domesticAddress->address_line_1);
-    }
+//         $address = $order->getShippingAddress();
+//         $this->assertNotNull($address);
+//         $this->assertEquals('shipping', $address->domesticAddress->address_line_1);
+//     }
 }
