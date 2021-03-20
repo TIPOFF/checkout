@@ -77,3 +77,7 @@ All notable changes to `checkout` will be documented in this file.
 ## 2.5.1 - 2021-03-16
 
 - improve nova resources
+
+## 2.5.2 - 2021-03-20
+
+- enforce limited location access for some roles
