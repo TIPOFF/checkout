@@ -91,7 +91,7 @@ class CartItem extends BaseModel implements CartItemInterface
 
     public function cart()
     {
-        return $this->belongsTo(Cart::class);
+        return $this->belongsTo(app('cart'));
     }
 
     //endregion
