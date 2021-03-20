@@ -79,7 +79,7 @@ class OrderItem extends BaseModel implements OrderItemInterface
 
     public function order()
     {
-        return $this->belongsTo(Order::class);
+        return $this->belongsTo(app('order'));
     }
 
     //endregion

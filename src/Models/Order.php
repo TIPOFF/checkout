@@ -109,12 +109,12 @@ class Order extends BaseModel implements OrderInterface
 
     public function orderItems()
     {
-        return $this->hasMany(OrderItem::class);
+        return $this->hasMany(app('order_item'));
     }
 
     public function cart()
     {
-        return $this->hasOne(Cart::class);
+        return $this->hasOne(app('cart'));
     }
 
     public function purchasedVouchers()
