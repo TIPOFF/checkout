@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Spatie\Permission\Models\Role;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Order;
 use Tipoff\Checkout\Tests\TestCase;
@@ -16,11 +17,8 @@ class OrderResourceTest extends TestCase
 
     private const NOVA_ROUTE = 'nova-api/orders';
 
-    /**
-     * @dataProvider dataProviderForIndexRoleLocationFilter
-     * @test
-     */
-    public function index_role_location_filter(string $role, bool $isRoleLocationFiltered)
+    /** @test */
+    public function index_role_location_filter()
     {
         $location1 = Location::factory()->create();
         $location2 = Location::factory()->create();
@@ -34,27 +32,22 @@ class OrderResourceTest extends TestCase
         ]);
 
         /** @var User $user */
-        $user = User::factory()->create();
-        if ($role) {
-            $user->assignRole($role);
-        }
+        $user = User::factory()->create()->givePermissionTo(
+            Role::findByName('Admin')->getPermissionNames()     // Use individual permissions so we can revoke one
+        );
         $user->locations()->attach($location1);
         $this->actingAs($user);
 
         $response = $this->getJson(self::NOVA_ROUTE)
             ->assertOk();
 
-        $this->assertCount($isRoleLocationFiltered ? 2 : 5, $response->json('resources'));
-    }
+        $this->assertCount(5, $response->json('resources'));
 
-    public function dataProviderForIndexRoleLocationFilter()
-    {
-        return [
-            'Admin' => ['Admin', false],
-            'Owner' => ['Owner', false],
-            'Executive' => ['Executive', false],
-            'Staff' => ['Staff', true],
-        ];
+        $user->revokePermissionTo('all locations');
+        $response = $this->getJson(self::NOVA_ROUTE)
+            ->assertOk();
+
+        $this->assertCount(2, $response->json('resources'));
     }
 
     /**
