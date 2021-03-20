@@ -15,8 +15,8 @@ class CreateCartItemsTable extends Migration
     {
         Schema::create('cart_items', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Cart::class);
-            $table->foreignIdFor( CartItem::class, 'parent_id')->nullable();
+            $table->foreignIdFor(app('cart'));
+            $table->foreignIdFor(app('cart_item'), 'parent_id')->nullable();
             $table->morphs('sellable');
 
             // Opaque item identifier provided by Sellable
