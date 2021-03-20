@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Spatie\Permission\Models\Role;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -35,7 +36,9 @@ class CartItemResourceTest extends TestCase
         ]);
 
         /** @var User $user */
-        $user = User::factory()->create()->assignRole('Admin');
+        $user = User::factory()->create()->givePermissionTo(
+            Role::findByName('Admin')->getPermissionNames()     // Use individual permissions so we can revoke one
+        );
         $user->locations()->attach($location1);
         $this->actingAs($user);
 
@@ -43,7 +46,7 @@ class CartItemResourceTest extends TestCase
             ->assertOk();
 
         $this->assertCount(5, $response->json('resources'));
-        
+
         $user->revokePermissionTo('all locations');
         $this->actingAs($user->refresh());
 

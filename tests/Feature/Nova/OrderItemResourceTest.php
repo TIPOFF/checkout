@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Feature\Nova;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Spatie\Permission\Models\Role;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\OrderItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -35,7 +36,9 @@ class OrderItemResourceTest extends TestCase
         ]);
 
         /** @var User $user */
-        $user = User::factory()->create()->assignRole('Admin');
+        $user = User::factory()->create()->givePermissionTo(
+            Role::findByName('Admin')->getPermissionNames()     // Use individual permissions so we can revoke one
+        );
         $user->locations()->attach($location1);
         $this->actingAs($user);
 
@@ -43,7 +46,7 @@ class OrderItemResourceTest extends TestCase
             ->assertOk();
 
         $this->assertCount(5, $response->json('resources'));
-        
+
         $user->revokePermissionTo('all locations');
         $response = $this->getJson(self::NOVA_ROUTE)
             ->assertOk();
