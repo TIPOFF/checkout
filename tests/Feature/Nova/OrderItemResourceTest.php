@@ -63,9 +63,14 @@ class OrderItemResourceTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        OrderItem::factory()->count(4)->withSellable($sellable)->create();
+        $location = Location::factory()->create();
+
+        OrderItem::factory()->count(4)->withSellable($sellable)->create([
+            'location_id' => $location
+        ]);
 
         $user = User::factory()->create();
+        $user->locations()->attach($location);
         if ($role) {
             $user->assignRole($role);
         }
@@ -85,10 +90,10 @@ class OrderItemResourceTest extends TestCase
             'Admin' => ['Admin', true, true],
             'Owner' => ['Owner', true, true],
             'Executive' => ['Executive', true, true],
-            'Staff' => ['Staff', true, false],
-            'Former Staff' => ['Former Staff', true, false],
-            'Customer' => ['Customer', true, false],
-            'No Role' => [null, true, false],
+            'Staff' => ['Staff', true, true],
+            'Former Staff' => ['Former Staff', false, false],
+            'Customer' => ['Customer', false, false],
+            'No Role' => [null, false, false],
         ];
     }
 
@@ -101,9 +106,14 @@ class OrderItemResourceTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        $model = OrderItem::factory()->withSellable($sellable)->create();
+        $location = Location::factory()->create();
+
+        $model = OrderItem::factory()->withSellable($sellable)->create([
+            'location_id' => $location
+        ]);
 
         $user = User::factory()->create();
+        $user->locations()->attach($location);
         if ($role) {
             $user->assignRole($role);
         }
@@ -123,6 +133,7 @@ class OrderItemResourceTest extends TestCase
             'Admin' => ['Admin', true, true],
             'Owner' => ['Owner', true, true],
             'Executive' => ['Executive', true, true],
+            'Staff' => ['Staff', true, false],
             'Former Staff' => ['Former Staff', false, false],
             'Customer' => ['Customer', false, false],
             'No Role' => [null, false, false],
@@ -138,9 +149,14 @@ class OrderItemResourceTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        $model = OrderItem::factory()->withSellable($sellable)->create();
+        $location = Location::factory()->create();
+
+        $model = OrderItem::factory()->withSellable($sellable)->create([
+            'location_id' => $location
+        ]);
 
         $user = User::factory()->create();
+        $user->locations()->attach($location);
         if ($role) {
             $user->assignRole($role);
         }
@@ -161,9 +177,9 @@ class OrderItemResourceTest extends TestCase
             'Owner' => ['Owner', true, false],
             'Executive' => ['Executive', true, false],
             'Staff' => ['Staff', true, false],
-            'Former Staff' => ['Former Staff', true, false],
-            'Customer' => ['Customer', true, false],
-            'No Role' => [null, true, false],
+            'Former Staff' => ['Former Staff', false, false],
+            'Customer' => ['Customer', false, false],
+            'No Role' => [null, false, false],
         ];
     }
 }
