@@ -59,7 +59,7 @@ class CartResourceTest extends TestCase
         $location = Location::factory()->create();
 
         Cart::factory()->count(4)->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();
@@ -99,7 +99,7 @@ class CartResourceTest extends TestCase
         $location = Location::factory()->create();
 
         $model = Cart::factory()->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();
@@ -139,7 +139,7 @@ class CartResourceTest extends TestCase
         $location = Location::factory()->create();
 
         $model = Cart::factory()->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();

@@ -59,7 +59,7 @@ class OrderResourceTest extends TestCase
         $location = Location::factory()->create();
 
         Order::factory()->count(4)->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();
@@ -99,7 +99,7 @@ class OrderResourceTest extends TestCase
         $location = Location::factory()->create();
 
         $model = Order::factory()->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();
@@ -139,7 +139,7 @@ class OrderResourceTest extends TestCase
         $location = Location::factory()->create();
 
         $model = Order::factory()->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();

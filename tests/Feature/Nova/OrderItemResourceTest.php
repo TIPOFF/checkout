@@ -66,7 +66,7 @@ class OrderItemResourceTest extends TestCase
         $location = Location::factory()->create();
 
         OrderItem::factory()->count(4)->withSellable($sellable)->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();
@@ -109,7 +109,7 @@ class OrderItemResourceTest extends TestCase
         $location = Location::factory()->create();
 
         $model = OrderItem::factory()->withSellable($sellable)->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();
@@ -152,7 +152,7 @@ class OrderItemResourceTest extends TestCase
         $location = Location::factory()->create();
 
         $model = OrderItem::factory()->withSellable($sellable)->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();

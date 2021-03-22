@@ -113,7 +113,7 @@ class CartItemResourceTest extends TestCase
         $location = Location::factory()->create();
 
         $model = CartItem::factory()->withSellable($sellable)->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();
@@ -156,7 +156,7 @@ class CartItemResourceTest extends TestCase
         $location = Location::factory()->create();
 
         $model = CartItem::factory()->withSellable($sellable)->create([
-            'location_id' => $location
+            'location_id' => $location,
         ]);
 
         $user = User::factory()->create();
