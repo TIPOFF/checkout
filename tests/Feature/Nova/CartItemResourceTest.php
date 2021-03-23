@@ -65,9 +65,14 @@ class CartItemResourceTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        CartItem::factory()->count(4)->withSellable($sellable)->create();
+        $location = Location::factory()->create();
+
+        CartItem::factory()->count(4)->withSellable($sellable)->create([
+            'location_id' => $location,
+        ]);
 
         $user = User::factory()->create();
+        $user->locations()->attach($location);
         if ($role) {
             $user->assignRole($role);
         }
@@ -87,10 +92,10 @@ class CartItemResourceTest extends TestCase
             'Admin' => ['Admin', true, true],
             'Owner' => ['Owner', true, true],
             'Executive' => ['Executive', true, true],
-            'Staff' => ['Staff', true, false],
-            'Former Staff' => ['Former Staff', true, false],
-            'Customer' => ['Customer', true, false],
-            'No Role' => [null, true, false],
+            'Staff' => ['Staff', true, true],
+            'Former Staff' => ['Former Staff', false, false],
+            'Customer' => ['Customer', false, false],
+            'No Role' => [null, false, false],
         ];
     }
 
@@ -100,12 +105,19 @@ class CartItemResourceTest extends TestCase
      */
     public function show_by_role(?string $role, bool $hasAccess, bool $canView)
     {
+        $this->logToStderr();
+
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        $model = CartItem::factory()->withSellable($sellable)->create();
+        $location = Location::factory()->create();
+
+        $model = CartItem::factory()->withSellable($sellable)->create([
+            'location_id' => $location,
+        ]);
 
         $user = User::factory()->create();
+        $user->locations()->attach($location);
         if ($role) {
             $user->assignRole($role);
         }
@@ -125,6 +137,7 @@ class CartItemResourceTest extends TestCase
             'Admin' => ['Admin', true, true],
             'Owner' => ['Owner', true, true],
             'Executive' => ['Executive', true, true],
+            'Staff' => ['Staff', true, false],
             'Former Staff' => ['Former Staff', false, false],
             'Customer' => ['Customer', false, false],
             'No Role' => [null, false, false],
@@ -140,9 +153,14 @@ class CartItemResourceTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        $model = CartItem::factory()->withSellable($sellable)->create();
+        $location = Location::factory()->create();
+
+        $model = CartItem::factory()->withSellable($sellable)->create([
+            'location_id' => $location,
+        ]);
 
         $user = User::factory()->create();
+        $user->locations()->attach($location);
         if ($role) {
             $user->assignRole($role);
         }
@@ -163,9 +181,9 @@ class CartItemResourceTest extends TestCase
             'Owner' => ['Owner', true, false],
             'Executive' => ['Executive', true, false],
             'Staff' => ['Staff', true, false],
-            'Former Staff' => ['Former Staff', true, false],
-            'Customer' => ['Customer', true, false],
-            'No Role' => [null, true, false],
+            'Former Staff' => ['Former Staff', false, false],
+            'Customer' => ['Customer', false, false],
+            'No Role' => [null, false, false],
         ];
     }
 }

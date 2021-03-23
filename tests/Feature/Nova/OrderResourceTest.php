@@ -56,9 +56,14 @@ class OrderResourceTest extends TestCase
      */
     public function index_by_role(?string $role, bool $hasAccess, bool $canIndex)
     {
-        Order::factory()->count(4)->create();
+        $location = Location::factory()->create();
+
+        Order::factory()->count(4)->create([
+            'location_id' => $location,
+        ]);
 
         $user = User::factory()->create();
+        $user->locations()->attach($location);
         if ($role) {
             $user->assignRole($role);
         }
@@ -78,10 +83,10 @@ class OrderResourceTest extends TestCase
             'Admin' => ['Admin', true, true],
             'Owner' => ['Owner', true, true],
             'Executive' => ['Executive', true, true],
-            'Staff' => ['Staff', true, false],
-            'Former Staff' => ['Former Staff', true, false],
-            'Customer' => ['Customer', true, false],
-            'No Role' => [null, true, false],
+            'Staff' => ['Staff', true, true],
+            'Former Staff' => ['Former Staff', false, false],
+            'Customer' => ['Customer', false, false],
+            'No Role' => [null, false, false],
         ];
     }
 
@@ -91,9 +96,14 @@ class OrderResourceTest extends TestCase
      */
     public function show_by_role(?string $role, bool $hasAccess, bool $canView)
     {
-        $model = Order::factory()->create();
+        $location = Location::factory()->create();
+
+        $model = Order::factory()->create([
+            'location_id' => $location,
+        ]);
 
         $user = User::factory()->create();
+        $user->locations()->attach($location);
         if ($role) {
             $user->assignRole($role);
         }
@@ -126,9 +136,14 @@ class OrderResourceTest extends TestCase
      */
     public function delete_by_role(?string $role, bool $hasAccess, bool $canDelete)
     {
-        $model = Order::factory()->create();
+        $location = Location::factory()->create();
+
+        $model = Order::factory()->create([
+            'location_id' => $location,
+        ]);
 
         $user = User::factory()->create();
+        $user->locations()->attach($location);
         if ($role) {
             $user->assignRole($role);
         }
@@ -149,9 +164,9 @@ class OrderResourceTest extends TestCase
             'Owner' => ['Owner', true, false],
             'Executive' => ['Executive', true, false],
             'Staff' => ['Staff', true, false],
-            'Former Staff' => ['Former Staff', true, false],
-            'Customer' => ['Customer', true, false],
-            'No Role' => [null, true, false],
+            'Former Staff' => ['Former Staff', false, false],
+            'Customer' => ['Customer', false, false],
+            'No Role' => [null, false, false],
         ];
     }
 }
