@@ -23,12 +23,14 @@ class TestCase extends BaseTestCase
     protected function apiUrl(string $uri): string
     {
         $prefix = rtrim(config('tipoff.api.uri_prefix'), '/');
+
         return ltrim("{$prefix}/{$uri}", '/');
     }
 
     protected function webUrl(string $uri): string
     {
         $prefix = rtrim(config('tipoff.web.uri_prefix'), '/');
+
         return ltrim("{$prefix}/{$uri}", '/');
     }
 
