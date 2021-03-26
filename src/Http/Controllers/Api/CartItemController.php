@@ -66,7 +66,7 @@ class CartItemController extends BaseApiController
 
     public function show(ShowRequest $request, CartItem $cartItem): JsonResponse
     {
-        if (!$cartItem->isOwnerByEmailAddressId($request->getEmailAddressId())) {
+        if (! $cartItem->isOwnerByEmailAddressId($request->getEmailAddressId())) {
             throw new AuthorizationException();
         }
 
@@ -76,7 +76,7 @@ class CartItemController extends BaseApiController
 
     public function update(UpdateRequest $request, CartItem $cartItem): JsonResponse
     {
-        if (!$cartItem->isOwnerByEmailAddressId($request->getEmailAddressId())) {
+        if (! $cartItem->isOwnerByEmailAddressId($request->getEmailAddressId())) {
             throw new AuthorizationException();
         }
 
@@ -89,7 +89,7 @@ class CartItemController extends BaseApiController
 
     public function destroy(DestroyRequest $request, CartItem $cartItem): JsonResponse
     {
-        if (!$cartItem->isOwnerByEmailAddressId($request->getEmailAddressId())) {
+        if (! $cartItem->isOwnerByEmailAddressId($request->getEmailAddressId())) {
             throw new AuthorizationException();
         }
 

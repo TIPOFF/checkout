@@ -6,7 +6,6 @@ namespace Tipoff\Checkout\Tests\Unit\Http\Controllers\Api;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Authorization\Models\EmailAddress;
-use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;

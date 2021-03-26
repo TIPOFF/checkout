@@ -11,7 +11,6 @@ use Tipoff\Addresses\Traits\HasAddresses;
 use Tipoff\Checkout\Enums\AddressTypes;
 use Tipoff\Checkout\Objects\ContainerPricingDetail;
 use Tipoff\Support\Contracts\Checkout\BaseItemInterface;
-use Tipoff\Support\Contracts\Models\UserInterface;
 use Tipoff\Support\Contracts\Sellable\Fee;
 use Tipoff\Support\Objects\DiscountableValue;
 use Tipoff\Support\Traits\HasCreator;

@@ -7,7 +7,6 @@ namespace Tipoff\Checkout\Tests\Unit\Models;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Authorization\Models\EmailAddress;
-use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Models\Order;
