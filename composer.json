@@ -16,9 +16,8 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "tipoff/addresses": "dev-pdbreen/bugfix/create-domestic-address as 2.6.0",
         "tipoff/authorization": "dev-pdbreen/feature/checkout-85 as 2.7.0",
-        "tipoff/locations": "^2.7.1",
+        "tipoff/locations": "^2.8.0",
         "tipoff/statuses": "^2.1.0",
         "tipoff/support": "^1.8.7"
     },
