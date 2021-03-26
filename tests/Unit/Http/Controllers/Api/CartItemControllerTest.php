@@ -47,7 +47,7 @@ class CartItemControllerTest extends TestCase
 
         $this->actingAs($emailAddress, 'email');
 
-        $response = $this->getJson('tipoff/cart-items')
+        $response = $this->getJson($this->apiUrl('cart-items'))
             ->assertOk();
 
         $this->assertCount(4, $response->json('data'));
@@ -69,7 +69,7 @@ class CartItemControllerTest extends TestCase
 
         $this->actingAs($cart->emailAddress, 'email');
 
-        $response = $this->getJson("tipoff/cart-items/{$cartItem->id}")
+        $response = $this->getJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertOk();
 
         $this->assertEquals($cartItem->id, $response->json('data.id'));
@@ -91,7 +91,7 @@ class CartItemControllerTest extends TestCase
 
         $this->actingAs(EmailAddress::factory()->create(), 'email');
 
-        $this->getJson("tipoff/cart-items/{$cartItem->id}")
+        $this->getJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
@@ -104,7 +104,7 @@ class CartItemControllerTest extends TestCase
         $emailAddress = EmailAddress::factory()->create();
         $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => get_class($sellable),
             'sellable_id' => $sellable->id,
             'item_id' => 'abc',
@@ -113,7 +113,7 @@ class CartItemControllerTest extends TestCase
 
         $this->assertEquals(1234, $response->json('data.amount_each'));
 
-        $response = $this->getJson('tipoff/cart?include=items');
+        $response = $this->getJson($this->apiUrl('cart?include=items'));
         $this->assertCount(1, $response->json('data.items.data'));
     }
 
@@ -126,7 +126,7 @@ class CartItemControllerTest extends TestCase
         $emailAddress = EmailAddress::factory()->create();
         $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => get_class($sellable),
             'sellable_id' => $sellable->id,
             'item_id' => 'abc',
@@ -140,7 +140,7 @@ class CartItemControllerTest extends TestCase
         $this->assertEquals('ABC', $response->json('data.tax_code'));
         $this->assertNotNull($response->json('data.expires_at'));
 
-        $response = $this->getJson('tipoff/cart?include=items');
+        $response = $this->getJson($this->apiUrl('cart?include=items'));
         $this->assertCount(1, $response->json('data.items.data'));
     }
 
@@ -150,7 +150,7 @@ class CartItemControllerTest extends TestCase
         $emailAddress = EmailAddress::factory()->create();
         $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => 'notaclass',
             'sellable_id' => 123,
             'item_id' => 'abc',
@@ -166,7 +166,7 @@ class CartItemControllerTest extends TestCase
         $emailAddress = EmailAddress::factory()->create();
         $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => Model::class,
             'sellable_id' => 123,
             'item_id' => 'abc',
@@ -184,7 +184,7 @@ class CartItemControllerTest extends TestCase
         $emailAddress = EmailAddress::factory()->create();
         $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => TestSellable::class,
             'sellable_id' => 123,
             'item_id' => 'abc',
@@ -212,7 +212,7 @@ class CartItemControllerTest extends TestCase
         $this->actingAs($cart->emailAddress, 'email');
 
         $response = $this
-            ->putJson("tipoff/cart-items/{$cartItem->id}", [
+            ->putJson($this->apiUrl("cart-items/{$cartItem->id}"), [
                 'quantity' => 2,
             ])
             ->assertOk();
@@ -237,7 +237,7 @@ class CartItemControllerTest extends TestCase
         $this->actingAs(EmailAddress::factory()->create(), 'email');
 
         $this
-            ->putJson("tipoff/cart-items/{$cartItem->id}", [
+            ->putJson($this->apiUrl("cart-items/{$cartItem->id}"), [
                 'quantity' => 2,
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN);
@@ -259,12 +259,12 @@ class CartItemControllerTest extends TestCase
 
         $this->actingAs($cart->emailAddress, 'email');
 
-        $response = $this->deleteJson("tipoff/cart-items/{$cartItem->id}")
+        $response = $this->deleteJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertOk();
 
         $this->assertEquals('success', $response->json('data.message'));
 
-        $response = $this->getJson('tipoff/cart-items')
+        $response = $this->getJson($this->apiUrl('cart-items'))
             ->assertOk();
 
         $this->assertCount(3, $response->json('data'));
@@ -286,14 +286,14 @@ class CartItemControllerTest extends TestCase
 
         $this->actingAs(EmailAddress::factory()->create(), 'email');
 
-        $this->deleteJson("tipoff/cart-items/{$cartItem->id}")
+        $this->deleteJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */
     public function index_not_logged_in()
     {
-        $this->getJson('tipoff/cart-items')
+        $this->getJson($this->apiUrl('cart-items'))
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
@@ -311,7 +311,7 @@ class CartItemControllerTest extends TestCase
         $cart->refresh()->save();
         $cartItem = $cart->cartItems->first();
 
-        $this->getJson("tipoff/cart-items/{$cartItem->id}")
+        $this->getJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 }

@@ -23,7 +23,7 @@ class CartApplyCodeControllerTest extends TestCase
         $this->actingAs($user);
 
         $response = $this
-            ->postJson('tipoff/cart/apply-code', [
+            ->postJson($this->apiUrl('cart/apply-code'), [
                 'code' => 'abcd',
             ])
             ->assertStatus(422);
@@ -51,7 +51,7 @@ class CartApplyCodeControllerTest extends TestCase
         $this->actingAs($user);
 
         $this
-            ->postJson('tipoff/cart/apply-code', [
+            ->postJson($this->apiUrl('cart/apply-code'), [
                 'code' => 'abcd',
             ])
             ->assertStatus(200);

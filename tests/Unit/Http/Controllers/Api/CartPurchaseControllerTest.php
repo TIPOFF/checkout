@@ -29,14 +29,14 @@ class CartPurchaseControllerTest extends TestCase
         ]);
         $this->actingAs($user);
 
-        $this->postJson('tipoff/cart-items', [
+        $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => get_class($sellable),
             'sellable_id' => $sellable->id,
             'item_id' => 'abc',
             'amount' => 1234,
         ])->assertOk();
 
-        $response = $this->postJson('tipoff/cart/purchase')
+        $response = $this->postJson($this->apiUrl('cart/purchase'))
             ->assertOk();
 
         $this->assertNotNull($response->json('data.order_number'));
@@ -53,7 +53,7 @@ class CartPurchaseControllerTest extends TestCase
         $this->actingAs($user);
 
         $response = $this
-            ->postJson('tipoff/cart/purchase')
+            ->postJson($this->apiUrl('cart/purchase'))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $this->assertEquals('Cart is empty.', $response->json('errors.cart.0'));
@@ -83,7 +83,7 @@ class CartPurchaseControllerTest extends TestCase
         $item->save();
 
         $response = $this
-            ->postJson('tipoff/cart/purchase')
+            ->postJson($this->apiUrl('cart/purchase'))
             ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
 
         $this->assertEquals('Cart is empty.', $response->json('errors.cart.0'));

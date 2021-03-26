@@ -22,7 +22,7 @@ class CartControllerTest extends TestCase
 
         $this->actingAs($emailAddress, 'email');
 
-        $response = $this->getJson('tipoff/cart')
+        $response = $this->getJson($this->apiUrl('cart'))
             ->assertOk();
 
         $this->assertNotNull($response->json('data.item_amount_total'));
@@ -44,7 +44,8 @@ class CartControllerTest extends TestCase
 
         $this->actingAs($cart->emailAddress, 'email');
 
-        $response = $this->getJson('tipoff/cart')
+        $prefix = config('tipoff.api.uri_prefix');
+        $response = $this->getJson($this->apiUrl('cart'))
             ->assertOk();
 
         $this->assertNotNull($response->json('data.item_amount_total'));
@@ -67,7 +68,7 @@ class CartControllerTest extends TestCase
 
         $this->actingAs($cart->emailAddress, 'email');
 
-        $response = $this->getJson('tipoff/cart?include=items')
+        $response = $this->getJson($this->apiUrl('cart?include=items'))
             ->assertOk();
 
         $this->assertNotNull($response->json('data.item_amount_total'));
@@ -86,7 +87,7 @@ class CartControllerTest extends TestCase
 
         $this->actingAs($emailAddress, 'email');
 
-        $response = $this->deleteJson('tipoff/cart')
+        $response = $this->deleteJson($this->apiUrl('cart'))
             ->assertOk();
 
         $this->assertEquals('success', $response->json('data.message'));
@@ -98,7 +99,7 @@ class CartControllerTest extends TestCase
     /** @test */
     public function index_not_logged_in()
     {
-        $response = $this->getJson('tipoff/cart')
+        $response = $this->getJson($this->apiUrl('cart'))
             ->assertOk();
 
         $this->assertCount(0, $response->json('data'));
@@ -107,7 +108,7 @@ class CartControllerTest extends TestCase
     /** @test */
     public function delete_not_logged_in()
     {
-        $response = $this->deleteJson('tipoff/cart')
+        $response = $this->deleteJson($this->apiUrl('cart'))
             ->assertOk();
 
         $this->assertEquals('success', $response->json('data.message'));
