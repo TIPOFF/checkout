@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Http\Controllers\Api;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
@@ -18,9 +19,9 @@ class CartControllerTest extends TestCase
     /** @test */
     public function index_with_no_cart()
     {
-        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create();
 
-        $this->actingAs($user);
+        $this->actingAs($emailAddress, 'email');
 
         $response = $this->getJson('tipoff/cart')
             ->assertOk();
@@ -42,7 +43,7 @@ class CartControllerTest extends TestCase
         ]);
         $cart->refresh()->save();
 
-        $this->actingAs($cart->getUser());
+        $this->actingAs($cart->emailAddress, 'email');
 
         $response = $this->getJson('tipoff/cart')
             ->assertOk();
@@ -65,7 +66,7 @@ class CartControllerTest extends TestCase
         ]);
         $cart->refresh()->save();
 
-        $this->actingAs($cart->getUser());
+        $this->actingAs($cart->emailAddress, 'email');
 
         $response = $this->getJson('tipoff/cart?include=items')
             ->assertOk();
@@ -80,11 +81,11 @@ class CartControllerTest extends TestCase
     /** @test */
     public function delete_json()
     {
-        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create();
         /** @var Cart $cart */
-        $cart = Cart::activeCart($user->id);
+        $cart = Cart::activeCart($emailAddress->id);
 
-        $this->actingAs($user);
+        $this->actingAs($emailAddress, 'email');
 
         $response = $this->deleteJson('tipoff/cart')
             ->assertOk();

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Http\Controllers\Api;
 
 use Carbon\Carbon;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Tipoff\Checkout\Http\Requests\Api\CartItem\DestroyRequest;
 use Tipoff\Checkout\Http\Requests\Api\CartItem\IndexRequest;
@@ -23,13 +24,11 @@ class CartItemController extends BaseApiController
     public function __construct(CartItemTransformer $transformer)
     {
         $this->transformer = $transformer;
-
-        $this->authorizeResource(CartItem::class);
     }
 
     public function index(IndexRequest $request): JsonResponse
     {
-        $cartItems = CartItem::query()->visibleBy($request->user())->paginate(
+        $cartItems = CartItem::query()->visibleByEmailAddressId($request->getEmailAddressId())->paginate(
             $request->getPageSize()
         );
 
@@ -59,7 +58,7 @@ class CartItemController extends BaseApiController
             $cartItem->setExpiresAt(Carbon::parse($request->expires_at));
         }
 
-        $cartItem = Cart::activeCart($request->user()->id)->upsertItem($cartItem);
+        $cartItem = Cart::activeCart($request->getEmailAddressId())->upsertItem($cartItem);
 
         return fractal($cartItem, $this->transformer)
             ->respond();
@@ -67,12 +66,20 @@ class CartItemController extends BaseApiController
 
     public function show(ShowRequest $request, CartItem $cartItem): JsonResponse
     {
+        if (!$cartItem->isOwnerByEmailAddressId($request->getEmailAddressId())) {
+            throw new AuthorizationException();
+        }
+
         return fractal($cartItem, $this->transformer)
             ->respond();
     }
 
     public function update(UpdateRequest $request, CartItem $cartItem): JsonResponse
     {
+        if (!$cartItem->isOwnerByEmailAddressId($request->getEmailAddressId())) {
+            throw new AuthorizationException();
+        }
+
         $cartItem->setQuantity((int) $request->quantity);
         $cartItem->save();
 
@@ -82,6 +89,10 @@ class CartItemController extends BaseApiController
 
     public function destroy(DestroyRequest $request, CartItem $cartItem): JsonResponse
     {
+        if (!$cartItem->isOwnerByEmailAddressId($request->getEmailAddressId())) {
+            throw new AuthorizationException();
+        }
+
         if ($cartItem->delete()) {
             return $this->respondSuccess();
         }

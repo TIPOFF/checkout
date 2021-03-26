@@ -27,10 +27,8 @@ use Tipoff\Support\Traits\HasUpdater;
  * @property Carbon created_at
  * @property Carbon updated_at
  * // Relations
- * @property mixed user
  * @property mixed location
  * // Raw Relation ID
- * @property int|null user_id
  * @property int|null location_id
  * @property int|null creator_id
  * @property int|null updater_id
@@ -49,11 +47,6 @@ trait IsItemContainer
     }
 
     //region RELATIONSHIPS
-
-    public function user()
-    {
-        return $this->belongsTo(app('user'));
-    }
 
     public function location()
     {
@@ -129,11 +122,6 @@ trait IsItemContainer
     //endregion
 
     //region INTERFACE IMPLEMENTATION
-
-    public function getUser(): UserInterface
-    {
-        return $this->user;
-    }
 
     public function getItemAmountTotal(): DiscountableValue
     {

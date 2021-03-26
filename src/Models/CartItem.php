@@ -112,22 +112,18 @@ class CartItem extends BaseModel implements CartItemInterface
 
     //region PERMISSIONS
 
-    public function scopeVisibleBy(Builder $query, UserInterface $user): Builder
+    public function scopeVisibleByEmailAddressId(Builder $query, int $emailAddressId): Builder
     {
-        return $query->whereHas('cart', function (Builder $q) use ($user) {
-            $q->visibleBy($user);
+        return $query->whereHas('cart', function (Builder $q) use ($emailAddressId) {
+            $q->visibleByEmailAddressId($emailAddressId);
         });
     }
 
-    public function isOwner(UserInterface $user): bool
+    public function isOwnerByEmailAddressId(int $emailAddressId): bool
     {
-        if ($userId = $user->getId()) {
-            $cart = Cart::activeCart($userId);
+        $cart = Cart::activeCart($emailAddressId);
 
-            return $this->cart_id === $cart->getId();
-        }
-
-        return false;
+        return $this->cart_id === $cart->getId();
     }
 
     //endregion

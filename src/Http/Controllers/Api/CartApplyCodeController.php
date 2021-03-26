@@ -21,7 +21,7 @@ class CartApplyCodeController extends BaseApiController
 
     public function __invoke(ApplyCodeRequest $request): JsonResponse
     {
-        $cart = Cart::activeCart($request->user()->id);
+        $cart = Cart::activeCart($request->getEmailAddressId());
 
         $cart->applyCode($request->code);
 

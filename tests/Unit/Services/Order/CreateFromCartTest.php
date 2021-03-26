@@ -6,6 +6,7 @@ namespace Tipoff\Checkout\Tests\Unit\Services\Order;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Addresses\Models\Zip;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Enums\OrderStatus;
 use Tipoff\Checkout\Models\Cart;
@@ -31,10 +32,13 @@ class CreateFromCartTest extends TestCase
     public function create_from_empty_cart()
     {
         $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
         $cart = Cart::factory()->create([
             'shipping' => new DiscountableValue(123),
             'discounts' => 456,
-            'user_id' => $user,
+            'email_address_id' => $emailAddress->id,
             'location_id' => 321,
         ])->refresh();
 
@@ -56,6 +60,9 @@ class CreateFromCartTest extends TestCase
     public function create_from_single_item_cart()
     {
         $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
 
         /** @var Cart $cart */
         $cart = Cart::factory()->create([
@@ -102,6 +109,9 @@ class CreateFromCartTest extends TestCase
     public function create_from_linked_items_cart()
     {
         $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
 
         /** @var Cart $cart */
         $cart = Cart::factory()->create();
@@ -139,32 +149,36 @@ class CreateFromCartTest extends TestCase
         $this->assertEquals(200, $orderItem->getAmountTotal()->getOriginalAmount());
     }
 
-//     public function addresses_are_copied()
-//     {
-//         $user = User::factory()->create();
-//         /** @var Cart $cart */
-//         $cart = Cart::factory()->create([
-//             'shipping' => new DiscountableValue(123),
-//             'discounts' => 456,
-//             'user_id' => $user,
-//             'location_id' => 321,
-//         ])->refresh();
+    /** @test */
+    public function addresses_are_copied()
+    {
+        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create([
+            'shipping' => new DiscountableValue(123),
+            'discounts' => 456,
+            'email_address_id' => $emailAddress,
+            'location_id' => 321,
+        ])->refresh();
 
-//         $this->actingAs($user);
+        $this->actingAs($user);
 
-//         $zip = Zip::factory()->create();
-//         $cart->setBillingAddress(Cart::createDomesticAddress('billing', null, 'Boston', $zip));
-//         $cart->setShippingAddress(Cart::createDomesticAddress('shipping', null, 'Boston', $zip));
+        $zip = Zip::factory()->create();
+        $cart->setBillingAddress(Cart::createDomesticAddress('billing', null, 'Boston', $zip));
+        $cart->setShippingAddress(Cart::createDomesticAddress('shipping', null, 'Boston', $zip));
 
-//         $handler = $this->app->make(CreateFromCart::class);
-//         $order = ($handler)($cart);
+        $handler = $this->app->make(CreateFromCart::class);
+        $order = ($handler)($cart);
 
-//         $address = $order->getBillingAddress();
-//         $this->assertNotNull($address);
-//         $this->assertEquals('billing', $address->domesticAddress->address_line_1);
+        $address = $order->getBillingAddress();
+        $this->assertNotNull($address);
+        $this->assertEquals('billing', $address->domesticAddress->address_line_1);
 
-//         $address = $order->getShippingAddress();
-//         $this->assertNotNull($address);
-//         $this->assertEquals('shipping', $address->domesticAddress->address_line_1);
-//     }
+        $address = $order->getShippingAddress();
+        $this->assertNotNull($address);
+        $this->assertEquals('shipping', $address->domesticAddress->address_line_1);
+    }
 }

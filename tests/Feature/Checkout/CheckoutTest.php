@@ -7,6 +7,7 @@ namespace Tipoff\Checkout\Tests\Feature\Checkout;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -38,6 +39,9 @@ class CheckoutTest extends TestCase
         ]);
 
         $user = User::factory()->create();
+        EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
         $this->actingAs($user);
 
         /** @var TestSellable $sellable */
@@ -90,6 +94,9 @@ class CheckoutTest extends TestCase
         ]);
 
         $user = User::factory()->create();
+        EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
         $this->actingAs($user);
 
         /** @var TestSellable $sellable */

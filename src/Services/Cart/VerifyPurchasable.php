@@ -25,6 +25,7 @@ class VerifyPurchasable
 
             $this->verifyNotEmpty($cart)
                 ->verifyNoExpiredItems($cart)
+                ->verifyUser($cart)
                 ->verifyItems($cart)
                 ->verifyNoPriceChange($cart);
         });
@@ -47,6 +48,16 @@ class VerifyPurchasable
         // All items must be active
         if ($cart->cartItems->first->isExpired()) {
             throw CartNotValidException::cartHasExpiredItems();
+        }
+
+        return $this;
+    }
+
+    private function verifyUser(Cart $cart): self
+    {
+        // User must exist for email
+        if (empty($cart->emailAddress->user)) {
+            throw CartNotValidException::noUserExists();
         }
 
         return $this;
