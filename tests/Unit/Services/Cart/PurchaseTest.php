@@ -6,6 +6,7 @@ namespace Tipoff\Checkout\Tests\Unit\Services\Cart;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Services\Cart\Purchase;
@@ -40,6 +41,9 @@ class PurchaseTest extends TestCase
         ]);
 
         $user = User::factory()->create();
+        EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
 
         /** @var Cart $cart */
         $cart = Cart::factory()->create();

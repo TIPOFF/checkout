@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Enums\OrderStatus;
 use Tipoff\Checkout\Filters\ItemFilter;
 use Tipoff\Checkout\Models\Traits\IsItemContainer;
@@ -25,6 +26,7 @@ use Tipoff\Support\Traits\HasPackageFactory;
 /**
  * @property string order_number
  * // Relations
+ * @property User user
  * @property Cart cart
  * @property Collection orderItems
  * @property Collection invoices
@@ -32,6 +34,7 @@ use Tipoff\Support\Traits\HasPackageFactory;
  * @property Collection vouchers
  * @property Collection discounts
  * @property Collection notes
+ * @property int user_id
  */
 class Order extends BaseModel implements OrderInterface
 {
@@ -65,7 +68,7 @@ class Order extends BaseModel implements OrderInterface
         // Build by field to avoid fillable permissions
         $order = new static;
 
-        $order->user()->associate($cart->user);
+        $order->user()->associate($cart->emailAddress->user);
         $order->shipping = $cart->getShipping();
         $order->item_amount_total = $cart->getItemAmountTotal();
         $order->discounts = $cart->getDiscounts();
@@ -106,6 +109,11 @@ class Order extends BaseModel implements OrderInterface
     }
 
     //region RELATIONSHIPS
+
+    public function user()
+    {
+        return $this->belongsTo(app('user'));
+    }
 
     public function orderItems()
     {
@@ -173,6 +181,11 @@ class Order extends BaseModel implements OrderInterface
     //endregion
 
     //region INTERFACE
+
+    public function getUser(): UserInterface
+    {
+        return $this->user;
+    }
 
     public static function itemFilter(): ItemFilter
     {

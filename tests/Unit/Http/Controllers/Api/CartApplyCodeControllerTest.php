@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Http\Controllers\Api;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
@@ -22,7 +23,7 @@ class CartApplyCodeControllerTest extends TestCase
         $this->actingAs($user);
 
         $response = $this
-            ->postJson('tipoff/cart/apply-code', [
+            ->postJson($this->apiUrl('cart/apply-code'), [
                 'code' => 'abcd',
             ])
             ->assertStatus(422);
@@ -43,11 +44,14 @@ class CartApplyCodeControllerTest extends TestCase
         $this->app->instance(DiscountInterface::class, $service);
 
         $user = User::factory()->create();
+        EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
 
         $this->actingAs($user);
 
         $this
-            ->postJson('tipoff/cart/apply-code', [
+            ->postJson($this->apiUrl('cart/apply-code'), [
                 'code' => 'abcd',
             ])
             ->assertStatus(200);

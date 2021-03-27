@@ -22,7 +22,7 @@ class CartPurchaseController extends BaseApiController
 
     public function __invoke(PurchaseRequest $request): JsonResponse
     {
-        $cart = Cart::activeCart($request->user()->id);
+        $cart = Cart::activeCart($request->getEmailAddressId());
 
         $order = DB::transaction(function () use ($cart) {
             // Final check all is good to go

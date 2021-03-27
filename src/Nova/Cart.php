@@ -43,7 +43,7 @@ class Cart extends BaseCheckoutResource
     {
         return array_filter([
             ID::make()->sortable(),
-            nova('user') ? BelongsTo::make('Customer', 'user', nova('user'))->sortable() : null,
+            nova('email_address') ? BelongsTo::make('Email Address', 'emailAddress', nova('email_address'))->sortable() : null,
             nova('location') ? BelongsTo::make('Location', 'location', nova('location'))->sortable() : null,
             Currency::make('Item Total', 'item_amount_total')->asMinorUnits()->sortable(),
             Date::make('Created', 'created_at')->sortable()->exceptOnForms(),
@@ -65,9 +65,9 @@ class Cart extends BaseCheckoutResource
             nova('discount') ? HasMany::make('Discounts', 'discounts', nova('discount')) : null,
             nova('voucher') ? HasMany::make('Vouchers', 'voucher', nova('voucher')) : null,
             nova('location') ? BelongsTo::make('Location', 'location', nova('location')) : null,
-            nova('user') ? BelongsTo::make('User', 'user', nova('user'))->searchable() : null,
+            nova('email_address') ? BelongsTo::make('Email Address', 'emailAddress', nova('email_address'))->searchable() : null,
             nova('order') ? BelongsTo::make('Order', 'order', nova('order'))->nullable() : null,
-            HasMany::make('Cart items', 'cart items', CartItem::class)->nullable(),
+            HasMany::make('Cart items', 'cartItems', CartItem::class)->nullable(),
 
             new Panel('Data Fields', $this->dataFields()),
         ]);

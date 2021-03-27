@@ -18,6 +18,11 @@ class CartNotValidException extends \InvalidArgumentException implements Checkou
         return new static('Cart contains 1 or more expired items.', $code, $previous);
     }
 
+    public static function noUserExists($code = 0, Throwable $previous = null): self
+    {
+        return new static('Email address is not associated with a user.', $code, $previous);
+    }
+
     public static function pricingHasChanged($code = 0, Throwable $previous = null): self
     {
         return new static('Cart pricing has changed.', $code, $previous);

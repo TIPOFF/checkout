@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Policies;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
@@ -31,9 +32,12 @@ class CartItemPolicyTest extends TestCase
     public function all_permissions_as_owner(string $permission, bool $expected)
     {
         $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
         $cartItem = CartItem::factory()->make([
             'cart_id' => Cart::factory()->create([
-                'user_id' => $user,
+                'email_address_id' => $emailAddress,
             ]),
         ]);
 
@@ -43,10 +47,10 @@ class CartItemPolicyTest extends TestCase
     public function data_provider_for_all_permissions_as_owner()
     {
         return [
-            'view' => [ 'view', true ],
+            'view' => [ 'view', false ],
             'create' => [ 'create', true ],
-            'update' => [ 'update', true ],
-            'delete' => [ 'delete', true ],
+            'update' => [ 'update', false ],
+            'delete' => [ 'delete', false ],
         ];
     }
 

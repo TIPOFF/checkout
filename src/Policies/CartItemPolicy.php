@@ -21,7 +21,7 @@ class CartItemPolicy
 
     public function view(UserInterface $user, CartItem $cartItem): bool
     {
-        return $cartItem->isOwner($user) || $this->hasLocationPermission($user, 'view cart items', $cartItem->location_id);
+        return $this->hasLocationPermission($user, 'view cart items', $cartItem->location_id);
     }
 
     public function create(UserInterface $user): bool

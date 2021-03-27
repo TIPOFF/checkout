@@ -44,7 +44,7 @@ class OrderItemControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->getJson('tipoff/order-items')
+        $response = $this->getJson($this->apiUrl('order-items'))
             ->assertOk();
 
         $this->assertCount(4, $response->json('data'));
@@ -66,7 +66,7 @@ class OrderItemControllerTest extends TestCase
 
         $this->actingAs($order->getUser());
 
-        $response = $this->getJson("tipoff/order-items/{$orderItem->id}")
+        $response = $this->getJson($this->apiUrl("order-items/{$orderItem->id}"))
             ->assertOk();
 
         $this->assertEquals($orderItem->id, $response->json('data.id'));
@@ -88,14 +88,14 @@ class OrderItemControllerTest extends TestCase
 
         $this->actingAs(User::factory()->create());
 
-        $this->getJson("tipoff/order-items/{$orderItem->id}")
+        $this->getJson($this->apiUrl("order-items/{$orderItem->id}"))
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */
     public function index_not_logged_in()
     {
-        $this->getJson('tipoff/order-items')
+        $this->getJson($this->apiUrl('order-items'))
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
@@ -113,7 +113,7 @@ class OrderItemControllerTest extends TestCase
         $order->refresh()->save();
         $orderItem = $order->orderItems->first();
 
-        $this->getJson("tipoff/order-items/{$orderItem->id}")
+        $this->getJson($this->apiUrl("order-items/{$orderItem->id}"))
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 }
