@@ -33,7 +33,7 @@ class OrderControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->getJson('tipoff/orders')
+        $response = $this->getJson($this->apiUrl('orders'))
             ->assertOk();
 
         $this->assertCount(4, $response->json('data'));
@@ -54,7 +54,7 @@ class OrderControllerTest extends TestCase
 
         $this->actingAs($order->getUser());
 
-        $response = $this->getJson("tipoff/orders/{$order->id}")
+        $response = $this->getJson($this->apiUrl("orders/{$order->id}"))
             ->assertOk();
 
         $this->assertEquals($order->order_number, $response->json('data.order_number'));
@@ -76,7 +76,7 @@ class OrderControllerTest extends TestCase
 
         $this->actingAs($order->getUser());
 
-        $response = $this->getJson("tipoff/orders/{$order->id}?include=items")
+        $response = $this->getJson($this->apiUrl("orders/{$order->id}?include=items"))
             ->assertOk();
 
         $this->assertEquals($order->order_number, $response->json('data.order_number'));
@@ -94,14 +94,14 @@ class OrderControllerTest extends TestCase
 
         $this->actingAs(User::factory()->create());
 
-        $this->getJson("tipoff/orders/{$order->id}")
+        $this->getJson($this->apiUrl("orders/{$order->id}"))
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */
     public function index_not_logged_in()
     {
-        $this->getJson('tipoff/orders')
+        $this->getJson($this->apiUrl('orders'))
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
@@ -111,7 +111,7 @@ class OrderControllerTest extends TestCase
         /** @var Order $order */
         $order = Order::factory()->create();
 
-        $this->getJson("tipoff/orders/{$order->id}")
+        $this->getJson($this->apiUrl("orders/{$order->id}"))
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 }

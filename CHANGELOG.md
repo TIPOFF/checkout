@@ -81,3 +81,7 @@ All notable changes to `checkout` will be documented in this file.
 ## 2.5.2 - 2021-03-20
 
 - enforce limited location access for some roles
+
+## 2.6.0 - 2021-03-26
+
+- cart email address requirement

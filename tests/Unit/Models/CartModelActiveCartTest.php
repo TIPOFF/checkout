@@ -6,7 +6,7 @@ namespace Tipoff\Checkout\Tests\Unit\Models;
 
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Tipoff\Authorization\Models\User;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Models\Order;
@@ -27,30 +27,30 @@ class CartModelActiveCartTest extends TestCase
     /** @test */
     public function active_cart_none_exist()
     {
-        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create();
 
-        $cart = Cart::activeCart($user->id);
+        $cart = Cart::activeCart($emailAddress->id);
         $this->assertNotNull($cart);
-        $this->assertEquals($user->id, $cart->user_id);
+        $this->assertEquals($emailAddress->id, $cart->email_address_id);
     }
 
     /** @test */
     public function active_cart_one_already_exist()
     {
-        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create();
 
-        $cart = Cart::activeCart($user->id);
+        $cart = Cart::activeCart($emailAddress->id);
 
-        $newCart = Cart::activeCart($user->id);
+        $newCart = Cart::activeCart($emailAddress->id);
         $this->assertEquals($cart->id, $newCart->id);
     }
 
     /** @test */
     public function active_cart_already_exist_with_expired_item()
     {
-        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create();
 
-        $cart = Cart::activeCart($user->id);
+        $cart = Cart::activeCart($emailAddress->id);
 
         // Active Item
         CartItem::factory()
@@ -60,7 +60,7 @@ class CartModelActiveCartTest extends TestCase
                 'expires_at' => Carbon::now()->addMonths(3),
             ]);
 
-        $newCart = Cart::activeCart($user->id);
+        $newCart = Cart::activeCart($emailAddress->id);
         $this->assertEquals($cart->id, $newCart->id);
 
         // Expired Item
@@ -71,23 +71,23 @@ class CartModelActiveCartTest extends TestCase
                 'expires_at' => Carbon::now()->subMinutes(3),
             ]);
 
-        $newCart = Cart::activeCart($user->id);
+        $newCart = Cart::activeCart($emailAddress->id);
         $this->assertNotEquals($cart->id, $newCart->id);
     }
 
     /** @test */
     public function active_cart_multiple_already_exist()
     {
-        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create();
         Cart::factory()->create([
-            'user_id' => $user,
+            'email_address_id' => $emailAddress,
         ]);
         $activeCart = Cart::factory()->create([
-            'user_id' => $user,
+            'email_address_id' => $emailAddress,
         ]);
 
         $cart = Cart::factory()->create([
-            'user_id' => $user,
+            'email_address_id' => $emailAddress,
         ]);
         CartItem::factory()
             ->withSellable(TestSellable::factory()->create())
@@ -96,7 +96,7 @@ class CartModelActiveCartTest extends TestCase
                 'expires_at' => Carbon::now()->subMinutes(3),
             ]);
 
-        $cart = Cart::activeCart($user->id);
+        $cart = Cart::activeCart($emailAddress->id);
 
         $this->assertEquals($activeCart->id, $cart->id);
     }
@@ -104,16 +104,16 @@ class CartModelActiveCartTest extends TestCase
     /** @test */
     public function cart_with_order_conversion_not_active()
     {
-        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create();
         $activeCart = Cart::factory()->create([
-            'user_id' => $user,
+            'email_address_id' => $emailAddress,
         ]);
         Cart::factory()->create([
-            'user_id' => $user,
+            'email_address_id' => $emailAddress,
             'order_id' => Order::factory()->create(),
         ]);
 
-        $cart = Cart::activeCart($user->id);
+        $cart = Cart::activeCart($emailAddress->id);
 
         $this->assertEquals($activeCart->id, $cart->id);
     }

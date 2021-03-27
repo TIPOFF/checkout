@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Symfony\Component\HttpFoundation\Response;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
@@ -25,9 +26,9 @@ class CartItemControllerTest extends TestCase
         $sellable = TestSellable::factory()->create();
 
         // First user
-        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create();
         $cart = Cart::factory()->create([
-            'user_id' => $user,
+            'email_address_id' => $emailAddress,
         ]);
         CartItem::factory()->withSellable($sellable)->count(3)->create([
             'cart_id' => $cart,
@@ -35,18 +36,18 @@ class CartItemControllerTest extends TestCase
         $cart->refresh()->save();
 
         // Second user
-        $user = User::factory()->create();
+        $emailAddress = EmailAddress::factory()->create();
         $cart = Cart::factory()->create([
-            'user_id' => $user,
+            'email_address_id' => $emailAddress,
         ]);
         CartItem::factory()->withSellable($sellable)->count(4)->create([
             'cart_id' => $cart,
         ]);
         $cart->refresh()->save();
 
-        $this->actingAs($user);
+        $this->actingAs($emailAddress, 'email');
 
-        $response = $this->getJson('tipoff/cart-items')
+        $response = $this->getJson($this->apiUrl('cart-items'))
             ->assertOk();
 
         $this->assertCount(4, $response->json('data'));
@@ -66,9 +67,9 @@ class CartItemControllerTest extends TestCase
         $cart->refresh()->save();
         $cartItem = $cart->cartItems->first();
 
-        $this->actingAs($cart->getUser());
+        $this->actingAs($cart->emailAddress, 'email');
 
-        $response = $this->getJson("tipoff/cart-items/{$cartItem->id}")
+        $response = $this->getJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertOk();
 
         $this->assertEquals($cartItem->id, $response->json('data.id'));
@@ -88,9 +89,9 @@ class CartItemControllerTest extends TestCase
         $cart->refresh()->save();
         $cartItem = $cart->cartItems->first();
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(EmailAddress::factory()->create(), 'email');
 
-        $this->getJson("tipoff/cart-items/{$cartItem->id}")
+        $this->getJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
@@ -100,10 +101,10 @@ class CartItemControllerTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $emailAddress = EmailAddress::factory()->create();
+        $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => get_class($sellable),
             'sellable_id' => $sellable->id,
             'item_id' => 'abc',
@@ -112,7 +113,7 @@ class CartItemControllerTest extends TestCase
 
         $this->assertEquals(1234, $response->json('data.amount_each'));
 
-        $response = $this->getJson('tipoff/cart?include=items');
+        $response = $this->getJson($this->apiUrl('cart?include=items'));
         $this->assertCount(1, $response->json('data.items.data'));
     }
 
@@ -122,10 +123,10 @@ class CartItemControllerTest extends TestCase
         TestSellable::createTable();
         $sellable = TestSellable::factory()->create();
 
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $emailAddress = EmailAddress::factory()->create();
+        $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => get_class($sellable),
             'sellable_id' => $sellable->id,
             'item_id' => 'abc',
@@ -139,17 +140,17 @@ class CartItemControllerTest extends TestCase
         $this->assertEquals('ABC', $response->json('data.tax_code'));
         $this->assertNotNull($response->json('data.expires_at'));
 
-        $response = $this->getJson('tipoff/cart?include=items');
+        $response = $this->getJson($this->apiUrl('cart?include=items'));
         $this->assertCount(1, $response->json('data.items.data'));
     }
 
     /** @test */
     public function store_unknown_sellable_type()
     {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $emailAddress = EmailAddress::factory()->create();
+        $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => 'notaclass',
             'sellable_id' => 123,
             'item_id' => 'abc',
@@ -162,10 +163,10 @@ class CartItemControllerTest extends TestCase
     /** @test */
     public function store_not_a_sellable_type()
     {
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $emailAddress = EmailAddress::factory()->create();
+        $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => Model::class,
             'sellable_id' => 123,
             'item_id' => 'abc',
@@ -180,10 +181,10 @@ class CartItemControllerTest extends TestCase
     {
         TestSellable::createTable();
 
-        $user = User::factory()->create();
-        $this->actingAs($user);
+        $emailAddress = EmailAddress::factory()->create();
+        $this->actingAs($emailAddress, 'email');
 
-        $response = $this->postJson('tipoff/cart-items', [
+        $response = $this->postJson($this->apiUrl('cart-items'), [
             'sellable_type' => TestSellable::class,
             'sellable_id' => 123,
             'item_id' => 'abc',
@@ -208,10 +209,10 @@ class CartItemControllerTest extends TestCase
         $cart->refresh()->save();
         $cartItem = $cart->cartItems->first();
 
-        $this->actingAs($cart->getUser());
+        $this->actingAs($cart->emailAddress, 'email');
 
         $response = $this
-            ->putJson("tipoff/cart-items/{$cartItem->id}", [
+            ->putJson($this->apiUrl("cart-items/{$cartItem->id}"), [
                 'quantity' => 2,
             ])
             ->assertOk();
@@ -233,10 +234,10 @@ class CartItemControllerTest extends TestCase
         $cart->refresh()->save();
         $cartItem = $cart->cartItems->first();
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(EmailAddress::factory()->create(), 'email');
 
         $this
-            ->putJson("tipoff/cart-items/{$cartItem->id}", [
+            ->putJson($this->apiUrl("cart-items/{$cartItem->id}"), [
                 'quantity' => 2,
             ])
             ->assertStatus(Response::HTTP_FORBIDDEN);
@@ -256,14 +257,14 @@ class CartItemControllerTest extends TestCase
         $cart->refresh()->save();
         $cartItem = $cart->cartItems->first();
 
-        $this->actingAs($cart->getUser());
+        $this->actingAs($cart->emailAddress, 'email');
 
-        $response = $this->deleteJson("tipoff/cart-items/{$cartItem->id}")
+        $response = $this->deleteJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertOk();
 
         $this->assertEquals('success', $response->json('data.message'));
 
-        $response = $this->getJson('tipoff/cart-items')
+        $response = $this->getJson($this->apiUrl('cart-items'))
             ->assertOk();
 
         $this->assertCount(3, $response->json('data'));
@@ -283,16 +284,16 @@ class CartItemControllerTest extends TestCase
         $cart->refresh()->save();
         $cartItem = $cart->cartItems->first();
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(EmailAddress::factory()->create(), 'email');
 
-        $this->deleteJson("tipoff/cart-items/{$cartItem->id}")
+        $this->deleteJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     /** @test */
     public function index_not_logged_in()
     {
-        $this->getJson('tipoff/cart-items')
+        $this->getJson($this->apiUrl('cart-items'))
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 
@@ -310,7 +311,7 @@ class CartItemControllerTest extends TestCase
         $cart->refresh()->save();
         $cartItem = $cart->cartItems->first();
 
-        $this->getJson("tipoff/cart-items/{$cartItem->id}")
+        $this->getJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 }

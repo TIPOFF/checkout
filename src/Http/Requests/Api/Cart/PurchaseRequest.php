@@ -14,7 +14,7 @@ class PurchaseRequest extends CartRequest
     {
         $validator->after(function ($validator) {
             /** @var Cart|null $cart */
-            $cart = auth()->id() ? Cart::activeCart(auth()->id()) : null;
+            $cart = $this->getEmailAddressId() ? Cart::activeCart($this->getEmailAddressId()) : null;
             $this->validateCartIsPurchasable($cart, $validator);
         });
     }

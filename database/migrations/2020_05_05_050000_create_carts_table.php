@@ -13,7 +13,7 @@ class CreateCartsTable extends Migration
     {
         Schema::create('carts', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(app('user'));
+            $table->foreignIdFor(app('email_address'));
 
             $table->foreignIdFor(Order::class)->nullable();
 

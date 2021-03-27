@@ -42,7 +42,6 @@ abstract class BaseItemContainerTransformer extends BaseTransformer
             'credits' => $container->getCredits(),
             'codes' => $container->getCodes(),
             'tax' => $container->getTax(),
-            'user_id' => $container->getUser()->getId(),
             'location_id' => $container->getLocationId(),
             'creator_id' => $container->creator_id,
             'updater_id' => $container->updater_id,

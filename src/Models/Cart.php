@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Checkout\Filters\ItemFilter;
@@ -38,9 +39,11 @@ use Tipoff\Support\Traits\HasPackageFactory;
 /**
  * @property Carbon|null deleted_at
  * // Relations
+ * @property EmailAddress emailAddress
  * @property Order|null order
  * @property Collection cartItems
  * @property int|null order_id
+ * @property int|null email_address_id
  */
 class Cart extends BaseModel implements CartInterface
 {
@@ -62,7 +65,7 @@ class Cart extends BaseModel implements CartInterface
         'discounts' => 'integer',
         'credits' => 'integer',
         'tax' => 'integer',
-        'user_id' => 'integer',
+        'email_address_id' => 'integer',
         'order_id' => 'integer',
         'location_id' => 'integer',
         'creator_id' => 'integer',
@@ -75,7 +78,7 @@ class Cart extends BaseModel implements CartInterface
 
         static::saving(function (Cart $cart) {
             Assert::lazy()
-                ->that($cart->user_id, 'user_id')->notEmpty('A cart must belong to a user.')
+                ->that($cart->email_address_id, 'email_address_id')->notEmpty('A cart must have an email address.')
                 ->verifyNow();
         });
 
@@ -90,6 +93,11 @@ class Cart extends BaseModel implements CartInterface
     }
 
     //region RELATIONSHIPS
+
+    public function emailAddress()
+    {
+        return $this->belongsTo(app('email_address'));
+    }
 
     public function cartItems()
     {
@@ -136,14 +144,14 @@ class Cart extends BaseModel implements CartInterface
 
     //region PERMISSIONS
 
-    public function scopeVisibleBy(Builder $query, UserInterface $user): Builder
+    public function scopeVisibleByEmailAddressId(Builder $query, int $emailAddressId): Builder
     {
-        return $query->where('user_id', '=', $user->getId());
+        return $query->where('email_address_id', '=', $emailAddressId);
     }
 
-    public function isOwner(UserInterface $user): bool
+    public function isOwnerEmailAddressId(int $emailAddressId): bool
     {
-        return $this->user_id === $user->getId();
+        return $this->email_address_id === $emailAddressId;
     }
 
     //endregion
@@ -217,16 +225,16 @@ class Cart extends BaseModel implements CartInterface
 
     //region INTERFACE IMPLEMENTATION
 
-    public static function activeCart(int $userId): CartInterface
+    public static function activeCart(int $emailAddressId): CartInterface
     {
         $cart = static::query()
-            ->where('user_id', $userId)
+            ->where('email_address_id', $emailAddressId)
             ->active()
             ->orderByDesc('id')
             ->first();
 
         return $cart ?: static::create([
-            'user_id' => $userId,
+            'email_address_id' => $emailAddressId,
         ]);
     }
 
@@ -243,6 +251,11 @@ class Cart extends BaseModel implements CartInterface
                 }
             })
             ->get();
+    }
+
+    public function getUser(): UserInterface
+    {
+        return $this->emailAddress->user;
     }
 
     public static function itemFilter(): ItemFilter

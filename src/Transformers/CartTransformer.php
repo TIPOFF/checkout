@@ -22,6 +22,7 @@ class CartTransformer extends BaseItemContainerTransformer
         /** @var Cart $cart */
         return array_merge(parent::transform($cart), [
             'expires_at' => $cart->getExpiresAt(),
+            'email_address_id' => $cart->emailAddress->id,
         ]);
     }
 }

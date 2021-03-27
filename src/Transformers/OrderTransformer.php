@@ -22,6 +22,7 @@ class OrderTransformer extends BaseItemContainerTransformer
         /** @var Order $order */
         return array_merge(parent::transform($order), [
             'order_number' => $order->getOrderNumber(),
+            'user_id' => $order->user->id,
         ]);
     }
 }

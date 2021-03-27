@@ -22,7 +22,7 @@ class CartPolicy
     public function view(UserInterface $user, Cart $cart): bool
     {
         /** @psalm-suppress  UndefinedMagicPropertyFetch */
-        return $cart->isOwner($user) || $this->hasLocationPermission($user, 'view carts', $cart->location_id);
+        return $this->hasLocationPermission($user, 'view carts', $cart->location_id);
     }
 
     public function create(UserInterface $user): bool
