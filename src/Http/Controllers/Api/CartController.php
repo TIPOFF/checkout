@@ -31,7 +31,6 @@ class CartController extends BaseApiController
     public function destroy(DestroyRequest $request): JsonResponse
     {
         if ($emailAddressId = $request->getEmailAddressId()) {
-            /** @var Cart $cart */
             $cart = Cart::activeCart($emailAddressId);
             $cart->delete();
         }
