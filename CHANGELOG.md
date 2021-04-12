@@ -85,3 +85,7 @@ All notable changes to `checkout` will be documented in this file.
 ## 2.6.0 - 2021-03-26
 
 - cart email address requirement
+
+## 2.7.0 - 2021-04-11
+
+- bump package dependencies
