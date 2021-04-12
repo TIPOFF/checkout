@@ -7,6 +7,7 @@ namespace Tipoff\Checkout\Tests;
 use DrewRoberts\Blog\BlogServiceProvider;
 use DrewRoberts\Media\MediaServiceProvider;
 use Laravel\Nova\NovaCoreServiceProvider;
+use Livewire\LivewireServiceProvider;
 use Spatie\Fractal\FractalServiceProvider;
 use Spatie\Permission\PermissionServiceProvider;
 use Tipoff\Addresses\AddressesServiceProvider;
@@ -45,6 +46,7 @@ class TestCase extends BaseTestCase
             SupportServiceProvider::class,
             PermissionServiceProvider::class,
             AuthorizationServiceProvider::class,
+            LivewireServiceProvider::class,
             AddressesServiceProvider::class,
             MediaServiceProvider::class,
             SeoServiceProvider::class,
