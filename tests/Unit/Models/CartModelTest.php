@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Models;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -48,5 +49,19 @@ class CartModelTest extends TestCase
 
         $cartItems = $cart->getItems();
         $this->assertCount(3, $cartItems);
+    }
+
+    /** @test */
+    public function is_owner_email_address_id()
+    {
+        $emailAddress = EmailAddress::factory()->create();
+
+        $cart = Cart::factory()->create([
+            'email_address_id' => $emailAddress,
+        ]);
+
+        $result = $cart->isOwnerEmailAddressId($emailAddress->id);
+
+        $this->assertTrue($result);
     }
 }
