@@ -6,12 +6,15 @@ namespace Tipoff\Checkout\Tests\Unit\Models;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
+use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
+use Tipoff\Support\Contracts\Checkout\CartItemInterface;
 use Tipoff\Support\Contracts\Sellable\Fee;
+use Tipoff\Support\Contracts\Sellable\Sellable;
 use Tipoff\Support\Events\Checkout\CartItemCreated;
 use Tipoff\Support\Events\Checkout\CartItemRemoved;
 use Tipoff\Support\Events\Checkout\CartItemUpdated;
@@ -56,6 +59,16 @@ class CartModelInterfaceTest extends TestCase
 
         Event::assertNotDispatched(CartItemCreated::class);
         Event::assertNotDispatched(CartItemUpdated::class);
+    }
+
+    /** @test */
+    public function cannot_create_basic_item()
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        $sellable = $this->getMockBuilder(Sellable::class);
+
+        Cart::createItem($sellable->getMock(), 'item-id', 1234, 2);
     }
 
     /** @test */
@@ -400,6 +413,17 @@ class CartModelInterfaceTest extends TestCase
 
         $item = $cart1->findItem($sellable, 'item');
         $this->assertEquals($item1->getId(), $item->getId());
+    }
+
+    /** @test */
+    public function cannot_upsert_base_item()
+    {
+        $this->expectException(CartNotValidException::class);
+        $cart = Cart::factory()->create();
+
+        $mock = $this->getMockBuilder(CartItemInterface::class);
+
+        $cart->upsertItem($mock->getMock());
     }
 }
 
