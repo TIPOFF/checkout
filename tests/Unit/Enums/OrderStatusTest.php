@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Tests\Unit\Enums;
 
+use ReflectionClass;
 use Tipoff\Checkout\Enums\OrderStatus;
 use Tipoff\Checkout\Models\Order;
 use Tipoff\Checkout\Tests\TestCase;
 use Tipoff\Statuses\Models\Status;
-use ReflectionClass;
 
 class OrderStatusTest extends TestCase
 {

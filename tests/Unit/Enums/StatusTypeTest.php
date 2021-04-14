@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Tests\Unit\Enums;
 
+use ReflectionClass;
 use Tipoff\Checkout\Enums\StatusType;
 use Tipoff\Checkout\Tests\TestCase;
-use ReflectionClass;
 
 class StatusTypeTest extends TestCase
 {
