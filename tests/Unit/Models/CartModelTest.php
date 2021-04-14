@@ -8,8 +8,11 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
+use Tipoff\Checkout\Models\Order;
+use Tipoff\Checkout\Services\Cart\Purchase;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
+use Tipoff\Support\Contracts\Checkout\OrderInterface;
 
 class CartModelTest extends TestCase
 {
@@ -63,5 +66,26 @@ class CartModelTest extends TestCase
         $result = $cart->isOwnerEmailAddressId($emailAddress->id);
 
         $this->assertTrue($result);
+    }
+
+    /** @test */
+    public function can_purchase()
+    {
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create();
+
+        /** @var Order $order */
+        $order = Order::factory()->create();
+
+        $this->partialMock(Purchase::class, function($mock) use ($cart, $order) {
+            $mock->shouldReceive('__invoke')
+                    ->once()
+                    ->with($cart, 'paymethod')
+                    ->andReturn($order);
+        });
+
+        $order = $cart->purchase('paymethod');
+
+        $this->assertInstanceOf(OrderInterface::class, $order);
     }
 }
