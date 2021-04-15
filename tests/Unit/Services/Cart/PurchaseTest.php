@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
 use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;
+use Tipoff\Checkout\Exceptions\PaymentNotAvailableException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Services\Cart\Purchase;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -66,5 +67,31 @@ class PurchaseTest extends TestCase
 
         Event::assertDispatched(OrderItemCreated::class, 1);
         Event::assertDispatched(OrderCreated::class, 1);
+    }
+
+    /** @test */
+    public function cannot_purchase()
+    {
+        $this->app->forgetInstance(PaymentInterface::class);
+
+        $user = User::factory()->create();
+        EmailAddress::factory()->create([
+            'user_id' => $user,
+        ]);
+
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create();
+
+        $sellable = TestSellable::factory()->create();
+
+        $cart->upsertItem(
+            Cart::createItem($sellable, 'item-id', 1234, 2)
+                ->setLocationId(123)
+        );
+
+        $this->expectException(PaymentNotAvailableException::class);
+
+        $handler = $this->app->make(Purchase::class);
+        ($handler)($cart, 'paymethod');
     }
 }
