@@ -58,6 +58,7 @@ class CheckoutServiceProvider extends TipoffServiceProvider
                 'order-deduction' => Components\Order\OrderDeductionComponent::class,
             ])
             ->hasApiRoute('api')
+            ->hasWebRoute('web')
             ->name('checkout')
             ->hasViews()
             ->hasConfigFile();

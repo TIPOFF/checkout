@@ -16,7 +16,7 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "tipoff/authorization": "^2.8.1",
+        "tipoff/authorization": "dev-pdbreen/feature/uses-tipoff-auth-trait as 2.8.1",
         "tipoff/locations": "^2.10.0",
         "tipoff/statuses": "^2.2.0",
         "tipoff/support": "^2.0.2"
