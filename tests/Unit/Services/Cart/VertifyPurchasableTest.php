@@ -183,4 +183,35 @@ class VertifyPurchasableTest extends TestCase
         $handler = $this->app->make(VerifyPurchasable::class);
         ($handler)($cart);
     }
+
+    /** @test */
+    public function cannot_verify_items()
+    {
+        Event::fake([
+            CartItemPurchaseVerification::class,
+        ]);
+
+        $emailAddress = EmailAddress::factory()->create([
+            'user_id' => User::factory()->create(),
+        ]);
+
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create([
+            'email_address_id' => $emailAddress,
+        ]);
+
+        $cartItem = CartItem::factory()
+            ->withSellable(TestSellable::factory()->create())
+            ->active()
+            ->create([
+                'cart_id' => $cart,
+            ]);
+
+        $cartItem->update(['sellable_id' => 123]);
+
+        $this->expectException(CartNotValidException::class);
+
+        $handler = $this->app->make(VerifyPurchasable::class);
+        ($handler)($cart);
+    }
 }
