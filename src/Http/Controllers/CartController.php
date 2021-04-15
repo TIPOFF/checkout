@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Http\Controllers;
 
-use Illuminate\Support\Facades\Auth;
-use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Checkout\Http\Requests\Cart\AddCodeRequest;
-use Tipoff\Checkout\Http\Requests\Cart\CreateRequest;
 use Tipoff\Checkout\Http\Requests\Cart\DeleteItemRequest;
 use Tipoff\Checkout\Http\Requests\Cart\ShowRequest;
 use Tipoff\Checkout\Models\Cart;
