@@ -75,7 +75,7 @@ class OrderControllerTest extends TestCase
     /** @test */
     public function index_not_logged_in()
     {
-        Route::get('login', function() {
+        Route::get('login', function () {
             return 'login';
         })->name('login');
 
@@ -91,7 +91,7 @@ class OrderControllerTest extends TestCase
     /** @test */
     public function show_not_logged_in()
     {
-        Route::get('login', function() {
+        Route::get('login', function () {
             return 'login';
         })->name('login');
 

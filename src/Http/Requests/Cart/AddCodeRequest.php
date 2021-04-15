@@ -15,7 +15,7 @@ class AddCodeRequest extends FormRequest
     public function rules()
     {
         return [
-            'code' => ['required', 'string', new AdjustmentCode(),]
+            'code' => ['required', 'string', new AdjustmentCode(),],
         ];
     }
 }

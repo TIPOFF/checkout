@@ -28,6 +28,7 @@ class CheckoutController extends BaseController
         $cart = Cart::activeCart($request->getEmailAddressId());
         $order = DB::transaction(function () use ($cart) {
             $cart->verifyPurchasable();
+
             return $cart->completePurchase();
         });
 
