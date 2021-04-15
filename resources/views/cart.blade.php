@@ -4,6 +4,8 @@
     @include('checkout::partials._cart_identity_tag')
 
     <h2>CART</h2>
+    @include('checkout::partials._errors')
+
     <x-tipoff-cart :cart="$cart"/>
     <x-tipoff-cart-deductions :deductions="$cart->getCodes()"/>
     <x-tipoff-cart-total :cart="$cart"/>
@@ -13,7 +15,7 @@
             <label for="code">{{__('Code')}}</label>
             <input id="code" name="code" required/>
         </div>
-        <button type="submit" value="{{ __('Add Code') }}"/>
+        <button type="submit">{{ __('Add Code') }}</button>
     </form>
     <a href="{{route('checkout.show')}}" >{{ __('Checkout') }}</a>
 @endsection

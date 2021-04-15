@@ -7,17 +7,20 @@ use Tipoff\Checkout\Http\Controllers\CartController;
 use Tipoff\Checkout\Http\Controllers\CheckoutController;
 use Tipoff\Checkout\Http\Controllers\OrderController;
 use Tipoff\Checkout\Http\Middleware\CartAuthenticate;
+use Tipoff\Checkout\Http\Middleware\CartRedirectIfAuthenticated;
 
 Route::middleware(config('tipoff.web.middleware_group'))
     ->prefix(config('tipoff.web.uri_prefix'))
     ->group(function () {
 
-        // PUBLIC
-        Route::get('cart/create', function () {
-            return view('checkout::create');
-        })->name('checkout.cart-create');
+        // NO AUTH/GUEST ONLY
+        Route::middleware(CartRedirectIfAuthenticated::class)->group(function () {
+            Route::get('cart/create', function () {
+                return view('checkout::create');
+            })->name('checkout.cart-create');
 
-        Route::post('cart/create', [CartController::class, 'create']);
+            Route::post('cart/create', [CartController::class, 'create']);
+        });
 
         // PROTECTED ROUTES - any auth ('email' or 'web') with custom redirect
         Route::middleware(CartAuthenticate::class)->group(function () {

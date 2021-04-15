@@ -1,1 +1,1 @@
-<!-- C:{{$cart->id}} I:{{$cart->items->count()}} -->
+<!-- C:{{$cart->id}} I:{{$cart->cartItems->count()}} -->
