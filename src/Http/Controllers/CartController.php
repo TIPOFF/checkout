@@ -22,6 +22,8 @@ class CartController extends BaseController
         $emailAddress = EmailAddress::query()->firstOrCreate(['email' => trim(strtolower($request->email))]);
         Auth::guard('email')->login($emailAddress);
 
+        $request->session()->regenerate();
+
         return redirect()->intended(route('checkout.cart-show'));
     }
 

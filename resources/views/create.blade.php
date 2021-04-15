@@ -4,7 +4,7 @@
     <h2>CREATE</h2>
     @include('checkout::partials._errors')
 
-    <form method="POST" action="{{ route('checkout.cart.create') }}">
+    <form method="POST" action="{{ route('checkout.cart-create') }}">
         @csrf
         <div>
             <label for="email">{{__('Email')}}</label>

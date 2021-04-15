@@ -14,7 +14,7 @@ Route::middleware(config('tipoff.web.middleware_group'))
     ->group(function () {
 
         // NO AUTH/GUEST ONLY
-        Route::middleware(CartRedirectIfAuthenticated::class)->group(function () {
+        Route::middleware(CartRedirectIfAuthenticated::class.':email,web')->group(function () {
             Route::get('cart/create', function () {
                 return view('checkout::create');
             })->name('checkout.cart-create');
@@ -23,7 +23,7 @@ Route::middleware(config('tipoff.web.middleware_group'))
         });
 
         // PROTECTED ROUTES - any auth ('email' or 'web') with custom redirect
-        Route::middleware(CartAuthenticate::class)->group(function () {
+        Route::middleware(CartAuthenticate::class.':email,web')->group(function () {
             Route::post('cart/delete-item', [CartController::class, 'deleteItem'])->name('checkout.cart-delete-item');
             Route::post('cart/add-code', [CartController::class, 'addCode'])->name('checkout.cart.add-code');
             Route::get('cart', [CartController::class, 'show'])->name('checkout.cart-show');
