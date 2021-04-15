@@ -16,17 +16,6 @@ use Tipoff\Support\Http\Controllers\BaseController;
 
 class CartController extends BaseController
 {
-    public function create(CreateRequest $request)
-    {
-        /** @var EmailAddress $emailAddress */
-        $emailAddress = EmailAddress::query()->firstOrCreate(['email' => trim(strtolower($request->email))]);
-        Auth::guard('email')->login($emailAddress);
-
-        $request->session()->regenerate();
-
-        return redirect()->intended(route('checkout.cart-show'));
-    }
-
     public function show(ShowRequest $request)
     {
         $cart = Cart::activeCart($request->getEmailAddressId());
