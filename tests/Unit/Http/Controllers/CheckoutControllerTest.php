@@ -5,15 +5,12 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Http\Controllers;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Symfony\Component\HttpFoundation\Response;
 use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
 use Tipoff\Checkout\Tests\TestCase;
-use Tipoff\Support\Contracts\Checkout\CodedCartAdjustment;
-use Tipoff\Support\Contracts\Checkout\Discounts\DiscountInterface;
 
 class CheckoutControllerTest extends TestCase
 {

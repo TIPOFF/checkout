@@ -41,7 +41,7 @@ class CartControllerTest extends TestCase
         $this->actingAs(EmailAddress::factory()->create());
 
         $this->post(route('checkout.cart-add-code'), [
-            'code' => 'abcd'
+            'code' => 'abcd',
         ])
             ->assertRedirect(route('checkout.cart-show'));
     }
@@ -63,7 +63,7 @@ class CartControllerTest extends TestCase
         $this->actingAs($cart->emailAddress, 'email');
 
         $this->post(route('checkout.cart-delete-item'), [
-            'id' => $cartItem->id
+            'id' => $cartItem->id,
         ])
             ->assertRedirect(route('checkout.cart-show'));
     }
@@ -85,7 +85,7 @@ class CartControllerTest extends TestCase
         $this->actingAs(EmailAddress::factory()->create(), 'email');
 
         $this->post(route('checkout.cart-delete-item'), [
-            'id' => $cartItem->id
+            'id' => $cartItem->id,
         ])
             ->assertStatus(Response::HTTP_FORBIDDEN);
     }
