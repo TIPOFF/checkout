@@ -15,7 +15,7 @@ Route::middleware(config('tipoff.web.middleware_group'))
         // PROTECTED ROUTES - any auth ('email' or 'web') with custom redirect
         Route::middleware(TipoffAuthenticate::class.':email,web')->group(function () {
             Route::post('cart/delete-item', [CartController::class, 'deleteItem'])->name('checkout.cart-delete-item');
-            Route::post('cart/add-code', [CartController::class, 'addCode'])->name('checkout.cart.add-code');
+            Route::post('cart/add-code', [CartController::class, 'addCode'])->name('checkout.cart-add-code');
             Route::get('cart', [CartController::class, 'show'])->name('checkout.cart-show');
 
             Route::post('checkout/purchase', [CheckoutController::class, 'purchase'])->name('checkout.purchase');
