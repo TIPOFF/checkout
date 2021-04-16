@@ -21,7 +21,6 @@ use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Checkout\OrderItemInterface;
 use Tipoff\Support\TipoffPackage;
 use Tipoff\Support\TipoffServiceProvider;
-use Tipoff\Vouchers\Listeners\OrderCreatedListener;
 
 class CheckoutServiceProvider extends TipoffServiceProvider
 {
