@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Http\Controllers;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
-use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
 use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Authorization\Models\User;

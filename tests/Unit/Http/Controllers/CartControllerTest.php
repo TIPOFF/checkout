@@ -10,6 +10,4 @@ use Tipoff\Checkout\Tests\TestCase;
 class CartControllerTest extends TestCase
 {
     use DatabaseTransactions;
-
-
 }

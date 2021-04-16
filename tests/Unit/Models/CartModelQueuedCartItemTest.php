@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout\Tests\Unit\Models;
 
-use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Auth;
 use Tipoff\Authorization\Models\EmailAddress;
