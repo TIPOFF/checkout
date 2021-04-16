@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Tipoff\Checkout;
 
+use Illuminate\Auth\Events\Login;
+use Tipoff\Checkout\Listeners\LoginListener;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Models\Order;
@@ -19,6 +21,7 @@ use Tipoff\Support\Contracts\Checkout\OrderInterface;
 use Tipoff\Support\Contracts\Checkout\OrderItemInterface;
 use Tipoff\Support\TipoffPackage;
 use Tipoff\Support\TipoffServiceProvider;
+use Tipoff\Vouchers\Listeners\OrderCreatedListener;
 
 class CheckoutServiceProvider extends TipoffServiceProvider
 {
@@ -56,6 +59,11 @@ class CheckoutServiceProvider extends TipoffServiceProvider
                 'order-total' => Components\Order\OrderTotalComponent::class,
                 'order-deductions' => Components\Order\OrderDeductionsComponent::class,
                 'order-deduction' => Components\Order\OrderDeductionComponent::class,
+            ])
+            ->hasEvents([
+                Login::class => [
+                    LoginListener::class,
+                ],
             ])
             ->hasApiRoute('api')
             ->hasWebRoute('web')

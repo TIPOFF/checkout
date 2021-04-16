@@ -23,7 +23,7 @@ Route::middleware(config('tipoff.web.middleware_group'))
         });
 
         // PROTECTED ROUTES - 'web' auth only
-        Route::middleware(config('tipoff.web.auth_middleware').':web')->group(function () {
+        Route::middleware(TipoffAuthenticate::class.':web')->group(function () {
             Route::get('checkout/confirmation', [CheckoutController::class, 'confirmation'])->name('checkout.confirmation');
             Route::get('orders/{order}', [OrderController::class, 'show'])->name('checkout.order-show');
             Route::get('orders', [OrderController::class, 'index'])->name('checkout.orders');

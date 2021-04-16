@@ -75,10 +75,6 @@ class OrderControllerTest extends TestCase
     /** @test */
     public function index_not_logged_in()
     {
-        Route::get('login', function () {
-            return 'login';
-        })->name('login');
-
         $this->get($this->webUrl('orders'))
             ->assertRedirect('login');
 
@@ -91,10 +87,6 @@ class OrderControllerTest extends TestCase
     /** @test */
     public function show_not_logged_in()
     {
-        Route::get('login', function () {
-            return 'login';
-        })->name('login');
-
         /** @var Order $order */
         $order = Order::factory()->create();
 
