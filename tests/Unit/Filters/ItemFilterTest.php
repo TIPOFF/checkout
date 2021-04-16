@@ -220,9 +220,51 @@ class ItemFilterTest extends TestCase
                 ->apply();
 
             $this->assertCount(2, $items);
+
+            Carbon::setTestNow('2020-04-11 12:00:00');
+
+            $items = Cart::itemFilter()
+                ->yesterdayComparison()
+                ->apply();
+
+            $this->assertCount(0, $items);
+
+            Carbon::setTestNow('2020-04-9 12:00:00');
+
+            $items = Cart::itemFilter()
+                ->yesterdayComparison()
+                ->apply();
+
+            $this->assertCount(1, $items);
         } finally {
             Carbon::setTestNow(null);
         }
+    }
+
+    /** @test */
+    public function filter_by_item_id()
+    {
+        TestSellable::createTable();
+
+        $sellable = TestSellable::factory()->create();
+
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create();
+
+        $cart->upsertItem(
+            Cart::createItem($sellable, 'item-1', 1234, 2)
+        );
+
+        $cart->upsertItem(
+            Cart::createItem($sellable, 'item-2', 1234, 2)
+        );
+
+        $items = Cart::itemFilter()
+                    ->byItemId('item-2')
+                    ->apply();
+
+        $this->assertCount(1, $items);
+        $this->assertEquals('item-2', $items->last()->item_id);
     }
 }
 
