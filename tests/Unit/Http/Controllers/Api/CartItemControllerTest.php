@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Symfony\Component\HttpFoundation\Response;
 use Tipoff\Authorization\Models\EmailAddress;
-use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -313,5 +312,31 @@ class CartItemControllerTest extends TestCase
 
         $this->getJson($this->apiUrl("cart-items/{$cartItem->id}"))
             ->assertStatus(Response::HTTP_UNAUTHORIZED);
+    }
+
+    /** @test */
+    public function failed_delete_cart_item()
+    {
+        CartItem::deleting(function () {
+            return false;
+        });
+
+        TestSellable::createTable();
+        $sellable = TestSellable::factory()->create();
+
+        /** @var Cart $cart */
+        $cart = Cart::factory()->create();
+
+        CartItem::factory()->withSellable($sellable)->count(4)->create([
+            'cart_id' => $cart,
+        ]);
+
+        $cart->refresh()->save();
+        $cartItem = $cart->cartItems->first();
+        $this->actingAs($cart->emailAddress, 'email');
+
+        $response = $this->deleteJson($this->apiUrl("cart-items/{$cartItem->id}"));
+
+        $this->assertEquals('Failed to delete.', $response->json('errors.0.code'));
     }
 }
