@@ -4,7 +4,7 @@
     @include('checkout::partials._cart_identity_tag')
 
     <h2>CHECKOUT</h2>
-    @include('checkout::partials._errors')
+    @include('support::partials._errors')
 
     <x-tipoff-cart :cart="$cart"/>
     <x-tipoff-cart-deductions :deductions="$cart->getCodes()"/>

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Tipoff\Authorization\Models\EmailAddress;
+use Tipoff\Authorization\Models\User;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Locations\Traits\HasLocationPermissions;
 use Tipoff\Support\Contracts\Models\UserInterface;
@@ -29,14 +31,14 @@ class CartItemPolicy
         return true;
     }
 
-    public function update(UserInterface $user, CartItem $cartItem): bool
+    public function update($userOrEmailAddress, CartItem $cartItem): bool
     {
-        return $cartItem->isOwner($user);
+        return $cartItem->isOwnerByEmailAddressId($this->getEmailAddressId($userOrEmailAddress));
     }
 
-    public function delete(UserInterface $user, CartItem $cartItem): bool
+    public function delete($userOrEmailAddress, CartItem $cartItem): bool
     {
-        return $cartItem->isOwner($user);
+        return $cartItem->isOwnerByEmailAddressId($this->getEmailAddressId($userOrEmailAddress));
     }
 
     public function restore(UserInterface $user, CartItem $cartItem): bool
@@ -47,5 +49,18 @@ class CartItemPolicy
     public function forceDelete(UserInterface $user, CartItem $cartItem): bool
     {
         return false;
+    }
+
+    private function getEmailAddressId($userOrEmailAddress): ?int
+    {
+        if ($userOrEmailAddress instanceof User) {
+            return $userOrEmailAddress->email_addresses->id ?? null;
+        }
+
+        if ($userOrEmailAddress instanceof EmailAddress) {
+            return $userOrEmailAddress->id;
+        }
+
+        return null;
     }
 }
