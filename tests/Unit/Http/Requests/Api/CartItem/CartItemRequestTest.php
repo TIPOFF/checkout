@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Tipoff\Checkout\Tests\Unit\Http\Requests\Api\CartItem;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Tipoff\Checkout\Http\Requests\Api\CartItem\CartItemRequest;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\TestCase;
-use Tipoff\Checkout\Http\Requests\Api\CartItem\CartItemRequest;
 
 class CartItemRequestTest extends TestCase
 {
