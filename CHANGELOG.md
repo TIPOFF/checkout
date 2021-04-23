@@ -93,3 +93,7 @@ All notable changes to `checkout` will be documented in this file.
 ## 2.7.1 - 2021-04-16
 
 - add checkout routes, controllers & views
+
+## 2.7.2 - 2021-04-23
+
+- improve test coverage
