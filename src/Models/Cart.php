@@ -112,11 +112,17 @@ class Cart extends BaseModel implements CartInterface
         return $this->belongsTo(app('order'));
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function discounts()
     {
         return $this->belongsToMany(app('discount'));
     }
 
+    /**
+     * @codeCoverageIgnore
+     */
     public function vouchers()
     {
         return $this->belongsToMany(app('voucher'));
