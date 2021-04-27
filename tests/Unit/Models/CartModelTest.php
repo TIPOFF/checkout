@@ -77,7 +77,7 @@ class CartModelTest extends TestCase
         /** @var Order $order */
         $order = Order::factory()->create();
 
-        $this->partialMock(Purchase::class, function($mock) use ($cart, $order) {
+        $this->partialMock(Purchase::class, function ($mock) use ($cart, $order) {
             $mock->shouldReceive('__invoke')
                     ->once()
                     ->with($cart, 'paymethod')
