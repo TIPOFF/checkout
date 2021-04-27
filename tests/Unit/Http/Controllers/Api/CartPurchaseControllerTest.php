@@ -88,4 +88,31 @@ class CartPurchaseControllerTest extends TestCase
 
         $this->assertEquals('Cart is empty.', $response->json('errors.cart.0'));
     }
+
+    /** @test */
+    public function cannot_purchase_not_isset_cart()
+    {
+        TestSellable::createTable();
+
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        /** @var TestSellable $sellable */
+        $sellable = TestSellable::factory()->create();
+        $sellable->addToCart(1);
+
+        $sellable = TestSellable::factory()->create();
+
+        /** @var CartItem $item */
+        $item = $sellable->addToCart(1);
+        $item->expires_at = Carbon::now()->subDays(1);
+        $item->save();
+
+        $response = $this
+            ->postJson($this->apiUrl('cart/purchase'))
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
+
+        $this->assertEquals('Cart not available for purchase.', $response->json('errors.cart.0'));
+    }
 }

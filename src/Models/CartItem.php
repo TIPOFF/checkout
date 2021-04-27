@@ -118,11 +118,15 @@ class CartItem extends BaseModel implements CartItemInterface
         });
     }
 
-    public function isOwnerByEmailAddressId(int $emailAddressId): bool
+    public function isOwnerByEmailAddressId(?int $emailAddressId): bool
     {
-        $cart = Cart::activeCart($emailAddressId);
+        if ($emailAddressId) {
+            $cart = Cart::activeCart($emailAddressId);
 
-        return $this->cart_id === $cart->getId();
+            return $this->cart_id === $cart->getId();
+        }
+
+        return false;
     }
 
     //endregion

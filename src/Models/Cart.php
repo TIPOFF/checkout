@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Route;
 use Tipoff\Authorization\Models\EmailAddress;
 use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Exceptions\MultipleLocationException;
@@ -50,6 +51,8 @@ class Cart extends BaseModel implements CartInterface
     use HasPackageFactory;
     use SoftDeletes;
     use IsItemContainer;
+
+    private const QUEUED_CART_ITEM = 'checkout.queued_cart_item';
 
     protected $guarded = [
         'id',
@@ -225,6 +228,13 @@ class Cart extends BaseModel implements CartInterface
 
     //region INTERFACE IMPLEMENTATION
 
+    public static function route(string $name, array $parameters = [], bool $absolute = true): string
+    {
+        $name = Route::has($name) ? $name : 'checkout.cart-show';
+
+        return \route($name, $parameters, $absolute);
+    }
+
     public static function activeCart(int $emailAddressId): CartInterface
     {
         $cart = static::query()
@@ -236,6 +246,33 @@ class Cart extends BaseModel implements CartInterface
         return $cart ?: static::create([
             'email_address_id' => $emailAddressId,
         ]);
+    }
+
+    public static function queuedUpsertItem(CartItemInterface $cartItem, ?int $emailAddressId = null): CartItemInterface
+    {
+        if ($emailAddressId) {
+            return static::activeCart($emailAddressId)->upsertItem($cartItem);
+        }
+
+        return static::queueCartItem($cartItem);
+    }
+
+    private static function queueCartItem(CartItem $cartItem): CartItem
+    {
+        session()->put([self::QUEUED_CART_ITEM => $cartItem->toArray()]);
+
+        return $cartItem;
+    }
+
+    public static function dequeueCartItem(int $emailAddressId): void
+    {
+        $cartItemData = session()->get(self::QUEUED_CART_ITEM);
+        if (is_array($cartItemData)) {
+            $cartItem = new CartItem($cartItemData);
+            Cart::activeCart($emailAddressId)->upsertItem($cartItem);
+        }
+
+        session()->forget(self::QUEUED_CART_ITEM);
     }
 
     public static function abandonedCarts(?string $createdAfter = null, ?string $createdBefore = null): Collection
