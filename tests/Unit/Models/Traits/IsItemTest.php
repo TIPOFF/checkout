@@ -2,11 +2,11 @@
 
 namespace Tipoff\Checkout\Tests\Unit\Models\Traits;
 
-use Tipoff\Checkout\Tests\TestCase;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Tipoff\Checkout\Models\Traits\IsItem;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tipoff\Checkout\Models\Traits\IsItem;
+use Tipoff\Checkout\Tests\TestCase;
 
 class IsItemTest extends TestCase
 {
