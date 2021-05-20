@@ -6,6 +6,7 @@ namespace Tipoff\Checkout\Tests\Unit\Services\CartItem;
 
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Event;
+use Tipoff\Checkout\Exceptions\CartNotValidException;
 use Tipoff\Checkout\Models\Cart;
 use Tipoff\Checkout\Models\CartItem;
 use Tipoff\Checkout\Tests\Support\Models\TestSellable;
@@ -43,5 +44,18 @@ class UpdateInCartTest extends TestCase
 
         Event::assertDispatched(CartItemCreated::class, 1);
         Event::assertDispatched(CartItemUpdated::class, 1);
+    }
+
+    /** @test */
+    public function cannot_upsert_cart_item()
+    {
+        $this->expectException(CartNotValidException::class);
+
+        $cart = Cart::factory()->create();
+
+        $cartItem = Cart::createItem($this->sellable, 'item-id', 1234, 2);
+        $cart->upsertItem($cartItem);
+
+        $this->cart->upsertItem($cartItem);
     }
 }
