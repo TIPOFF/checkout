@@ -62,7 +62,7 @@ class CartItem extends BaseCheckoutResource
     {
         return array_filter([
             BelongsTo::make('Cart', 'cart', Cart::class),
-            MorphTo::make('sellable')->types(array_filter([
+            MorphTo::make('Sellable')->types(array_filter([
                 nova('booking'),
                 nova('product'),
                 nova('fee'),
